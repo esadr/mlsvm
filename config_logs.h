@@ -20,11 +20,13 @@
 
 #define debug_level                 0
 //---- kFold ----
-#define dbl_kf_shuffle_data         0           // default 0
-#define dbl_kf_cross_validation     0           // default 0
+#define dbl_kf_shuffle_data         0           // Default 0
+#define dbl_kf_cross_validation     0           // Default 0
+#define dbl_KF_CVS                  0           // Default 0
 //---- Loader ----
 #define dbl_LD_LWAB                 0
 #define dbl_LD_LFB                  0           // load flann binary
+#define dbl_LD_CD                   0           // 0 Default, 3 print raw and calculated distance
 #define dbl_LD_LNDS                 0           // 0 Default, 5 print size of data
 //---- Coarsening ----
 #define dbl_CO_calcP                1          // 1 normal with #edges
@@ -37,36 +39,70 @@
 //---- MainRecursion (Refinement) ----
 #define debug_level_main_rec        0           // 0 Default
 #define dbl_MR_refinement           1           // 1 Default
+
+
+
 #define dbl_MR_calc_performance     0           // 0 Default
-#define dbl_MR_ref_partition        3           // 1 Default, 3 report steps
-#define dbl_MR_CGI                  0           // 0 Default
-#define dbl_MR_find_groups          0           // 0 Default
-#define dbl_MR_calc_center          0           // 0 Default
-#define dbl_MR_calc_distances       0           // 0 Default
-#define dbl_MR_get_parts            1           // 0 Default (Metis), 1 #parts, 5 report the metis response, 7 print parts
-#define dbl_MR_single_part_matrix   0           // 0 Default
-#define dbl_MR_CSC                  7           // 0 Default
-#define dbl_MR_fSN                  1           // 1 Default find_SV_neighbors
+//---- Refinement ----
+#define dbl_RF_main                 1           // 1 Default
+#define dbl_RF_main_with_partition  3           // 1 Default, 3 report steps
+#define dbl_RF_main_no_partition    1           // 1 Default
+#define dbl_RF_fSN                  1           // 1 Default find_SV_neighbors
+#define dbl_RF_ABM                  3           // 0 Default, 3 report different levels results after sort, 5 report before and after sort
+
+//---- Partitioning ----
+#define dbl_PR_get_parts            5           // 0 Default (Metis), 1 #parts, 5 report the metis response, 7 print parts
+#define dbl_PR_SEW                  0           // 0 Default, 9 prints the adjwgt
+#define dbl_PR_single_part_matrix   0           // 0 Default
+#define dbl_PR_CSC                  0           // 0 Default    //calc_single_center
+#define dbl_PR_calc_center          1           // 0 Default
+#define dbl_PR_calc_distances       0           // 0 Default
+#define dbl_PR_find_groups          3           // 0 Default    5 prints final groups
+#define dbl_PR_CAC                  0           // 0 Default    //calc_avg_center
+#define dbl_PR_CCV                  0           // 0 Default    //calc_center_volume
+#define dbl_PR_CGI                  0           // 0 Default
+#define dbl_PR_CPM                  0           // 0 Default    //calc_performance_measure  5 prints final predicted label
 //---- Model Selection ----
 #define dbl_MS_UD                   1           // 1 Default
+#define dbl_MS_UDSepVal             1           // 1 Default
+#define dbl_MS_UDIB                 1           // 1 Default
 #define dbl_MS_combine_test_data    0
-#define dbl_MS_ud_param_generator   3           // 3 shows new parameters
+#define dbl_MS_ud_param_generator   0           // 0 Default, 3 shows new parameters
 #define dbl_MS_cross_fold           0           // 0 Default
-#define dbl_MS_PS                   3           // 0 Default
-#define dbl_MS_read_problem         0           // 0 Default
-#define dbl_MS_SB1                  5           // select_best_1st - print results of diff C,Gamma at 5
-#define dbl_MS_test_predict         1           // 1 it should be for real runs
+#define dbl_MS_PS                   0           // 0 Default
+#define dbl_MS_SB1                  3           // 0 Default, 3 prints after sort, 5 prints prints before and after sort
 #define dbl_MS_set_weights          0           // 0 Default, 1 shows the weight in the WSVM
-#define dbl_MS_malloc_weights       0           // 0 Default, 1 prints the labels for classes
-#define dbl_MS_free_model_selection 0           // 0 Default, 1 prints which class called the free method
+#define dbl_MS_UDC                  1           // 1 Default
 
+//---- Solver ----
+#define dbl_SV_free_solver          0           // 0 Default, 1 prints which class called the free method
+#define dbl_SV_malloc_weights       0           // 0 Default, 1 prints the labels for classes
+#define dbl_SV_read_problem         0           // 0 Default, 1 prints the number of points in classes
+#define dbl_SV_RPIB                 3           // 0 Default    //read_problem_index_base
+#define dbl_SV_SWNP                 0           // 0 Default    //set_weights_num_points
+#define dbl_SV_SWSV                 0           // 0 Default    //set_weights_sum_volume
+#define dbl_SV_SWSVIB               0           // 0 Default    //set_weights_sum_volume_index_base
+#define dbl_SV_PDSWSPIB             0           // 0 Default    //PD_set_weights_sum_num_point_IB
+#define dbl_SV_TM                   0           // 0 Default    1 prints C, gamma
+#define dbl_SV_PDTMIB               0           // 0 Default    1 prints C, gamma
+#define dbl_SV_TM_report_time       0           // 0 Default    1 prints time of train_model
+#define dbl_SV_test_predict         0           // 0 Default    1 prints the details        3 prints the test data summary
+#define dbl_SV_TPIB                 0           // 0 Default    1 prints the details        //1 cause many nan in partitioning mode
+#define dbl_SV_predict_label        3           // 0 Default    3 prints the both labels
+#define dbl_SV_predict_VD	    0           // 0 Default    3 prints the both labels
+#define dbl_SV_predict_label1       0           // 0 Default    3 prints the both labels
+#define dbl_SV_PSSM                 0           // 0 Default    3 prints number of support vectors
+#define dbl_SV_PD_predict_a_label   0           // 0 Default    3 prints the both labels
 //----- Reports --------
 #define report_MS_quiet_SVM         1           // 1 silent, 0 normal
 #define report_MS_untouched_ds      1           // model selection
 #define rpt_TD_only_l1              0           // report the Test data only at the finest level (to collect result for papers)
-
 //----- Unit Test ------
 #define ut_test_only                0           // 0 Default(unit test are disabled), 1 only do the unit test and exit with 1
+
+
+
+#define dbl_SV_PDTPIB               0           // 0 Default    1 prints the details
 
 #endif // CONFIG_LOGS_H
 

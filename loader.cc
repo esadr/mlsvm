@@ -170,6 +170,9 @@ Mat Loader::load_flann_binary(){                        //the current method Jul
 
 PetscScalar Loader::calc_distance(PetscScalar raw_weight){  // for now it suppose the input is:  (Euclidean Dist)^2
     if(this->weight_type == 1 ){ //Flann (square Euclidean distance)
+#if dbl_LD_CD >=3
+        printf("[LD][CD] raw distance:%g, calculated distance:%g \n",raw_weight, 1 / (sqrt(raw_weight) + 0.00001 ));
+#endif
         return ( 1 / (sqrt(raw_weight) + 0.00001 ) );    //
     }
 

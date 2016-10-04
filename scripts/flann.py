@@ -29,7 +29,7 @@ import PetscBinaryIO
 
 
 
-def run_flann(file_path, file_name):
+def run_flann(file_path, file_name, num_NN, dist_type):
 
     # read input in PetscBinary format
     try:
@@ -48,7 +48,7 @@ def run_flann(file_path, file_name):
         stop = timeit.default_timer()
         print("Data is read from PETSc binary format: %.1f seconds" % (stop - start))
     except e:
-        print("Exception in reading the input file:"+file_path + file_name)
+        print("\n\nException in reading the input file:%s"% (file_path + file_name))
         exit(1)
     # print("data is:")
     # print(data)
@@ -59,7 +59,13 @@ def run_flann(file_path, file_name):
     try:
         start = timeit.default_timer()
         flann = FLANN()
-        m_result,m_dists = flann.nn(data, data, 10,algorithm="kdtree",branching=32, iterations=3, trees=1, checks=64);
+
+        if(dist_type == 3):
+            set_distance_type(3,100)	#this is for flann Minkowski
+        else:
+            set_distance_type(int(dist_type))
+
+        m_result,m_dists = flann.nn(data, data, int(num_NN),algorithm="kdtree",branching=32, iterations=3, trees=1, checks=64);
         #This is not needed, as I transpose them back again in loader class in mlsvm
         #but for now that I don't want to change the loader, I transpose them for test
         m_result_T= transpose(m_result) 
@@ -68,7 +74,7 @@ def run_flann(file_path, file_name):
         stop = timeit.default_timer()
         print("Flann calculation takes: %.1f seconds" % (stop - start))
     except:
-        print("Exception in running Flann, error: "+ sys.exc_info()[0])
+        print("\n\nException in running Flann, error: %s" % sys.exc_info()[0])
         exit(1)
 
     #convert the "numpy.ndarray" to "scipy.sparse.csr.csr_matrix"
@@ -81,28 +87,30 @@ def run_flann(file_path, file_name):
 
     # save the result
     try:
-        no_suffix_name = file_name.split(".")[0]
+        #no_suffix_name = file_name.split(".")[0]
         start = timeit.default_timer()
-        result_outputfile = file_path+''+ no_suffix_name+'_indices.dat'
+        #result_outputfile = file_path+''+ no_suffix_name+'_indices.dat'
+        result_outputfile = file_path+''+ file_name+'_indices.dat'
         print('Outputing Data: '+result_outputfile)
         result_file = open(result_outputfile,'w')
         PetscBinaryIO.PetscBinaryIO().writeMatSciPy(result_file, m_result_sparse)
         stop = timeit.default_timer()
         print("result saved in PETSc format: %.1f seconds" % (stop - start))
     except:
-        print("Exception in saving the result, error: "+ sys.exc_info()[0])
+        print("\n\nException in saving the result, error: %s"% sys.exc_info()[0])
         exit(1)
 
     try:
         start = timeit.default_timer()
-        dists_outputfile = file_path+''+ no_suffix_name+'_dists.dat'
+        #dists_outputfile = file_path+''+ no_suffix_name+'_dists.dat'
+        dists_outputfile = file_path+''+ file_name+'_dists.dat'
         print('Outputing Data: '+dists_outputfile)
         dists_file = open(dists_outputfile,'w')
         PetscBinaryIO.PetscBinaryIO().writeMatSciPy(dists_file, m_dists_sparse)
         stop = timeit.default_timer()
         print("dists saved in PETSc format: %.1f seconds" % (stop - start))
     except:
-        print("Exception in saving the dists, error: "+ sys.exc_info()[0])
+        print("\n\nException in saving the dists, error: %s" % sys.exc_info()[0])
         exit(1)
 
 if __name__ == '__main__':
@@ -114,21 +122,24 @@ if __name__ == '__main__':
         file_path = './'
         file_name = 'kfold_min_train.dat'
     else:           # ----------------------- get parameters for production -------------------------------
-        if (len(argv)) < 3:
+        if (len(argv)) < 4:
             print ("please enter path and file_name")
-            print("Example: /data/ twonorm_min_data.dat  \nExit due to lack of parameters!")
+            print("Example: /data/ twonorm_min_data.dat int_num_NN int_dist_type  \nExit due to lack of parameters!")
             exit(1)
         else:
             try:
-                file_path = argv[1]
-                file_name = argv[2]
+                last_slash = argv[1].rfind('/')
+                file_path = argv[1][0:last_slash+1]
+                file_name = argv[1][last_slash+1:]
+                num_NN = argv[2]
+                dist_type = argv[3]
             except:
-                print("Exception on input path and file name, try again!")
+                print("\n\nException on input path and file name, try again!")
                 exit(1)
 
     # --------------------- After reading parameters, run the script  ------------------------
     print("Input filename is: "+file_path+ file_name)
-    run_flann(file_path, file_name)
+    run_flann(file_path, file_name, num_NN, dist_type)
 
 
 

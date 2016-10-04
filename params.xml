@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <Config_Params >
-  <mlsvm_version stringVal="0.0.1"/>
+  <mlsvm_version stringVal="0.0.31"/> <!-- [MS][select best] better_Gmean_SN--> 
 <!--   <debug_export boolVal= "1"/> -->	<!--This is defined as precompile -->
   <debug_exp_CS intVal="0"/>
   <debug_exp_CS_level intVal="0"/>
@@ -13,11 +13,15 @@
   <cpp_srand_seed stringVal= ""/>	 <!--for real runs should be empty string ""-->
   
   <main_num_repeat_exp intVal = "1"/>; 	<!--set the number of repeats in the Main file over the whole cross-validation -->
-  <main_num_kf_iter intVal = "10"/>; 	<!--set the number of cross-validation in the Main file-->
-    
+  <main_num_kf_iter intVal = "5"/>; 	<!--set the number of cross-validation in the Main file-->
+  <exp_info stringVal="unique_string"/>  
+  <!-- ****************** NN ********************-->
+  <nn_number intVal="10"/>
+  <nn_distance_type intVal="1"/>		
   <!-- ****************** Loader ********************-->
   <ds_path stringVal="./datasets/"/>
   <ds_name stringVal="twonorm"/>		 
+  <tmp_path stringVal="./data/"/>	<!--temp folder path for k_fold files-->
   <pre_init_loader_matrix intVal = "300"/>; 	<!--In Loader, for initaliation of the matrix (not less than the number of features)-->
   <inverse_weight boolVal= "1"/>		<!--0 : means the distance is related to strenght of the connection.
 						    1 : means the inverse is needed, like Euclidean distnace (July 20,2015)-->
@@ -33,7 +37,7 @@
   <cs_weak_edges_ft doubleVal= "0.1"/>		<!-- Filter threshold for the weak edges-->
   <!-- ****************** Model selection ********************-->
   <ms_status intVal= "1"/>
-  <ms_limit intVal= "2000"/>          		<!-- stop model selection, inherit the last C, gamma-->
+  <ms_limit intVal= "10000"/>          		<!-- stop model selection, inherit the last C, gamma-->
 						<!-- min size of ms_limit should be larger than double of coarse coarse_threshold-->
   <ms_svm_id intVal= "2"/>              	<!-- 1: Regular SVM, 2: Weighted SVM -->
   <ms_first_stage intVal= "9"/>			<!-- number of iterations in the first stage of Uniform design (default 9) -->
@@ -60,10 +64,10 @@
 						3: sigmoid: tanh(gamma*u'*v + coef0)
 						4: precomputed kernel (kernel values in training_set_file)-->
   <svm_degree intVal  = "3"/>			<!--for poly-->
-  <svm_gamma doubleVal  = "0.007"/>	 	<!--for poly/rbf/sigmoid--><!--1/num_features-->
+  <svm_gamma doubleVal  = "0.5"/>	 	<!--for poly/rbf/sigmoid--><!--1/num_features-->
   <svm_coef0 doubleVal  = "0"/>			<!--for poly/sigmoid-->
   <svm_nu doubleVal  = "0.5"/>			<!--for NU_SVC, ONE_CLASS, and NU_SVR-->
-  <svm_cache_size doubleVal  = "4000"/>		<!--in MB-->			
+  <svm_cache_size doubleVal  = "40000"/>		<!--in MB-->			
   <svm_C doubleVal  = "100"/>			<!--for C_SVC, EPSILON_SVR and NU_SVR-->
   <svm_eps doubleVal  = "0.001"/>		<!--stopping criteria--> <!--libsvm default: 1e-3  Talayeh code: 0.1-->
   <svm_p doubleVal  = "0.1"/>			<!--for EPSILON_SVR-->
@@ -73,11 +77,16 @@
   <!-- ****************** Refinement ********************-->
   <rf_add_fraction floatVal = "1"/>
   <rf_sel_all_min_limit intVal = "500"/>
-  <rf_add_distant_point_status boolVal = "1"/>		<!-- Add SV to finer levels  0: Disable, 1: Enable-->
+  <rf_add_distant_point_status boolVal = "0"/>		<!-- Add SV to finer levels  0: Disable, 1: Enable-->
   <rf_weight_vol intVal = "0"/>			<!-- How to Calculate the weights 
 						0: Number of points in each class
 						1: Sum of volumes of points in each class -->
-  <rf_start_partitioning intVal= "3000"/> 		<!--start to partition data to smaller parts-->
-  <rf_partition_max_size intVal= "1000"/> 		<!--Maximum number of points in each partition(partition) for partitioning classes-->
-  <rf_num_opposite_partitions intVal ="1"/> 	<!--ratio of number of parts from opposite class to be selected in refinement during the group training-->
+  <pr_start_partitioning intVal= "20000"/> 		<!--start to partition data to smaller parts-->
+  <!-- ****************** Partitioning ********************-->
+  <pr_partition_max_size intVal= "1000"/> 		<!--Maximum number of points in each partition(partition) for partitioning classes-->
+  <pr_maj_voting_id intVal= "2"/> 		<!-- Majority Voting technique
+						1: all votes are the same 
+						2: weighted by inverse Euclidean distance 
+						3: weighted by inverse (Euclidean distance)^2
+						4: weighted by inverse Manhatan distance -->
 </Config_Params>

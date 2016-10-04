@@ -14,12 +14,16 @@ void Config_params::init_to_default(){
     debug_exp_MR = 0;
     debug_exp_MR_level = 0;
 
+    nn_number =0;
+    nn_distance_type=0;
     ds_path = "";
     ds_name = "";
-    ds_version = "";
+    exp_info = "";
+    tmp_path = "";
     cpp_srand_seed = "";
     main_num_repeat_exp=0;
     main_num_kf_iter=0;
+//    multi_level_status=0;
     pre_init_loader_matrix = 0;
     inverse_weight = 0;
     ld_weight_type = 0;
@@ -31,34 +35,34 @@ void Config_params::init_to_default(){
     cp_max_coarse_level = 0;
     cs_use_real_points = 0;
     cs_weak_edges_ft = 0 ;
-    ms_status = false;
+    ms_status = 0;
     ms_limit = 0;
     ms_svm_id = 0;
-    ms_first_stage = 0;
+    ms_first_stage  = 0;
     ms_second_stage = 0;
     ms_print_untouch_reuslts = false;
-    ms_bs_gm_threshold = 0;
-    ms_best_selection = 0;
+    ms_bs_gm_threshold  = 0;
+    ms_best_selection   = 0;
     ms_save_final_model = 0;
-    svm_type = 0;
+    svm_type    = 0;
     kernel_type = 0;
-    degree = 0;
-    gamma = 0;
-    coef0 = 0;
-    nu = 0;
+    degree  = 0;
+    gamma   = 0;
+    coef0   = 0;
+    nu      = 0;
     cache_size = 0;
-    C = 0;
-    eps = 0;
-    p = 0;
-    shrinking = 0;
+    C       = 0;
+    eps     = 0;
+    p       = 0;
+    shrinking   = 0;
     probability = 0;
-    nr_weight = 0;
+    nr_weight   = 0;
     rf_add_fraction = 0;
-    rf_sel_all_min_limit = 0;
     rf_add_distant_point_status = 0;
-    rf_start_partitioning = 0;
-    rf_partition_max_size = 0;
-    rf_num_opposite_partitions = 0;
+    pr_start_partitioning = 0;
+    pr_partition_max_size = 0;
+
+    pr_maj_voting_id =0;
 
     best_C = 0;
     best_gamma = 0;
@@ -76,16 +80,21 @@ void Config_params::print_params(){
     std::cout << "============= dataset=============" <<
                  "\nds_path: "              << get_ds_path()          <<
                  "\nds_name: "              << get_ds_name()          <<
+                 "\ntmp_path: "             << get_tmp_path()          <<
                  std::endl;
 
-    std::cout << "--- C++ Paramters ---"    << "\ncpp_srand_seed: " <<
-                 get_cpp_srand_seed()             << "\nNotice the seeds for each expriment is different and prints in the beginning of experiment"<<
-                 std::endl;
+    std::cout << "\ncpp_srand_seed: " <<get_cpp_srand_seed()<< std::endl;
 
     std::cout << "--- Main file Paramters ---"      <<
                  "\nmain_num_repeat_exp: "          << get_main_num_repeat_exp()   <<
                  "\nmain_num_kf_iter: "             << get_main_num_kf_iter()      <<
+                 "\nexp_info: "                     << get_exp_info()              <<
+                 "\nML_status: "                    << get_multi_level_status()    <<
                  std::endl;
+
+    std::cout << "--- NN Paramters ---"     <<
+                 "\nnn_number: "        << get_nn_number()          <<
+                 "\nnn_distance_type:"  << get_nn_distance_type()   << std::endl;
 
     std::cout << "--- Loader Paramters ---"     <<
                  "\npre_init_loader_matrix: "   << get_pre_init_loader_matrix()   <<
@@ -116,7 +125,7 @@ void Config_params::print_params(){
                  std::endl;
 
     std::cout << "--- SVM Paramters ---" <<
-                 "\nsvm_type: "         << svm_type                 <<
+                 "\nsvm_type: "         << get_svm_svm_type()       <<
                  "\nkernel_type: "      << get_svm_kernel_type()    <<
                  "\ndegree: "           << degree                   <<
                  "\ngamma: "            << get_svm_gamma()          <<
@@ -132,13 +141,15 @@ void Config_params::print_params(){
 
 
     std::cout << "--- Refinement Paramters ---" <<
-                 "\nadd_fraction: "             << get_rf_add_fraction()          <<
-                 "\nrf_sel_all_min_limit: "     << rf_sel_all_min_limit     <<
-                 "\nrf_add_distant_point_status: "           << rf_add_distant_point_status           <<
-                 "\nrf_weight_vol: "            << get_rf_weight_vol()            <<
-                 "\nrf_start_partitioning: "      << get_rf_start_partitioning()      <<
-                 "\nrf_partition_max_size: "      << get_rf_partition_max_size()      <<
-                 "\nrf_num_opposite_partitions: "    << get_rf_num_opposite_partitions()    <<
+                 "\nadd_fraction: "             << get_rf_add_fraction()                <<
+                 "\nrf_add_distant_point_status(2nd): "   << get_rf_add_distant_point_status()      <<
+                 "\nrf_weight_vol: "            << get_rf_weight_vol()                  <<
+                 "\npr_start_partitioning: "    << get_pr_start_partitioning()          <<
+                 std::endl;
+
+    std::cout << "--- Partitioning Paramters ---" <<
+                 "\npr_partition_max_size: "      << get_pr_partition_max_size()        <<
+                 "\npr_maj_voting_id: "           << get_pr_maj_voting_id()             <<
                  std::endl;
 //    std::cout << "--- Log Paramters ---"                                    <<
 //                 "\ntimer_print: "              << timer_print              <<
@@ -159,8 +170,6 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
     // Create empty XML document within memory
     pugi::xml_document doc;
     // Load XML file into memory
-    // Remark: to fully read declaration entries you have to specify
-    // "pugi::parse_declaration"
     pugi::xml_parse_result result = doc.load_file(XML_FILE_PATH.c_str(),
         pugi::parse_default|pugi::parse_declaration);
     if (!result)   {
@@ -172,7 +181,6 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
     pugi::xml_node root = doc.document_element();
 
     /// Set debug parameters
-//    debug_export = root.child("debug_export").attribute("boolVal").as_bool();
     debug_exp_CS       = root.child("debug_exp_CS").attribute("intVal").as_int();
     debug_exp_CS_level = root.child("debug_exp_CS_level").attribute("intVal").as_int();
     debug_exp_MS       = root.child("debug_exp_MS").attribute("intVal").as_int();
@@ -187,17 +195,20 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
     cpp_srand_seed = root.child("cpp_srand_seed").attribute("stringVal").value();
     if(cpp_srand_seed == ""){                                          //for resimulate the same run later
         cpp_srand_seed =  std::to_string(std::chrono::system_clock::now().time_since_epoch() /std::chrono::milliseconds(1));
-//        std::cout << cpp_srand_seed << std::endl;
-//        exit(1);
     }
 
     main_num_repeat_exp = root.child("main_num_repeat_exp").attribute("intVal").as_int();
     main_num_kf_iter = root.child("main_num_kf_iter").attribute("intVal").as_int();
+    multi_level_status = root.child("multi_level_status").attribute("boolVal").as_bool();
+
+    nn_number = root.child("nn_number").attribute("intVal").as_int();
+    nn_distance_type = root.child("nn_distance_type").attribute("intVal").as_int();
 
     ds_path = root.child("ds_path").attribute("stringVal").value();
     ds_name = root.child("ds_name").attribute("stringVal").value();
-    ds_version = root.child("ds_version").attribute("stringVal").value();
-    set_inputs();           // set all the dataset files
+    tmp_path = root.child("tmp_path").attribute("stringVal").value();
+    exp_info = root.child("exp_info").attribute("stringVal").value();
+
     pre_init_loader_matrix = root.child("pre_init_loader_matrix").attribute("intVal").as_int();
     inverse_weight = root.child("inverse_weight").attribute("boolVal").as_bool();
     ld_weight_type = root.child("ld_weight_type").attribute("intVal").as_int();
@@ -237,50 +248,77 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
     nr_weight   = root.child("svm_nr_weight").attribute("intVal").as_int();
 
     rf_add_fraction = root.child("rf_add_fraction").attribute("floatVal").as_float();
-    rf_sel_all_min_limit = root.child("rf_sel_all_min_limit").attribute("intVal").as_int();
     rf_add_distant_point_status  = root.child("rf_add_distant_point_status").attribute("boolVal").as_bool();
     rf_weight_vol   = root.child("rf_weight_vol").attribute("intVal").as_int();
-    rf_start_partitioning = root.child("rf_start_partitioning").attribute("intVal").as_int();
-    rf_partition_max_size = root.child("rf_partition_max_size").attribute("intVal").as_int();
-    rf_num_opposite_partitions = root.child("rf_num_opposite_partitions").attribute("intVal").as_int();
+    pr_start_partitioning = root.child("pr_start_partitioning").attribute("intVal").as_int();
 
-    parser_.add_option("-s", "--sr_seed", "--srand_seed")    .dest("cpp_srand_seed")  .set_default(cpp_srand_seed);
-    parser_.add_option("-x", "--n_ex", "--num_exp")          .dest("main_num_repeat_exp")  .set_default(main_num_repeat_exp);
-    parser_.add_option("-k", "--n_kf", "--num_kfold")        .dest("main_num_kf_iter")  .set_default(main_num_kf_iter);
-    parser_.add_option("--ds_p", "--path")                   .dest("ds_path")  .set_default(ds_path);
+    pr_partition_max_size = root.child("pr_partition_max_size").attribute("intVal").as_int();
+    pr_maj_voting_id      = root.child("pr_maj_voting_id").attribute("intVal").as_int();
+
+    parser_.add_option("--nn_n")    .dest("nn_number")  .set_default(nn_number);
+    parser_.add_option("--nn_d")    .dest("nn_distance_type")  .set_default(nn_distance_type);
+
+    parser_.add_option("-s")                                 .dest("cpp_srand_seed")  .set_default(cpp_srand_seed);
+    parser_.add_option("-x")                                 .dest("main_num_repeat_exp")  .set_default(main_num_repeat_exp);
+    parser_.add_option("-k")                                 .dest("main_num_kf_iter")  .set_default(main_num_kf_iter);
+    parser_.add_option("--ml_s")                             .dest("multi_level_status")  .set_default(multi_level_status);
+    parser_.add_option("-u", "--exp_info")                   .dest("exp_info")  .set_default(exp_info);
+    parser_.add_option("--ds_p")                             .dest("ds_path")  .set_default(ds_path);
+    parser_.add_option("--tmp_p")                            .dest("tmp_path")  .set_default(tmp_path);
     parser_.add_option("-f", "--ds_f", "--file")             .dest("ds_name")  .set_default(ds_name);
-    parser_.add_option("--dsv", "--version")                 .dest("ds_version")  .set_default(ds_version);
-    parser_.add_option("--cspi", "--pre_init_loader_matrix") .dest("pre_init_loader_matrix")  .set_default(pre_init_loader_matrix);
+    parser_.add_option("--cs_pi")                            .dest("pre_init_loader_matrix")  .set_default(pre_init_loader_matrix);
 //    parser_.add_option("--iw", "--inverse_weight")           .dest("inverse_weight")  .set_default(inverse_weight);
     parser_.add_option("--cs_eta")                           .dest("coarse_Eta")  .set_default(coarse_Eta);
     parser_.add_option("-t", "--cs_t", "--coarse_threshold") .dest("coarse_threshold")  .set_default(coarse_threshold);
     parser_.add_option("-q", "--cs_q", "--coarse_q")         .dest("coarse_q")  .set_default(coarse_q);
     parser_.add_option("-r", "--cs_r", "--coarse_r")         .dest("coarse_r")  .set_default(coarse_r);
     parser_.add_option("--cs_m", "--cp_max_coarse_level")    .dest("cp_max_coarse_level")  .set_default(cp_max_coarse_level);
-    parser_.add_option("--cs_we_ft")                         .dest("cs_weak_edges_ft")  .set_default(cs_weak_edges_ft);
+    parser_.add_option("--cs_we")                            .dest("cs_weak_edges_ft")  .set_default(cs_weak_edges_ft);
     parser_.add_option("--ms_status")                        .dest("ms_status")     .set_default(ms_status);
     parser_.add_option("-l", "--ms_l")                       .dest("ms_limit")  .set_default(ms_limit);
-    parser_.add_option("-i", "--ms_id", "--ms_svm_id")       .dest("ms_svm_id")  .set_default(ms_svm_id);
-    parser_.add_option("-a", "--ms_s1", "--ms_first_stage")  .dest("ms_first_stage")  .set_default(ms_first_stage);
-    parser_.add_option("-b", "--ms_s2", "--ms_second_stage") .dest("ms_second_stage")  .set_default(ms_second_stage);
+    parser_.add_option("-i", "--ms_id")                      .dest("ms_svm_id")  .set_default(ms_svm_id);
+    parser_.add_option("-a", "--ms_s1")                      .dest("ms_first_stage")  .set_default(ms_first_stage);
+    parser_.add_option("-b", "--ms_s2")                      .dest("ms_second_stage")  .set_default(ms_second_stage);
     parser_.add_option("--ms_bs")                            .dest("ms_best_selection")  .set_default(ms_best_selection);
     parser_.add_option("-v", "--validation_part")            .dest("ms_validation_part")  .set_default(ms_validation_part);
-    parser_.add_option("-p", "--ms_pt", "--ms_prt_testdata") .dest("ms_print_untouch_reuslts")  .set_default(ms_print_untouch_reuslts);
-    parser_.add_option("--msk", "--kernel_type")             .dest("kernel_type")  .set_default(kernel_type);
+    parser_.add_option("-p", "--ms_prt")                     .dest("ms_print_untouch_reuslts")  .set_default(ms_print_untouch_reuslts);
+    parser_.add_option("--ms_k")                             .dest("kernel_type")  .set_default(kernel_type);
     parser_.add_option("-g", "--ms_g")                       .dest("gamma")  .set_default(gamma);
     parser_.add_option("-c", "--ms_c")                       .dest("C")  .set_default(C);
     parser_.add_option("-e", "--ms_eps")                     .dest("eps")  .set_default(eps);
     parser_.add_option("--ms_shrinking")                     .dest("shrinking")  .set_default(shrinking);
     parser_.add_option("--ms_probability")                   .dest("probability")  .set_default(probability);
-    parser_.add_option("-z", "--rff", "--rf_add_fraction")   .dest("rf_add_fraction")  .set_default(rf_add_fraction);
+    parser_.add_option("-z", "--rf_f")                       .dest("rf_add_fraction")  .set_default(rf_add_fraction);
+    parser_.add_option("--rf_2nd")                           .dest("rf_add_distant_point_status")     .set_default(rf_add_distant_point_status);
     parser_.add_option("--rf_weight_vol")                    .dest("rf_weight_vol")  .set_default(rf_weight_vol);
-    parser_.add_option("--rf_start_partitioning")              .dest("rf_start_partitioning")  .set_default(rf_start_partitioning);
-    parser_.add_option("--rf_partition_max_size")              .dest("rf_partition_max_size")  .set_default(rf_partition_max_size);
+    parser_.add_option("--pr_start")                         .dest("pr_start_partitioning")  .set_default(pr_start_partitioning);
+    parser_.add_option("--pr_max")                           .dest("pr_partition_max_size")  .set_default(pr_partition_max_size);
+    parser_.add_option("--mv_id")                            .dest("pr_maj_voting_id")     .set_default(pr_maj_voting_id);
+    // - - - Tools - - -
+    parser_.add_option("--sat_p")                            .dest("p_norm_data_f_name")     .set_default("");
+    parser_.add_option("--sat_n")                            .dest("n_norm_data_f_name")     .set_default("");
+    parser_.add_option("--sap_td")                            .dest("test_ds_f_name")     .set_default("");
 
 
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
+
+    set_inputs_file_names();           // set all the dataset files        //because of exp_info, file name's should set after parsing the argv
+
+    check_input_parameters();
     std::cout << "[Config_params] input parameters are read" << std::endl;
+}
+
+
+void Config_params::check_input_parameters(){
+    bool flg_error = false;
+    if(get_nn_distance_type() > 8 || get_nn_distance_type() <1){
+        std::cout << "[Config_params] supported distance types are from 1 to 8!" << std::endl;
+        flg_error = true;
+    }
+
+    if(flg_error)
+        exit(1);
 }
 
 
@@ -292,30 +330,42 @@ void Config_params::set_ds_name(std::string const new_ds_name){
     this->ds_name = new_ds_name;
 }
 
-//void Config_params::set_inputs(std::string const ds_name, std::string const ds_version){
-void Config_params::set_inputs(){
-//    p_indices_f_name    = ds_path + ds_name + "/" + ds_version +"/" +"P_indices.dat";
-//    p_dist_f_name       = ds_path + ds_name + "/" + ds_version +"/" +"P_dists.dat";
-//    n_indices_f_name    = ds_path + ds_name + "/" + ds_version +"/" +"N_indices.dat";
-//    n_dist_f_name       = ds_path + ds_name + "/" + ds_version +"/" +"N_dists.dat";
-    p_indices_f_name    = "./data/kfold_min_train_indices.dat";
-    p_dist_f_name       = "./data/kfold_min_train_dists.dat";
-    n_indices_f_name    = "./data/kfold_maj_train_indices.dat";
-    n_dist_f_name       = "./data/kfold_maj_train_dists.dat";
 
-//    p_norm_data_f_name  = ds_path + ds_name + "/" + ds_version +"/" +"P_data.dat";
-//    n_norm_data_f_name  = ds_path + ds_name + "/" + ds_version +"/" +"N_data.dat";
-//    test_ds_f_name      = ds_path + ds_name + "/" + ds_version +"/" +"T_data.dat";
-    p_norm_data_f_name  = "./data/kfold_min_train.dat";
-    n_norm_data_f_name  = "./data/kfold_maj_train.dat";
-    test_ds_f_name      = "./data/kfold_test_data.dat";
+void Config_params::set_inputs_file_names(){
+    p_indices_f_name    = get_tmp_path() +"kfold_min_train_"+get_exp_info()+"_indices.dat";
+    p_dist_f_name       = get_tmp_path() +"kfold_min_train_"+get_exp_info()+"_dists.dat";
+    n_indices_f_name    = get_tmp_path() +"kfold_maj_train_"+get_exp_info()+"_indices.dat";
+    n_dist_f_name       = get_tmp_path() +"kfold_maj_train_"+get_exp_info()+"_dists.dat";
+
+    p_norm_data_f_name  = get_tmp_path() +"kfold_min_train_"+get_exp_info();
+    n_norm_data_f_name  = get_tmp_path() +"kfold_maj_train_"+get_exp_info();
+    test_ds_f_name      = get_tmp_path() +"kfold_test_data_"+get_exp_info();
+}
+
+std::string Config_params::get_tmp_path() const {
+    std::string tmp_str (options_["tmp_path"]);   //http://www.cplusplus.com/reference/string/string/rfind/
+    std::string key ("/");
+
+    std::size_t found = tmp_str.rfind(key);
+    if (found == tmp_str.size() - 1)
+        return tmp_str;
+    else
+        return tmp_str + "/";
+}
+
+void Config_params::debug_only_set_p_norm_data_path_file_name(std::string const path_file_name){
+    p_norm_data_f_name  = path_file_name;
+}
+void Config_params::debug_only_set_n_norm_data_path_file_name(std::string const path_file_name){
+    n_norm_data_f_name  = path_file_name;
 }
 
 
 void Config_params::update_srand_seed(){
 //    cpp_srand_seed =  std::to_string(std::chrono::system_clock::now().time_since_epoch() /std::chrono::milliseconds(1));
-    cpp_srand_seed = std::to_string(atoll(cpp_srand_seed.c_str()) + 1)  ;
-    std::cout << "\n\n * * * New srand seed is: " << cpp_srand_seed <<" * * * \n"<< std::endl;
+    std::string last_srand_seed = get_cpp_srand_seed();
+    options_["cpp_srand_seed"] = std::to_string(atoll(last_srand_seed.c_str()) + 1)  ;
+    std::cout << "[CP][USS] new srand seed is: " << get_cpp_srand_seed() << std::endl;
 }
 
 void Config_params::debug_only_set_srand_seed(std::string new_seed){
@@ -323,53 +373,119 @@ void Config_params::debug_only_set_srand_seed(std::string new_seed){
     std::cout << "\n\n * * * (Only for debug - It shouldn't be used in the real runs) New srand seed is:" << cpp_srand_seed <<" * * * \n"<< std::endl;
 }
 
-void Config_params::add_final_summary(iter_summary current_summary){
+void Config_params::add_final_summary(summary current_summary, int selected_level){
+    current_summary.selected_level = selected_level;
     this->all_summary.push_back(current_summary);
     std::cout << "[Config_params] summary added to all_summary" << std::endl;
+}
+
+
+void Config_params::print_summary(const summary& summary_in, std::string caller_method, int level, int iter, int stage, int fold) const{
+    printf("%s, ",caller_method.c_str());
+
+    if(level != -1)
+        printf("l:%d, ",level);
+
+    if(iter >= 0 )
+        printf("it passed:%d, ",iter);
+
+    if(summary_in.iter != -1 && iter != -2)
+        printf("it set:%d, ",summary_in.iter);
+
+    if(fold != -1)
+        printf("fold:%d, ", fold);
+
+    if(stage != -1)
+        printf("stage:%d, ",stage);
+
+    printf("AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.3f, TP:%.0f, TN:%.0f, FP:%.0f, FN:%.0f",
+           summary_in.perf.at(Acc), summary_in.perf.at(Sens), summary_in.perf.at(Spec), summary_in.perf.at(PPV),
+           summary_in.perf.at(NPV), summary_in.perf.at(F1), summary_in.perf.at(Gmean), summary_in.perf.at(TP),
+           summary_in.perf.at(TN), summary_in.perf.at(FP), summary_in.perf.at(FN));
+
+    if(summary_in.C && summary_in.gamma)
+        printf(", C:%.2f, Gamma:%.4f", summary_in.C, summary_in.gamma);
+
+    if(summary_in.num_SV_p || summary_in.num_SV_n)
+        printf(", nSV+:%d, nSV-:%d", summary_in.num_SV_p, summary_in.num_SV_n);
+
+    printf("\n");
+
 }
 
 void Config_params::set_best_parameters(measures preferred_measure){    //default measure is set to Gmean in the header file
     double max_measure_=0;
     int max_index_ =0;
     for(unsigned int i=0; i < this->all_summary.size(); i++){
-        if(this->all_summary[i].result[preferred_measure] > max_measure_){
-            std::cout << "[CP][best_parameters] result at "<< i << " is " << this->all_summary[i].result[preferred_measure] << std::endl;
-            std::cout << "[CP][best_parameters] C at "<< i << " is " << this->all_summary[i].C << std::endl;
-            std::cout << "[CP][best_parameters] gamma at "<< i << " is " << this->all_summary[i].gamma << std::endl;
-            max_measure_ = this->all_summary[i].result[preferred_measure];
+        if(this->all_summary[i].perf[preferred_measure] > max_measure_){
+            std::cout << "[CP][Set_Best_params] result at "<< i << " is " << this->all_summary[i].perf[preferred_measure] << std::endl;
+            std::cout << "[CP][Set_Best_params] C at "<< i << " is " << this->all_summary[i].C << std::endl;
+            std::cout << "[CP][Set_Best_params] gamma at "<< i << " is " << this->all_summary[i].gamma << std::endl;
+            max_measure_ = this->all_summary[i].perf[preferred_measure];
             max_index_ = i;
         }
     }
     this->best_C = this->all_summary[max_index_].C;
     this->best_gamma = this->all_summary[max_index_].gamma;
-    std::cout << "[CP][best_parameters] selected C: "<< this->best_C <<
+    std::cout << "[CP][Set_Best_params] selected C: "<< this->best_C <<
                  ", gamma: " << this->best_gamma << " and size of summary is :"<<
                  this->all_summary.size() <<std::endl;
     this->best_params_are_set = 1;
 
 }
 
-void Config_params::print_final_results(){
+void Config_params::print_final_results() const{
     printf("[CP] final results are: \n");
     double sum_acc=0;
     double sum_gmean=0;
     double sum_sens=0;
     double sum_spec=0;
+    double sum_ppv=0;
+    double sum_npv=0;
+    double sum_f1=0;
 
     for(unsigned int i=0; i< this->all_summary.size(); i++){
-        printf("[CP][FP]|it:%d|\tAcc:%g|\tSN:%g|\tSP:%g|\tGmean:%g|\tC:%g|\tGamma:%g\n",i,
-               this->all_summary[i].result[Acc], this->all_summary[i].result[Sens],
-               this->all_summary[i].result[Spec], this->all_summary[i].result[Gmean],
-               this->all_summary[i].C, this->all_summary[i].gamma);
-        sum_acc += this->all_summary[i].result[Acc];
-        sum_sens += this->all_summary[i].result[Sens];
-        sum_spec += this->all_summary[i].result[Spec];
-        sum_gmean += this->all_summary[i].result[Gmean];
+        printf("[CP][PFR],it:%d, BestL:%d, AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f",
+               i, this->all_summary[i].selected_level,
+               this->all_summary[i].perf.at(Acc), this->all_summary[i].perf.at(Sens),
+               this->all_summary[i].perf.at(Spec), this->all_summary[i].perf.at(PPV),
+               this->all_summary[i].perf.at(NPV), this->all_summary[i].perf.at(F1),
+               this->all_summary[i].perf.at(Gmean));
+
+        if(this->all_summary[i].C && this->all_summary[i].gamma)
+            printf(", C:%.2f, G:%.4f",this->all_summary[i].C, this->all_summary[i].gamma);
+
+        printf("\n");
+
+        sum_acc += this->all_summary[i].perf.at(Acc);
+        sum_sens += this->all_summary[i].perf.at(Sens);
+        sum_spec += this->all_summary[i].perf.at(Spec);
+        sum_ppv += this->all_summary[i].perf.at(PPV);
+        sum_npv += this->all_summary[i].perf.at(NPV);
+        sum_f1 += this->all_summary[i].perf.at(F1);
+        sum_gmean += this->all_summary[i].perf.at(Gmean);
 
     }
     double avg_acc = sum_acc / this->all_summary.size();
     double avg_sens = sum_sens / this->all_summary.size();
     double avg_spec = sum_spec / this->all_summary.size();
+    double avg_ppv = sum_ppv / this->all_summary.size();
+    double avg_npv = sum_npv / this->all_summary.size();
+    double avg_f1 = sum_f1 / this->all_summary.size();
     double avg_gmean = sum_gmean / this->all_summary.size();
-    printf("\n\n[CP][FP]|\tAvg_Acc:%g|\tAvg_SN:%g|\tAvg_SP:%g|\tAvg_Gmean:%g\n\n",avg_acc, avg_sens, avg_spec, avg_gmean);
+    printf("\n\n[CP][PFR], Avg_Acc:%.2f, Avg_SN:%.2f, Avg_SP:%.2f, Avg_PPV:%.2f, Avg_NPV:%.2f, Avg_F1:%.2f, Avg_GM:%.2f\n\n",
+           avg_acc, avg_sens, avg_spec, avg_ppv, avg_npv, avg_f1, avg_gmean);
 }
+
+
+
+void Config_params::print_ref_result(const std::vector<ref_results>& v_ref_results) const{
+    for(auto it= v_ref_results.begin(); it!=v_ref_results.end(); ++it){
+        std::cout << "[CP][PRefResult] VD GM:" << it->validation_data_summary.perf.at(Gmean) <<
+                     ",TD GM:" << it->test_data_summary.perf.at(Gmean) <<
+                     ", level:" << it->level << std::endl;
+    }
+}
+
+
+

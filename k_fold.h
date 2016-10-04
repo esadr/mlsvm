@@ -15,7 +15,7 @@ private:
 
 public:
 
-    k_fold();
+
     /*
      * read the input data from file and load it into m_in_data_ matrix
      * read the input label from file and load it into v_in_label_ vector
@@ -23,7 +23,7 @@ public:
      * the _data.dat, _label.dat are used to postfix to the ds_name for data and label files
      * check the size of data and labels and return its result
      */
-    bool read_in_data();
+    void read_in_data(std::string input_train_data="", std::string input_train_label="");
 
     /*
      * Only devide the input data to 2 separate classes
@@ -37,7 +37,7 @@ public:
      * Create a random sequence of numbers for them and store them in local vectors (mXX_shuffled_indices_)
      * The seed for srand comes from the config params and it is recorded in output for debug
      */
-    void shuffle_data();
+    void shuffle_data(std::string preferred_srand="");
 
     /*
      * Get the random sequence from local vectors for both class
@@ -49,7 +49,27 @@ public:
      */
 //    bool cross_validation(int current_iteration,int total_iterations, Mat& m_min_train_data, Mat& m_maj_train_data, Mat& m_test_data);
     // refer to reports
-    void cross_validation(int current_iteration,int total_iterations);
+    void cross_validation(int current_iteration,int total_iterations,
+                          std::string p_data_fname="",
+                          std::string n_data_fname="",
+                          std::string test_data_fname="");
+    /*
+     * for debugging a specific train and test data, we write the output of divide data to files
+     * This make it possible for Flann to read the data and calculate the K-NN
+     */
+    void prepare_traindata_for_flann();
+
+    /*
+     * Not shuffle data, only partition data
+     * At each iteration, take i-th subset of data as submatrix to produce the test part for that class
+     * Take the rest as training for that class
+     * Combine both test parts with labels as one test matrix
+     * Note: iteration should start from ZERO
+     */
+    void cross_validation_simple(Mat& m_data_p, Mat& m_data_n, Vec& v_vol_p, Vec& v_vol_n,
+                                 int current_iteration, int total_iterations,
+                                 Mat& m_train_data_p, Mat& m_train_data_n, Mat& m_test_data,
+                                 Vec& v_train_vol_p, Vec& v_train_vol_n);
 
     /*
      * I guess I should skip this in future, but for now it is very similar to what I have in the model selection
@@ -60,12 +80,13 @@ public:
     void combine_test_data(Mat& test_total, Mat& dt_test_p, Mat& dt_test_n);
 
     /*
-     * I won't need this after I call Flann directly, but til I need to export the
+     * I won't need this after I call Flann directly, but till then I need to export the
      * data for each class to petsc binary format and read them in another script
      * to calculate the flann for training parts and save them in petsc binary format
      * again and read them
      */
-    void write_output(char f_name[PETSC_MAX_PATH_LEN], Mat m_Out);    //write the output to file
+//    void write_output(char f_name[PETSC_MAX_PATH_LEN], Mat m_Out);    //write the output to file
+    void write_output(std::string f_name, Mat m_Out);    //write the output to file
 //    /*
 //     * release the local matrix and vector for input data
 //     */
@@ -77,4 +98,5 @@ public:
 };
 
 #endif // K_FOLD_H
+
 

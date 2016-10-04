@@ -15,6 +15,7 @@ public:
     void load_vec(const char * f_name, Vec& v_input, bool print);
     void read_parts(std::vector<std::vector<PetscInt>>& vv_parts, Mat& m_parts, bool print);
 
+    void test_mr_get_part();
 
 // - - - - model selection - - - -
     void test_ms_ud();

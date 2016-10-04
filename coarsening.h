@@ -8,26 +8,36 @@
 
 //#include "utility.h"
 
+struct cs_info{
+    PetscInt num_point;
+    PetscInt num_edge;
+    PetscInt min_num_edge;
+    PetscInt avg_num_edge;
+    PetscInt max_num_edge;
+};
 
 class Coarsening {
 private:
     PetscInt num_coarse_points = 0;
     std::string cc_name;        // classifier_class_name for printing
 public:
-    Coarsening(){ } //default empty constructor (not a goog idea, it is here only as a reminder)
+    Coarsening() {}
 
     Coarsening(std::string classfier_class_name){ cc_name = classfier_class_name; }
 
-    ~Coarsening(){}
-
-    Mat calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices);
     /* @param WA
      *      weighted Adjancency matrix (graph)
      * @param vol
      *      vector of volumes for the nodes (current level)
+     * @param ref_info
+     *      graph information for printing during the refinement
      * @return
      *      P matrix
      */
+    Mat calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info);
+
+
+    Mat calc_P_without_shrinking(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info);
 
 //    Mat calc_aggregate_data(Mat& P, Mat& data, Vec& v_vol);
     Mat calc_aggregate_data(Mat& P, Mat& data, Vec& v_vol, std::vector<NodeId>& seeds_indices);

@@ -5,7 +5,7 @@
 #include <set>
 
 
-Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices) {
+Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info) {
 
     PetscInt num_row;
     MatGetSize(WA,&num_row,0);    //num_row returns the number of rows globally
@@ -76,12 +76,19 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices) {
 #endif
     }//end of for each row (num_row)
 
+
 #if dbl_CO_calcP >= 1         //calculate the stat for number of edges
+    ref_info.num_point = num_row;
+    ref_info.num_edge = sum_nnz / 2;
     std::cout <<"[CO][calc_p]{" << this->cc_name <<"} number of rows:"<< num_row <<
-                "\t\tedges:"<< sum_nnz / 2 << std::endl;
+                "\t\tedges:"<< ref_info.num_edge << std::endl;
     std::sort(stat_degree_.begin(), stat_degree_.end(), std::greater<tmp_degree>());     //Sort all edges in descending order
-    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} Degrees\t Max:" << stat_degree_[0].degree_ <<
-                "\t\tMin:" << stat_degree_[num_row-1].degree_ << "\t\tAvg:"<< (sum_nnz/2) / num_row  <<  std::endl;
+
+    ref_info.min_num_edge = stat_degree_[num_row-1].degree_;
+    ref_info.avg_num_edge = (sum_nnz/2) / num_row;
+    ref_info.max_num_edge = stat_degree_[0].degree_;
+    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} Degrees\t Max:" << ref_info.max_num_edge <<
+                "\t\tMin:" << ref_info.min_num_edge << "\t\tAvg:"<< ref_info.avg_num_edge  <<  std::endl;
 #endif
 
     vertexs.setAvgFutureVolume( sum_future_volume / vertexs.getSize());
@@ -298,6 +305,67 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices) {
 }
 
 
+
+
+
+Mat Coarsening::calc_P_without_shrinking(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info) {
+
+    PetscInt num_row,i;
+    MatGetSize(WA,&num_row,0);    //num_row returns the number of rows globally
+    v_seeds_indices.reserve(num_row);
+
+#if dbl_CO_calcP >= 1         //calculate the stat for number of edges
+    int sum_nnz =0;
+    std::vector<tmp_degree> stat_degree_;
+    stat_degree_.reserve(num_row);
+    PetscInt ncols;
+    const PetscInt    *cols;                        //if not NULL, the column numbers
+    const PetscScalar *vals;
+
+    for(i =0; i <num_row; i++){
+        MatGetRow(WA,i,&ncols,&cols,&vals); //ncols : number if non-zeros in the row
+        sum_nnz += ncols;                       //$$debug
+        stat_degree_.push_back(tmp_degree(i,(int)ncols));
+        MatRestoreRow(WA,i,&ncols,&cols,&vals);       //Frees any temporary space allocated by MatGetRow()
+    }//end of for each row (num_row)
+
+    ref_info.num_point = num_row;
+    ref_info.num_edge = sum_nnz / 2;
+    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} number of rows:"<< num_row <<
+                "\t\tedges:"<< ref_info.num_edge << std::endl;
+    std::sort(stat_degree_.begin(), stat_degree_.end(), std::greater<tmp_degree>());     //Sort all edges in descending order
+
+    ref_info.min_num_edge = stat_degree_[num_row-1].degree_;
+    ref_info.avg_num_edge = (sum_nnz/2) / num_row;
+    ref_info.max_num_edge = stat_degree_[0].degree_;
+    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} Degrees\t Max:" << ref_info.max_num_edge <<
+                "\t\tMin:" << ref_info.min_num_edge << "\t\tAvg:"<< ref_info.avg_num_edge  <<  std::endl;
+#endif
+
+
+
+//========================= Create the P matrix ===========================
+// rows : fine points        => row_dimension : num_rows
+// columns : coarse points   => col_dimension : count the coarse points => num_col
+    Mat         m_P;
+    // each row has only 1 non zero, which is it self
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, 1,PETSC_NULL, &m_P);
+#if dbl_CO_calcP >= 3
+    printf("[CO][calc_p]after MatCreate for P matrix\n");
+#endif
+    for(i =0; i <num_row; ++i){
+        MatSetValue(m_P,i,i,1,INSERT_VALUES);       // create a diagonal matrix
+        v_seeds_indices.push_back(i);
+    }
+    MatAssemblyBegin(m_P,MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_P,MAT_FINAL_ASSEMBLY);
+#if dbl_CO_calcP >=0
+    printf("[CO][calc_p] P Matrix:\n");                                               //$$debug
+    MatView(m_P,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+#endif
+//    exit(1);
+    return m_P;
+}
 
 
 
@@ -638,6 +706,7 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa){
             if( fabs(vals[j]) > trs_ ) {   nnz_real++;    }
         }
         avg_weight = a_sum_row[i] / nnz_real;  //calc average edge weight
+//        std::cout << "[CS][FWE] average edge weight"<<avg_weight << std::endl;
         a_nnz_per_row[i] = nnz_real;                        // this is not ultimate num_nnz because, the weak edges are going to be removed later
 #if dbl_CO_FWE >=9
         std::cout << " alfa * aveg_weight:"<< alfa * avg_weight <<", nnz_real:"<<nnz_real<< std::endl;

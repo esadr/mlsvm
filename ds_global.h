@@ -1,6 +1,8 @@
 #ifndef DS_GLOBAL_H
 #define DS_GLOBAL_H
 
+#include <map>
+#include <vector>
 #include <cstdint>
 
             /* This file would be useful in case I need to
@@ -17,7 +19,45 @@ typedef int SmallSize;              // I don't think I need a very large number
 typedef uint_fast64_t LargeSize;    // For large volume of objects, I can use this one
 
 
+//remember to update measures which are defined in the model selection header file as enum (all supported metrics)
+enum measures {TP, TN, FP, FN, Acc, Sens, Spec, Gmean, F1, PPV, NPV};
 
+//struct iter_summary{
+//    double C, gamma;
+//    std::map<measures, double> result;
+//};
+
+
+
+struct solution{
+    std::vector<int> p_index;
+    std::vector<int> n_index;
+    double C, gamma;
+};
+
+
+
+struct summary{
+    int iter;
+//    double gmean;
+    std::map<measures,double> perf;
+    int num_SV_p;
+    int num_SV_n;
+//    int num_SV_t;
+    double C;
+    double gamma;
+    bool operator > (const summary new_) const{
+//        return ((this->perf.at(Gmean) - new_.perf.at(Gmean)) > 0.001);
+        return (this->perf.at(Gmean) > new_.perf.at(Gmean));
+    }
+    int selected_level = -1;
+};
+
+struct ref_results{
+    summary validation_data_summary;
+    summary test_data_summary;
+    int level;
+};
 
 
 
