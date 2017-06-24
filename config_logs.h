@@ -22,14 +22,18 @@
 //---- kFold ----
 #define dbl_kf_shuffle_data         0           // Default 0
 #define dbl_kf_cross_validation     0           // Default 0
+#define dbl_KF_CVC                  0           // Default 0
 #define dbl_KF_CVS                  0           // Default 0
+#define dbl_KF_FN                   0           // Default 0
+#define dbl_KF_CTD                  0           // Default 0
 //---- Loader ----
 #define dbl_LD_LWAB                 0
-#define dbl_LD_LFB                  0           // load flann binary
+#define dbl_LD_LFB                  0           // 0 Default, load flann binary
+#define dbl_LD_CWAM                 0           // 0 Default, create WA matrix using input NN matrices
 #define dbl_LD_CD                   0           // 0 Default, 3 print raw and calculated distance
 #define dbl_LD_LNDS                 0           // 0 Default, 5 print size of data
 //---- Coarsening ----
-#define dbl_CO_calcP                1          // 1 normal with #edges
+#define dbl_CO_calcP                3          // 1 normal with #edges
 #define dbl_CO_vNorm                0           // calculate the normalized vector
 #define dbl_CO_cInv                 0           // calculate the inverse vector
 #define dbl_CO_CAD                  0           // 0 Default [Calculate Aggregate data]
@@ -78,19 +82,20 @@
 #define dbl_SV_free_solver          0           // 0 Default, 1 prints which class called the free method
 #define dbl_SV_malloc_weights       0           // 0 Default, 1 prints the labels for classes
 #define dbl_SV_read_problem         0           // 0 Default, 1 prints the number of points in classes
-#define dbl_SV_RPIB                 3           // 0 Default    //read_problem_index_base
+#define dbl_SV_RPIB                 0           // 0 Default    //read_problem_index_base
 #define dbl_SV_SWNP                 0           // 0 Default    //set_weights_num_points
 #define dbl_SV_SWSV                 0           // 0 Default    //set_weights_sum_volume
 #define dbl_SV_SWSVIB               0           // 0 Default    //set_weights_sum_volume_index_base
 #define dbl_SV_PDSWSPIB             0           // 0 Default    //PD_set_weights_sum_num_point_IB
 #define dbl_SV_TM                   0           // 0 Default    1 prints C, gamma
 #define dbl_SV_PDTMIB               0           // 0 Default    1 prints C, gamma
-#define dbl_SV_TM_report_time       0           // 0 Default    1 prints time of train_model
+#define dbl_SV_TM_report_time       1           // 0 Default    1 prints time of train_model
 #define dbl_SV_test_predict         0           // 0 Default    1 prints the details        3 prints the test data summary
 #define dbl_SV_TPIB                 0           // 0 Default    1 prints the details        //1 cause many nan in partitioning mode
 #define dbl_SV_predict_label        3           // 0 Default    3 prints the both labels
 #define dbl_SV_predict_VD	    0           // 0 Default    3 prints the both labels
-#define dbl_SV_predict_label1       0           // 0 Default    3 prints the both labels
+#define dbl_SV_predict_VD_rpt_time  1           // 0 Default    1 prints time
+#define dbl_SV_predict_label1       3           // 0 Default    3 prints the both labels
 #define dbl_SV_PSSM                 0           // 0 Default    3 prints number of support vectors
 #define dbl_SV_PD_predict_a_label   0           // 0 Default    3 prints the both labels
 //----- Reports --------
@@ -103,6 +108,7 @@
 
 
 #define dbl_SV_PDTPIB               0           // 0 Default    1 prints the details
+#define export_SVM_models           1           // 0 Default    1 Save the SVM models in svm_models folder
 
 #endif // CONFIG_LOGS_H
 

@@ -1,40 +1,43 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <Config_Params >
-  <mlsvm_version stringVal="0.0.31"/> <!-- [MS][select best] better_Gmean_SN--> 
-<!--   <debug_export boolVal= "1"/> -->	<!--This is defined as precompile -->
-  <debug_exp_CS intVal="0"/>
-  <debug_exp_CS_level intVal="0"/>
-  <debug_exp_MS intVal="0"/>
-  <debug_exp_MS_level intVal="10"/>
-  <debug_exp_MR intVal="0"/>
-  <debug_exp_MR_level intVal="7"/>
+  <main_function intVal="0"/>                 <!-- -d main functinality
+												 0: Classification
+							                     1: Regression (has not developed) -->
   
-  <!-- ****************** Debug ********************-->
-  <cpp_srand_seed stringVal= ""/>	 <!--for real runs should be empty string ""-->
+
+  <mlsvm_version stringVal="0.0.43"/> 
+  <!-- ****************** Main ********************-->
+  <cpp_srand_seed stringVal= ""/>	 	    <!--for real runs should be empty string ""-->
   
-  <main_num_repeat_exp intVal = "1"/>; 	<!--set the number of repeats in the Main file over the whole cross-validation -->
-  <main_num_kf_iter intVal = "5"/>; 	<!--set the number of cross-validation in the Main file-->
-  <exp_info stringVal="unique_string"/>  
+  <main_num_repeat_exp intVal = "1"/>; 		<!--set the number of repeats in the Main file over the whole cross-validation -->
+  <main_num_kf_iter intVal = "5"/>; 		<!--set the number of cross-validation in the Main file-->
+  <exp_info stringVal="unique_string"/>
+  <multi_level_status boolVal = "0"/>	    <!-- only for personalized training -->
   <!-- ****************** NN ********************-->
-  <nn_number intVal="10"/>
+  <nn_number_of_classes intVal="2"/>
+  <nn_number_of_neighbors intVal="10"/>
   <nn_distance_type intVal="1"/>		
   <!-- ****************** Loader ********************-->
   <ds_path stringVal="./datasets/"/>
   <ds_name stringVal="twonorm"/>		 
-  <tmp_path stringVal="./data/"/>	<!--temp folder path for k_fold files-->
+  <tmp_path stringVal="./temp/"/>	<!--temp folder path for k_fold files-->
   <pre_init_loader_matrix intVal = "300"/>; 	<!--In Loader, for initaliation of the matrix (not less than the number of features)-->
-  <inverse_weight boolVal= "1"/>		<!--0 : means the distance is related to strenght of the connection.
-						    1 : means the inverse is needed, like Euclidean distnace (July 20,2015)-->
-  <ld_weight_type intVal="1"/>			<!--1: Flann(square of Euclidean distance), 2: Gaussian distance-->
+  <inverse_weight boolVal= "1"/>		<!-- 0: means the distance is related to strenght of the connection.
+						                     1: means the inverse is needed, like Euclidean distnace (July 20,2015)-->
+  <ld_weight_type intVal="1"/>			<!-- 1: Flann(square of Euclidean distance), 2: Gaussian distance-->
   <ld_weight_param doubleVal="0.005"/>
   <!-- ****************** Coarsening ********************-->
   <coarse_Eta doubleVal= "2"/>
   <coarse_threshold intVal= "300"/> 		<!-- Number of data points in each class (usual 300,500)-->
   <coarse_q doubleVal= "0.4"/> 
-  <coarse_r intVal= "1"/>    			<!-- Max number of aggregates each fine point could participate to them-->
-  <cp_max_coarse_level intVal = "30"/>		<!-- Limit the number of levels in the coarsening (stop infinit loops)-->
+  <coarse_r intVal= "4"/>    			<!-- Max number of aggregates each fine point could participate to them-->
+  <cs_max_coarse_level intVal = "30"/>		<!-- Limit the number of levels in the coarsening (stop infinit loops)-->
   <cs_use_real_points intVal= "0"/>		<!-- Default 0: calculate the fake points, 1: use real point for coarser levels -->
-  <cs_weak_edges_ft doubleVal= "0.1"/>		<!-- Filter threshold for the weak edges-->
+  <cs_weak_edges_ft doubleVal= "0.001"/>		<!-- Filter threshold for the weak edges-->
+  <cs_boundary_points_status boolVal = "0"/>	<!--max number of fractions added to a row of P matrix for a fine point in case of considering the boundary points-->
+  <cs_boundary_points_threshold doubleVal= "0.5"/> 	<!--the minimum entropy for a fine point to be considered as boundary point between 0 and 1-->
+  <cs_boundary_points_max_num intVal = "30"/>	<!-- 0: no boundary point, 1: added max number of fraction for boundary poitns-->
+  
   <!-- ****************** Model selection ********************-->
   <ms_status intVal= "1"/>
   <ms_limit intVal= "10000"/>          		<!-- stop model selection, inherit the last C, gamma-->
@@ -43,7 +46,8 @@
   <ms_first_stage intVal= "9"/>			<!-- number of iterations in the first stage of Uniform design (default 9) -->
   <ms_second_stage intVal= "5"/>		<!-- number of iterations in the first stage of Uniform design (default 5) -->
   <!--this is the percentage of training data as an input to the model selection for each class. e.g 0.1 means 10% for validation and 90% for training-->	
-  <ms_validation_part doubleVal= "0.10"/>		<!--default is 0.1 -->  
+  <!--<ms_validation_part doubleVal= "0.10"/>		<!--default is 0.1 -->  -->
+  <ms_VD_sample_size_fraction doubleVal="0.1"/> 	<!--the fraction of whole training data used for validation-->  
   <ms_print_untouch_reuslts intVal = "1"/>
   <!--Thershold for comapring the Gmeans in model selection, select best parameters-->
   <ms_bs_gm_threshold doubleVal = "0.00001"/>		<!--default for not rel should be 0.00001-->
@@ -78,12 +82,12 @@
   <rf_add_fraction floatVal = "1"/>
   <rf_sel_all_min_limit intVal = "500"/>
   <rf_add_distant_point_status boolVal = "0"/>		<!-- Add SV to finer levels  0: Disable, 1: Enable-->
-  <rf_weight_vol intVal = "0"/>			<!-- How to Calculate the weights 
+  <rf_weight_vol intVal = "1"/>			<!-- How to Calculate the weights 
 						0: Number of points in each class
 						1: Sum of volumes of points in each class -->
-  <pr_start_partitioning intVal= "20000"/> 		<!--start to partition data to smaller parts-->
+  <pr_start_partitioning intVal= "5000"/> 		<!--start to partition data to smaller parts-->
   <!-- ****************** Partitioning ********************-->
-  <pr_partition_max_size intVal= "1000"/> 		<!--Maximum number of points in each partition(partition) for partitioning classes-->
+  <pr_partition_max_size intVal= "1500"/> 		<!--Maximum number of points in each partition(partition) for partitioning classes-->
   <pr_maj_voting_id intVal= "2"/> 		<!-- Majority Voting technique
 						1: all votes are the same 
 						2: weighted by inverse Euclidean distance 

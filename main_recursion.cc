@@ -6,8 +6,21 @@
 
 
 solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
-                             Mat& n_data, Mat& m_P_n_f, Mat& n_WA, Vec& n_vol, int level,
-                             std::vector<ref_results>& v_ref_results){
+                             Mat& n_data, Mat& m_P_n_f, Mat& n_WA, Vec& n_vol,
+                             Mat& m_VD_p, Mat& m_VD_n, int level, std::vector<ref_results>& v_ref_results){
+    PetscInt check_num_row_VD;
+    MatGetSize(m_VD_p, &check_num_row_VD, NULL );
+    if(!check_num_row_VD){
+        std::cout << "[MR][main] empty validation data for minority class, Exit!" << std::endl;
+        exit(1);
+    }
+
+    MatGetSize(m_VD_n, &check_num_row_VD, NULL );
+    if(!check_num_row_VD){
+        std::cout << "[MR][main] empty validation data for majority class, Exit!" << std::endl;
+        exit(1);
+    }
+
     level++;
     int c_limit = Config_params::getInstance()->get_coarse_threshold();
     Mat p_data_c,p_WA_c, n_data_c, n_WA_c,m_P_p,m_P_n;  //data_c is aggregated data (coarse data point)
@@ -21,8 +34,6 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
     /// ----------------- Both classes are small enough, Now call the ModelSelection (Recursive Condition) -----------------
     if ((p_num_row <  c_limit) && (n_num_row <  c_limit))  {          //both classes are small enough (coarsest level)
         printf("\n[MR][main] ================= End of Coarsening at level:%d =================\n",level);
-        MatGetSize(p_data,&p_num_row,0);    //m returns the number of rows globally
-        MatGetSize(n_data,&n_num_row,0);    //m returns the number of rows globally
         printf("[MR][main] num points P:%d, N:%d\n",p_num_row, n_num_row);      //$$debug
 //        printf("[MR][main] start to solve SVM for level:%d\n",level);      //$$debug
 
@@ -30,7 +41,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         solution sol_coarsest;
 
         Refinement rf;
-        rf.process_coarsest_level(p_data, p_vol, n_data, n_vol,level ,sol_coarsest, v_ref_results);
+        rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n, level ,sol_coarsest, v_ref_results);
 
         // free resources
         MatDestroy(&p_data);
@@ -44,7 +55,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
 
     }else{      ///-------------- Coarsening -------------------
         ETimer t_coarse;
-        if(level > Config_params::getInstance()->get_cp_max_coarse_level())     {
+        if(level > Config_params::getInstance()->get_cs_max_coarse_level())     {
             printf("!!! the coarsening is not converged after %d levels, skip this run !!!\n", level);
             solution empty_solution;
             empty_solution.C = -1;
@@ -55,7 +66,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         Coarsening n_coarser("Majority");
         cs_info ref_info_p, ref_info_n;
         printf("\n[MR][main] ================= Coarsening at level:%d =================\n",level);
-        if(p_num_row > c_limit){
+        if(p_num_row >= c_limit){
             printf("[MR][main]+ + + + + + + + Positive class + + + + + + + + \n");
             m_P_p = p_coarser.calc_P(p_WA, p_vol, v_p_seeds_indices, ref_info_p); //m_P_p measn P matrix for positive label (minority class)
 //            t_coarse.stop_timer("[MR][Main]{1} from start of both class calc_p minority, level:",std::to_string(level));
@@ -66,7 +77,9 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
             p_WA_c = p_coarser.calc_WA_c(m_P_p, p_WA);
 //            t_coarse.stop_timer("[MR][Main]{2} from start of both class calc Agg Data minority, level:",std::to_string(level));
 
-            p_coarser.filter_weak_edges(p_WA_c, filter_threshold);
+            p_coarser.calc_real_weight(p_WA_c, p_data_c);       //recalculate the weights in adjacency matrix from the data
+            p_coarser.filter_weak_edges(p_WA_c, filter_threshold, level);
+
 
             p_vol_c = p_coarser.calc_coarse_volumes(m_P_p, p_vol);
 //            t_coarse.stop_timer("[MR][Main]{3} from start of both class calc Agg Vol minority, level:",std::to_string(level));
@@ -99,7 +112,9 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         n_WA_c = n_coarser.calc_WA_c(m_P_n, n_WA);
 //        t_coarse.stop_timer("[MR][Main]{6} from start of both class calc Agg Vol majority",std::to_string(level));
 
-        n_coarser.filter_weak_edges(n_WA_c, filter_threshold);
+        n_coarser.calc_real_weight(n_WA_c, n_data_c);       //recalculate the weights in adjacency matrix from the data
+        n_coarser.filter_weak_edges(n_WA_c, filter_threshold,level);
+
 
         n_vol_c = n_coarser.calc_coarse_volumes(m_P_n, n_vol);
 //        t_coarse.stop_timer("[MR][Main]{7} from start of both class calc Agg Vol majority",std::to_string(level));
@@ -108,7 +123,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
 
 
         solution sol_coarser ;
-        sol_coarser = main(p_data_c, m_P_p, p_WA_c, p_vol_c, n_data_c, m_P_n, n_WA_c, n_vol_c,level, v_ref_results); // recursive call
+        sol_coarser = main(p_data_c, m_P_p, p_WA_c, p_vol_c, n_data_c, m_P_n, n_WA_c, n_vol_c, m_VD_p, m_VD_n, level, v_ref_results); // recursive call
         if(sol_coarser.C == -1 ){       // the coarsening didn't converge after maximum number of levels, so we skip this v-cycle completely
             //free the memory
             MatDestroy(&p_data);
@@ -139,7 +154,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         solution sol_refine;
         Refinement rf;
 
-        sol_refine = rf.main(p_data,m_P_p,p_vol, p_WA, n_data,m_P_n,n_vol, n_WA, sol_coarser,level,v_ref_results);
+        sol_refine = rf.main(p_data,m_P_p,p_vol, p_WA, n_data,m_P_n,n_vol, n_WA, m_VD_p, m_VD_n, sol_coarser,level,v_ref_results);
 
         MatDestroy(&p_data);
         MatDestroy(&n_data);
@@ -154,6 +169,3 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         return sol_refine;
     }
 }
-
-
-

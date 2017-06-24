@@ -1,4 +1,4 @@
-#ifndef SOLVER_H
+ #ifndef SOLVER_H
 #define SOLVER_H
 
 #define weight_instance 1
@@ -44,12 +44,13 @@ private:
     const char * test_dataset_f_name;
 
     void read_parameters();
+    void print_parameters();
     void read_problem_index_base(Mat& p_train_data, Mat& n_train_data,
                                  std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
                                  PetscInt iter_p_end,PetscInt iter_n_end,
                                  Vec& v_vol_p, Vec& v_vol_n);
 
-    void PD_read_problem_index_base(Mat& m_data, std::vector<int>& v_lbl, const PetscScalar * arr_index, int num_nnz);
+    void PD_read_problem_index_base(Mat& m_data, std::vector<int>& v_lbl, const PetscScalar * arr_index, int num_nnz); //personalized classifier
 
     void read_problem(Mat& m_train_data_p, Vec& v_vol_p, Mat& m_train_data_n, Vec& v_vol_n);
 
@@ -62,7 +63,7 @@ private:
     void set_weights_sum_volume_index_base(svm_parameter& param_, Vec& v_vol_p, Vec& v_vol_n,
                         std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index, PetscInt iter_p_end, PetscInt iter_n_end);
 
-    void PD_set_weights_sum_num_point_IB(svm_parameter& param_,std::vector<int>& v_lbl, const PetscScalar * arr_index, int num_nnz);
+    void PD_set_weights_sum_num_point_IB(svm_parameter& param_,std::vector<int>& v_lbl, const PetscScalar * arr_index, int num_nnz); //personalized classifier
 
     void alloc_memory_for_weights(svm_parameter& in_param, bool free_first);
 
@@ -99,16 +100,17 @@ public:
 
     void partial_solver(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n, double last_c, double last_gamma,
                                     int level, std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
-                                    std::unordered_set<PetscInt>& uset_SV_index_p, std::unordered_set<PetscInt>& uset_SV_index_n);
+                                    std::unordered_set<PetscInt>& uset_SV_index_p, std::unordered_set<PetscInt>& uset_SV_index_n,
+                                    Mat& m_VD_p, Mat& m_VD_n, Mat& m_VD_both, Mat& m_all_predict_VD, Mat& m_testdata, int classifier_id, Mat& m_all_predict_TD);
 
-    void cross_fold_data(const Mat data_p, const Mat data_n, Mat& train_, Mat& train_n_, Mat& test_total_);
+//    void cross_fold_data(const Mat data_p, const Mat data_n, Mat& train_, Mat& train_n_, Mat& test_total_);
 
     void combine_test_data(Mat& test_total, Mat& dt_test_p, PetscInt size_p, Mat& dt_test_n, PetscInt size_n, PetscInt max_num_col_);
 
 
-//    void predict_label(Mat& test_data, int target_row, Mat& m_predicted_label);
+    void predict_test_data_in_matrix_output(Mat& test_data, int target_row, Mat& m_predicted_label);
 
-    void predict_label1(Mat& test_data, int target_row, Mat& m_predicted_label);
+    void predict_VD_in_output_matrix(Mat& m_VD_p,Mat& m_VD_n, int target_row, Mat& m_predicted_label);
 
 //    std::map<measures,double> evaluate_testdata(int level);
     void evaluate_testdata(int level, summary& final_summary);
@@ -134,10 +136,13 @@ public:
                                                    PetscInt iter_p_end, PetscInt iter_n_end, summary& result_summary, int iteration,
                                                    Mat& m_VD_p, Mat& m_VD_n);
 
-    void PD_test_predict_index_base(Mat& m_data, std::vector<PetscInt> v_lbl, const PetscScalar * arr_train_index,
-                                PetscInt idx_start_test, PetscInt idx_end_test, summary& result_summary, int iteration);
 
-    int PD_predict_a_label(Mat& m_data, int target_row);
+
+    void PD_test_predict_index_base(Mat& m_data, std::vector<PetscInt> v_lbl, const PetscScalar * arr_train_index,
+                                PetscInt idx_start_test, PetscInt idx_end_test, summary& result_summary, int iteration); //personalized classifier
+
+    int PD_predict_a_label(Mat& m_data, int target_row);                //personalized classifier
+
 
     void prepare_solution_single_model(svm_model * model_, int num_point_p, solution& sol_single_model);
 

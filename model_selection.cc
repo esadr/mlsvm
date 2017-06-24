@@ -117,9 +117,9 @@ struct BetterAcc
         if( (a.perf.at(Acc) - b.perf.at(Acc)) > 0.01 )     //a has better gmean
             return true;
         else{                                                    //similar gmean
-            if(Config_params::getInstance()->get_ms_best_selection() == 1)
-                return (a.num_SV_p + a.num_SV_n <  b.num_SV_p + b.num_SV_n );    // less nSV is better
-            else
+//            if(Config_params::getInstance()->get_ms_best_selection() == 1)
+//                return (a.num_SV_p + a.num_SV_n <  b.num_SV_p + b.num_SV_n );    // less nSV is better
+//            else
                 return false;
         }
     }
@@ -178,14 +178,16 @@ void ModelSelection::set_range(){
         range_c.min = -6.64385619 ;
         range_c.max =  6.64385619 ;
     }else{                                                      //Weighted SVM (ms_svm_id == 2)
-        range_c.min = -6.64385619 ;
-        range_c.max =  10.5507468 ;
-//        range_c.min = -10 ;
-//        range_c.max =  20 ;
+//        range_c.min = -6.64385619 ;
+//        range_c.max =  10.5507468 ;
+        range_c.min = -10 ;
+        range_c.max =  10 ;
 
     }
-    range_g.min = -7.6439 ;
-    range_g.max =  1.5850 ;
+//    range_g.min = -7.6439 ;
+    range_g.min = -10 ;
+//    range_g.max =  1.5850 ;
+    range_g.max =  10 ;
 
 //    // Assume no center is set, we set the center to (0,0) {notice that the pow2(0,0) is (1,1)}
 //    point_center.C =1;  // log2(1) == 0, later inside the ud_param_generator, log2 applied to this first
@@ -348,6 +350,7 @@ int ModelSelection::select_best_model(std::vector<summary> v_summary, int level,
 //    std::sort(v_summary.begin(),v_summary.end(),BetterGmean());   // the main method for a year before Sep 21, 2016 - 09:00
 //    std::sort(v_summary.begin(),v_summary.end(),BetterSN_Gmean());  // experiment 092116_0940
     std::sort(v_summary.begin(),v_summary.end(),Better_Gmean_SN());  // experiment 092816_1600
+
 //    std::sort(v_summary.begin(),v_summary.end(),sortByGmean);
 //    std::sort(v_summary.begin(),v_summary.end(),BetterAcc());
 //    std::sort(v_summary.begin(),v_summary.end(),BetterPPV());
@@ -507,18 +510,24 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, 
 
 
 
+void ModelSelection::add_debug_parameters(std::vector<ud_point>& v_initialized_params){
+    ud_point extra_parameters;
+    extra_parameters.C= Config_params::getInstance()->get_svm_C();
+    extra_parameters.G= Config_params::getInstance()->get_svm_gamma();
+    v_initialized_params.push_back(extra_parameters);
+
+}
 
 
-void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec& v_train_vol_p, Mat& m_train_data_n, Vec& v_train_vol_n, bool inh_params,
-                        double param_C, double param_G, int level, solution & udc_sol, std::vector<ref_results>& v_ref_results){
+void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec& v_train_vol_p, Mat& m_train_data_n, Vec& v_train_vol_n,
+                                                        bool inh_params, double param_C, double param_G, Mat& m_VD_p, Mat& m_VD_n, int level,
+                                                        solution & udc_sol, std::vector<ref_results>& v_ref_results){
     // - - - -  Load validation data which is the training part of whole data in the beginning of the coarsening - - - -
     ETimer t_whole_UD;
     Loader ld;
-    Mat m_VD_p, m_VD_n;
-    m_VD_p = ld.load_norm_data_sep(Config_params::getInstance()->get_p_norm_data_f_name());
-    m_VD_n = ld.load_norm_data_sep(Config_params::getInstance()->get_n_norm_data_f_name());
     // - - - - set number of iterations in each stage - - - - -
-    unsigned int num_iter_st1 = Config_params::getInstance()->get_ms_first_stage();
+//    unsigned int num_iter_st1 = Config_params::getInstance()->get_ms_first_stage();
+    unsigned int num_iter_st1 = Config_params::getInstance()->get_ms_first_stage()  + 1; //+1 for one extra parameter to test
     unsigned int num_iter_st2 = Config_params::getInstance()->get_ms_second_stage();
     // - - - - define required variables - - - - -
     std::vector<Solver> v_solver;       // vector of solvers for current fold_id
@@ -532,6 +541,7 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
     printf("[MS][UDSepVal] ------ stage:%d, level:%d------ \n", stage, level);
     std::vector<ud_point> ud_params_st_1;
     ud_params_st_1 = ud_param_generator(stage, inh_params, param_C, param_G);
+    add_debug_parameters(ud_params_st_1);
     for(unsigned int i =0; i < num_iter_st1;++i){
         Solver sv;
         svm_model * curr_svm_model;
@@ -589,13 +599,13 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
     m_TD = ld.load_norm_data_sep(Config_params::getInstance()->get_test_ds_f_name() );
 
     /* - - - - - start experiment all the best values to find a better selection technique - - - - - */
-    ETimer t_exp;
-    printf("[MS][UDSepVal] expriment all the solvers of model selection stage on the test data(check the quality of the sort we use)\n");
-    for(auto it= v_solver.begin(); it!= v_solver.end(); ++it){
-        it->test_predict(m_TD, current_summary);
-        Config_params::getInstance()->print_summary(current_summary,"[MS][UDSepVal]TD [experiment only] ", 4444000+level);
-    }
-    t_exp.stop_timer("[MS][UDSepVal][exp] evaluate the performance of all the parameters on the testdata at level", std::to_string(level) );
+//    ETimer t_exp;
+//    printf("[MS][UDSepVal] expriment all the solvers of model selection stage on the test data(check the quality of the sort we use)\n");
+//    for(auto it= v_solver.begin(); it!= v_solver.end(); ++it){
+//        it->test_predict(m_TD, current_summary);
+//        Config_params::getInstance()->print_summary(current_summary,"[MS][UDSepVal]TD [experiment only] ", 4444000+level);
+//    }
+//    t_exp.stop_timer("[MS][UDSepVal][exp] evaluate the performance of all the parameters on the testdata at level", std::to_string(level) );
     /* - - - - - end   experiment all the best values to find a better selection technique - - - - - */
 
     // - - - - - prepare solution for finer level - - - -
@@ -627,8 +637,8 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
         it->free_solver("[MS][UDSepVal] ");   //free all solvers
     }
     MatDestroy(&m_TD);
-    MatDestroy(&m_VD_p);
-    MatDestroy(&m_VD_n);
+//    MatDestroy(&m_VD_p);
+//    MatDestroy(&m_VD_n);
     t_prep_sol.stop_timer("[MS][UDSepVal] Prepare solution at level", std::to_string(level) );
     t_whole_UD.stop_timer("[MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level",std::to_string(level));
 }
@@ -756,7 +766,7 @@ void ModelSelection::uniform_design_index_base(Mat& p_data, Vec& v_vol_p, Mat& n
         //TODO: multiple hyperplain
     }
 
-    best_sv.predict_label1(m_testdata, classifier_id, m_all_predict);
+    best_sv.predict_test_data_in_matrix_output(m_testdata, classifier_id, m_all_predict);
 
     for(auto it=v_solver.begin(); it!= v_solver.end(); ++it){
         it->free_solver("[MS][UDIB] ");   //free all solvers
@@ -777,7 +787,7 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
                         bool inh_params, double last_c, double last_gamma,int level,
                         std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
                         std::unordered_set<PetscInt>& uset_SV_index_p, std::unordered_set<PetscInt>& uset_SV_index_n,
-                        Mat& m_VD_p, Mat& m_VD_n, Mat& m_testdata, int classifier_id, Mat& m_all_predict){
+                        Mat& m_VD_p, Mat& m_VD_n, Mat& m_VD_both, Mat& m_all_predict_VD, Mat& m_testdata, int classifier_id, Mat& m_all_predict_TD){
     ETimer t_sv_ps;
     srand(std::stoll(Config_params::getInstance()->get_cpp_srand_seed()));
     std::random_shuffle( v_p_index.begin(), v_p_index.end() ); //shuffle all nodes
@@ -789,7 +799,7 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
     PetscInt iter_train_p_end = v_p_index.size();    //number of poitns in training data
     PetscInt iter_train_n_end = v_n_index.size();
 
-#if dbl_MS_UDIB >= 1
+#if dbl_MS_UDIB >= 0
     std::cout << "[MS][UDIBSepVal] p index size:" << v_p_index.size() << ", n index size:" << v_n_index.size() << std::endl;
 #endif
 
@@ -812,9 +822,12 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
                                         iter_train_p_end, iter_train_n_end,true, ud_params_st_1[i].C, ud_params_st_1[i].G);
         v_solver.push_back(sv);
 //        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index, iter_train_p_end, iter_train_n_end, current_summary,solver_id);
+//        std::cout << "[MS][UDIBSepVal] after push_back solver" << std::endl;
         sv.predict_validation_data(m_VD_p, m_VD_n, current_summary, solver_id);     // The normal predict method for full matrix is useful rather than index base methods
+//        std::cout << "[MS][UDIBSepVal] after predicting the validation data" << std::endl;
         v_summary.push_back(current_summary);
         ++solver_id;
+//        exit(1);
     }
     int best_1st_stage = select_best_model(v_summary,level,1);
 
@@ -863,7 +876,12 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
         //TODO: multiple hyperplain
     }
 
-    best_sv.predict_label1(m_testdata, classifier_id, m_all_predict);
+
+    //@@ calculating the validation data for all the partition groups are missed, I need to save the results for picking the best level //#TODO 021317-1750
+//    best_sv.predict_VD_in_output_matrix(m_VD_p, m_VD_n, classifier_id, m_all_predict_VD);  //added 021517-1328
+    best_sv.predict_test_data_in_matrix_output(m_VD_both, classifier_id, m_all_predict_VD);  //added 021517-1456
+
+    best_sv.predict_test_data_in_matrix_output(m_testdata, classifier_id, m_all_predict_TD);
 
     for(auto it=v_solver.begin(); it!= v_solver.end(); ++it){
         it->free_solver("[MS][UDIBSepVal] ");   //free all solvers

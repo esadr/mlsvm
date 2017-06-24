@@ -5,7 +5,7 @@
 #include "loader.h"
 #include "common_funcs.h"
 #include "solver.h"
-
+#include "k_fold.h"
 
 struct selected_agg
 {
@@ -21,8 +21,8 @@ struct selected_agg
 
 
 solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
-                                   Mat& m_data_n, Mat& m_P_n, Vec& v_vol_n, Mat&m_WA_n,
-                                   solution& sol_coarser,int level, std::vector<ref_results>& v_ref_results){
+                          Mat& m_data_n, Mat& m_P_n, Vec& v_vol_n, Mat&m_WA_n, Mat& m_VD_p, Mat& m_VD_n,
+                          solution& sol_coarser,int level, std::vector<ref_results>& v_ref_results){
 #if dbl_RF_main >=5
     PetscInt num_row_p_data =0, num_row_n_data =0;
     MatGetSize(m_data_p,&num_row_p_data,NULL);
@@ -62,7 +62,7 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
     }
 
     solution sol_refine;
-    summary final_summary;
+    summary summary_TD;
     /***********************************************************************************************/
     /*                                  Start Partitioning                                         */
     /***********************************************************************************************/
@@ -97,7 +97,7 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
     #endif
 
         // try different partitioning of same input data (1 ignores it), iter passes to get_parts as random seed to metis
-        int num_iter_refinement = 1;
+        int num_iter_refinement = 1;        //#TODO only one iteration is used, multiple iterations didn't improve the results
         // - - - -  load the test data matrix - - - -
         Mat m_TD ;
         Loader test_loader;
@@ -105,8 +105,20 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
         PetscInt num_row_TD;
         MatGetSize(m_TD, &num_row_TD, NULL);
 
+        // get validation data size
+        PetscInt            num_VD_p, num_VD_n, num_VD_both;
+        MatGetSize(m_VD_p, &num_VD_p, NULL);
+        MatGetSize(m_VD_n, &num_VD_n, NULL);
+
+        k_fold kf;
+        Mat m_VD_both;
+        kf.combine_two_classes_in_one(m_VD_both, m_VD_p, m_VD_n,false);  //false make sure that the input matrices won't be destroyed inside the function
+        num_VD_both = num_VD_p + num_VD_n;
+
+
         std::vector<Mat> v_mat_avg_centers(num_iter_refinement);
-        std::vector<Mat> v_mat_all_predict(num_iter_refinement);
+        std::vector<Mat> v_mat_all_predict_validation(num_iter_refinement);
+        std::vector<Mat> v_mat_all_predict_TD(num_iter_refinement);
         std::unordered_set<PetscInt> uset_SV_index_p;
         std::unordered_set<PetscInt> uset_SV_index_n;
         uset_SV_index_p.reserve(2*num_neigh_row_p_);
@@ -114,10 +126,8 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
 
         // - - - - multiple iterations with different partitioning - - - -
         Partitioning pt;
-        for(int iter=0; iter < num_iter_refinement; iter++){
-        #if dbl_RF_main >=1
+        for(int iter=0; iter < num_iter_refinement; iter++){                                       // #performance remove this loop and update the functions signiture
             printf("[RF][main] + + + + Partitioning, level:%d, iter:%d + + + + \n",level,iter);
-        #endif
 
             // - - - - - - - - - - calc number of partitions - - - - - - - - - -  #1
             int partition_max_size = Config_params::getInstance()->get_pr_partition_max_size();
@@ -188,13 +198,12 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
             // - - - - - - - - - - calc_avg_center - - - - - - - - - -  #5
             pt.calc_avg_center(m_centers_p, m_centers_n, v_groups, v_sum_vol_parts_p, v_sum_vol_parts_n, v_mat_avg_centers[iter]);
 
-            MatCreateSeqDense(PETSC_COMM_SELF, num_part_p+num_part_n, num_row_TD,NULL, &v_mat_all_predict[iter]);
+            MatCreateSeqDense(PETSC_COMM_SELF, num_part_p+num_part_n, num_row_TD,NULL, &v_mat_all_predict_TD[iter]);
 
-            // - - - -  Load validation data which is the training part of whole data in the beginning of the coarsening - - - -
-            Loader ld;
-            Mat m_VD_p, m_VD_n;
-            m_VD_p = ld.load_norm_data_sep(Config_params::getInstance()->get_p_norm_data_f_name());
-            m_VD_n = ld.load_norm_data_sep(Config_params::getInstance()->get_n_norm_data_f_name());
+
+
+//            MatCreateSeqDense(PETSC_COMM_SELF, num_part_p+num_part_n, num_VD_p+num_VD_n ,NULL, &v_mat_all_predict_validation[iter]);
+            MatCreateSeqDense(PETSC_COMM_SELF, num_part_p+num_part_n, num_VD_both, NULL, &v_mat_all_predict_validation[iter]);
 
 
             ETimer t_all_parts_training;
@@ -204,53 +213,71 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
                 pt.create_group_index(i, v_groups, m_parts_p, m_parts_n, v_p_index, v_n_index);
                 // - - - - - - Train & predict Model - - - - - - -
                 //Without model selection
-    //            Solver sv_part;
-    //            sv_part.partial_solver(m_new_neigh_p, v_neigh_Vol_p, m_new_neigh_n, v_neigh_Vol_n, sol_coarser.C, sol_coarser.gamma, level,
-    //                                   v_p_index,v_n_index, uset_SV_index_p, uset_SV_index_n);
+//                Solver sv_part;
+//                sv_part.partial_solver(m_new_neigh_p, v_neigh_Vol_p, m_new_neigh_n, v_neigh_Vol_n, sol_coarser.C, sol_coarser.gamma, level,
+//                                    v_p_index,v_n_index, uset_SV_index_p, uset_SV_index_n, m_VD_p, m_VD_n,m_VD_both, v_mat_all_predict_validation[iter],
+//                                    m_TD, i, v_mat_all_predict_TD[iter]);
 
                 //with model selection
                 ModelSelection ms_partition;
-//                ms_partition.uniform_design_index_base(m_new_neigh_p, v_neigh_Vol_p, m_new_neigh_n, v_neigh_Vol_n, true, sol_coarser.C,
-//                                sol_coarser.gamma, level, v_p_index, v_n_index, uset_SV_index_p, uset_SV_index_n,
-//                                m_TD, i, v_mat_all_predict[iter]);
-
                 ms_partition.uniform_design_index_base_separate_validation(m_new_neigh_p, v_neigh_Vol_p, m_new_neigh_n, v_neigh_Vol_n,
                                 true, sol_coarser.C, sol_coarser.gamma, level, v_p_index, v_n_index, uset_SV_index_p, uset_SV_index_n,
-                                m_VD_p, m_VD_n, m_TD, i, v_mat_all_predict[iter]);
-                // I need to skip predicting for the lower levels for preformance // TODO, #Performance
+                                m_VD_p, m_VD_n, m_VD_both, v_mat_all_predict_validation[iter], m_TD, i, v_mat_all_predict_TD[iter]);
+
+
 
             }
 
             t_all_parts_training.stop_timer("[RF][main] training for all partitions");
 
-            /// - - - - - - - report the final evaluation (boosting, majority voting,...) - - - - - - -
+            /// - - - - - - - calculate the quality of the models on Validation Data (boosting, majority voting,...) - - - - - - -
+            MatAssemblyBegin(v_mat_all_predict_validation[iter], MAT_FINAL_ASSEMBLY);
+            MatAssemblyEnd(v_mat_all_predict_validation[iter], MAT_FINAL_ASSEMBLY);
+
+
+            /// - - - - - - - report the final evaluation on Test Data (boosting, majority voting,...) - - - - - - -
             // I need to skip predicting for the lower levels for preformance // TODO, #Performance
-            MatAssemblyBegin(v_mat_all_predict[iter], MAT_FINAL_ASSEMBLY);
-            MatAssemblyEnd(v_mat_all_predict[iter], MAT_FINAL_ASSEMBLY);
+            MatAssemblyBegin(v_mat_all_predict_TD[iter], MAT_FINAL_ASSEMBLY);
+            MatAssemblyEnd(v_mat_all_predict_TD[iter], MAT_FINAL_ASSEMBLY);
 
         }// end of       for(int iter=0; iter < 2; iter++){  in line 81
 
-        pt.calc_performance_measure(m_TD, v_mat_avg_centers, v_mat_all_predict,final_summary);
+
+
+        summary curr_level_validation_summary;
+        pt.calc_performance_measure(m_VD_both, v_mat_avg_centers, v_mat_all_predict_validation,curr_level_validation_summary);
+
+        // - - - - - - calculate and report the performance quality of all the trained model on the test data at the current level - - - - -
+        pt.calc_performance_measure(m_TD, v_mat_avg_centers, v_mat_all_predict_TD,summary_TD);
+
+        // - - - - - - Add validation information for this level to the vector of whole results for all levels on validation data - - - - -
+        ref_results current_level_refinement_results;
+        current_level_refinement_results.validation_data_summary = curr_level_validation_summary;
+        current_level_refinement_results.test_data_summary = summary_TD;
+        current_level_refinement_results.level = level;
+        v_ref_results.push_back(current_level_refinement_results);
 
         MatDestroy(&m_TD);
+        MatDestroy(&m_VD_both);
         for(int iter=0; iter < num_iter_refinement; iter++){
-            MatDestroy(&v_mat_all_predict[iter]);
+            MatDestroy(&v_mat_all_predict_TD[iter]);
         }
 
 
 //        if(level == 1){
-////            Config_params::getInstance()->add_final_summary(final_summary);
+////            Config_params::getInstance()->add_final_summary(summary_TD);
 //            // - - - - - select best model from all level of refinement and record that - - - - -
 ////            int best_model_of_all_levels = select_best_model(v_ref_results);
 //            Config_params::getInstance()->print_ref_result(v_ref_results);
 //            std::cout << "[RF][main] line:248  is not completed, EXIT!" << std::endl;
 //            exit(1);
 ////            Config_params::getInstance()->add_final_summary(v_perf_per_level_refinement[best_model_of_all_levels]);
-//            Config_params::getInstance()->print_summary(final_summary, "[RF][main] TD",level,-2);
+//            Config_params::getInstance()->print_summary(summary_TD, "[RF][main] TD",level,-2);
 //        }else{
-        #if rpt_TD_only_l1 == 0
-            Config_params::getInstance()->print_summary(final_summary, "[RF][main] TD",level,-2);
-        #endif
+//        #if rpt_TD_only_l1 == 0
+            Config_params::getInstance()->print_summary(curr_level_validation_summary, "[RF][main] VD",level,-2);
+            Config_params::getInstance()->print_summary(summary_TD, "[RF][main] TD",level,-2);
+//        #endif
 //        }
 
         // - - - - - - - - - - prepare the solution - - - - - - - - - -  #7
@@ -270,6 +297,13 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
         #if dbl_RF_main_with_partition >=3
             std::cout << "[RF][main] nSV+:"<< uset_SV_index_p.size() << " nSV-:"<< uset_SV_index_n.size() << std::endl;
         #endif
+
+        #if export_SVM_models       //export the models
+
+
+        #endif
+
+
         }// end of "if(level > 1 )" for preparing the solution for levels except the finest
 
         MatDestroy(&m_neigh_WA_p);
@@ -281,6 +315,10 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
     #if dbl_RF_main_with_partition >= 3
         std::cout << "\n[MS][PS] ------------ end of partitioning at level " << level << " ------------\n" << std::endl;
     #endif
+
+//        std::cout << "[RF][main] L:317 , Exit!!!!" << std::endl;
+//        exit(1);
+
 
     }
     else
@@ -296,24 +334,22 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
             (num_neigh_row_p_ + num_neigh_row_n_) < Config_params::getInstance()->get_ms_limit()    ){
             // ------- call Model Selection (SVM) -------
             ModelSelection ms_refine;
-//            ms_refine.set_center(sol_coarser.C, sol_coarser.gamma); // we have the C, gamma from coarsest level now
-//             ms_refine.uniform_design(m_new_neigh_p, v_vol_p, m_new_neigh_n, v_vol_n, true, sol_coarser.C, sol_coarser.gamma, level, sol_refine);
             ms_refine.uniform_design_separate_validation(m_new_neigh_p, v_vol_p, m_new_neigh_n, v_vol_n, true,
-                                                         sol_coarser.C, sol_coarser.gamma, level, sol_refine, v_ref_results);
+                                                         sol_coarser.C, sol_coarser.gamma, m_VD_p, m_VD_n, level, sol_refine, v_ref_results);
             std::cout << "[RF]{no partitioning} ms_active uniform design is finished!\n";
 
         }else{  // No model selection either because it is disabled or the threshold is reached
             Solver sv_refine;
             svm_model * trained_model;
             trained_model = sv_refine.train_model(m_new_neigh_p, v_vol_p, m_new_neigh_n, v_vol_n, 1, sol_coarser.C,sol_coarser.gamma) ;
-            sv_refine.evaluate_testdata(level,final_summary);
+            sv_refine.evaluate_testdata(level,summary_TD);
 
             std::cout << "[RF]{no partitioning}{no model selection} the validation should be add, and the result should be saved!, EXIT!\n";
+            std::cout << "[RF]{no partitioning}{no model selection} Either increase the model selection threshold or reduce the start of partitioning to fix this.\n";
             exit(1); // #todolist
-//            v_perf_per_level_refinement.push_back(final_summary);           //collect the final best model at each level
+//            v_perf_per_level_refinement.push_back(summary_TD);           //collect the final best model at each level
             sv_refine.prepare_solution_single_model(trained_model,num_neigh_row_p_,sol_refine);
             sv_refine.free_solver("[RF]");
-//            std::cout << "[RF]{no partitioning} nothing, Exit!\n"; exit(1);
         }
 
     #if dbl_RF_main >=5
@@ -551,8 +587,20 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 
 
 
-void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, int level,
+void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, Mat& m_VD_p, Mat& m_VD_n, int level,
                                         solution& sol_coarsest, std::vector<ref_results>& v_ref_results){
+    PetscInt check_num_row_VD;
+    MatGetSize(m_VD_p, &check_num_row_VD, NULL );
+    if(!check_num_row_VD){
+        std::cout << "[RF][PCL] empty validation data for minority class, Exit!" << std::endl;
+        exit(1);
+    }
+
+    MatGetSize(m_VD_n, &check_num_row_VD, NULL );
+    if(!check_num_row_VD){
+        std::cout << "[RF][PCL] empty validation data for majority class, Exit!" << std::endl;
+        exit(1);
+    }
 
     // - - - - for long runs - - - -
     bool l_inh_param=false;
@@ -563,20 +611,12 @@ void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data
         local_param_c = Config_params::getInstance()->get_best_C();
         local_param_gamma = Config_params::getInstance()->get_best_gamma();
     }
-
-//    CommonFuncs cf;
-//    cf.exp_matrix(m_data_p, "./data/", "m_data_p.dat","[RF][PCL]");
-//    cf.exp_matrix(m_data_n, "./data/", "m_data_n.dat","[RF][PCL]");
-//    cf.exp_vector(v_vol_p, "./data/", "v_vol_p.dat","[RF][PCL]");
-//    cf.exp_vector(v_vol_n, "./data/", "v_vol_n.dat","[RF][PCL]");
-
+                                            // - - - - - load the validation data - - - - -
     if(Config_params::getInstance()->get_ms_status()){      // - - - - model selection - - - -
         // call model selection method
         ModelSelection ms_coarsest;
-//        ms_coarsest.set_center(local_param_c, local_param_gamma);   //set the center
-//         ms_coarsest.uniform_design(m_data_p, v_vol_p, m_data_n, v_vol_n, l_inh_param, local_param_c, local_param_gamma, level, sol_coarsest);
-        ms_coarsest.uniform_design_separate_validation(m_data_p, v_vol_p, m_data_n, v_vol_n, l_inh_param, local_param_c, local_param_gamma, level,
-                                                       sol_coarsest,v_ref_results);
+        ms_coarsest.uniform_design_separate_validation(m_data_p, v_vol_p, m_data_n, v_vol_n, l_inh_param, local_param_c, local_param_gamma,
+                                                       m_VD_p, m_VD_n, level, sol_coarsest,v_ref_results);
         std::cout << "[RF][PCL] nSV+:" << sol_coarsest.p_index.size() << std::endl;     //$$debug
     }else{                                          // - - - - No model selection (call solver directly) - - - -
 

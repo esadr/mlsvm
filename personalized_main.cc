@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     PetscInitialize(&argc, &argv, NULL, NULL);
 
 
-    Config_params::getInstance()->init_to_default();
+//    Config_params::getInstance()->init_to_default();
     Config_params::getInstance()->read_params("./params.xml", argc, argv);
     Config_params::getInstance()->print_params();
 

@@ -98,6 +98,6 @@ void Graph::find_seed_indices(std::vector<NodeId>& seeds_indices) const{
             cnt++;
         }
     }
-    std::cout <<"[DG][FSI] Node:" << cnt << std::endl;
+//    std::cout <<"[DG][FSI] total number of seeds for next level are " << cnt << std::endl;
 //    return seeds_indices;
 }

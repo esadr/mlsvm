@@ -35,9 +35,10 @@ public:
     void create_group_index(int target_group, std::vector<std::pair<int, int> > v_groups,
                            Mat& m_parts_p, Mat& m_parts_n, std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index);
 
-//    std::map<measures,double> calc_performance_measure(Mat& m_TD, Mat& m_avg_center, Mat& m_predicted_labels);
-//    void calc_performance_measure(Mat& m_TD, Mat& m_avg_center, Mat& m_predicted_labels, summary& result_summary);
     void calc_performance_measure(Mat& m_TD, std::vector<Mat>& v_mat_avg_center,
+                                                std::vector<Mat>& v_mat_predicted_labels, summary& result_summary);
+
+    void calc_performance_measure(PetscInt num_VD_p, PetscInt num_VD_n, std::vector<Mat>& v_mat_avg_center,
                                                 std::vector<Mat>& v_mat_predicted_labels, summary& result_summary);
 
 
@@ -49,6 +50,11 @@ public:
 
     void calc_majority_voting_distance_weight(std::vector<Mat>& v_mat_predicted_labels, int num_TD, Mat& m_TD,
                                             std::vector<Mat>& v_mat_AC, int distance_id, std::vector<double>& v_final_predicted_label );
+
+
+    void calc_majority_voting_nearest(std::vector<Mat>& v_mat_predicted_labels, int num_TD, Mat& m_TD,
+                                            std::vector<Mat>& v_mat_AC, int distance_id, std::vector<double>& v_final_predicted_label );
+
 
 };
 

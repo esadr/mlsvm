@@ -3,6 +3,7 @@
 #include "common_funcs.h"       //only for debugging
 #include "coarsening.h"
 #include "string"
+#include <limits>           //std::numeric_limits<double>::max()
 //#include "chrono"
 //#include "thread"
 
@@ -372,35 +373,25 @@ void Partitioning::calc_single_center(Mat& m_neigh_Data, Vec& v_vol, Mat& m_cent
 /*
  *  - - - - - - calculate the centroid of each partition - - - - - -
  * @method: for now I calculate the centroid based on Euclidean distance
+ * I consider the volumes in the calculating the centers and I normalize the center using sum of all volumes in this part
  * @input: neigh_Data, neigh_vol, and the partitions
  * @output: matrix with parts number of rows and for columns the same number of features as WA
  */
 void Partitioning::calc_center(Mat& m_neigh_Data, Vec& v_neigh_vol, std::vector<std::vector<PetscInt>>& vv_parts, Mat& m_parts,
                                                                 Mat& m_centers, std::vector<PetscScalar>& v_sum_vol_parts){
-//    //---- Normalize the Volumes #1 -----   @@
-//    Vec v_neigh_vol_normal;
-//    Coarsening co;
-//    co.normalize_vector(v_neigh_vol,v_neigh_vol_normal);
-
-//    //---- get sum of normalized volumes #2 -----
-//    PetscScalar sum_normalized_vol;
-//    VecSum(v_neigh_vol_normal, &sum_normalized_vol);
-
-    //---- create diagonal matrix from normalized volume #3 -----
+    //---- create diagonal matrix from volumes #1 -----
     PetscInt num_point, num_features;
     MatGetSize(m_neigh_Data, &num_point, &num_features);
     Mat m_VnormDiag;
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_point,num_point,1,PETSC_NULL, &m_VnormDiag);
     MatDiagonalSet(m_VnormDiag,v_neigh_vol,INSERT_VALUES);
 
-
-
-    //---- Data_Vol = VD * Data #4 -----
+    //---- Data_Vol = VD * Data #2 -----
     Mat m_Data_Vol;
     MatMatMult(m_VnormDiag, m_neigh_Data, MAT_INITIAL_MATRIX,PETSC_DEFAULT,&m_Data_Vol);
     MatDestroy(&m_VnormDiag);
 
-    //---- Sigma Columns = Parts * Data_Vol #5 -----
+    //---- Sigma Columns = Parts * Data_Vol #3 -----
     Mat m_Sum_Col_Part;     // (i,j) some of all values in column j for partition i
     MatMatMult(m_parts, m_Data_Vol, MAT_INITIAL_MATRIX,PETSC_DEFAULT,&m_Sum_Col_Part);
     MatDestroy(&m_Data_Vol);
@@ -408,18 +399,14 @@ void Partitioning::calc_center(Mat& m_neigh_Data, Vec& v_neigh_vol, std::vector<
     std::cout  << "[PR][calc_center] m_Sum_Col_Part matrix:\n";                       //$$debug
     MatView(m_Sum_Col_Part,PETSC_VIEWER_STDOUT_WORLD);
 #endif
-//    CommonFuncs cf;
-//    cf.exp_matrix(m_Sum_Col_Part,"./debug","m_Sum_Col_Part.dat");
 
-
-    //---- calculate the sum of normalized volume for  each partition #6 -----
+    //---- calculate the sum of normalized volume for  each partition #4 -----
     PetscInt num_parts, i;
     unsigned int j;
     PetscScalar sum_curr =0 ;
     MatGetSize(m_parts, &num_parts,NULL);
 //    printf("[PR][calc_center] num_parts:%d\n",num_parts);
 //    std::vector<PetscScalar> v_sum_norm_vol(num_parts);
-
     PetscScalar * arr_norm_vol;
     PetscMalloc1(num_point, &arr_norm_vol);
     VecGetArray(v_neigh_vol,&arr_norm_vol);
@@ -442,7 +429,7 @@ void Partitioning::calc_center(Mat& m_neigh_Data, Vec& v_neigh_vol, std::vector<
     VecRestoreArray(v_neigh_vol,&arr_norm_vol);
     PetscFree(arr_norm_vol);
 
-    //---- divide each row to Sum_normalized_vol related to that row (partition) #7 -----
+    //---- divide each row to Sum_normalized_vol related to that row (partition) #5 -----
     // get sum of each column, divide it to sum of normalized volumes
     PetscInt            ncols;
     const PetscInt      *cols;
@@ -811,8 +798,6 @@ void Partitioning::create_group_index(int target_group, std::vector<std::pair<in
 
 
 
-//std::map<measures,double> Partitioning::calc_performance_measure(Mat& m_TD, Mat& m_avg_center, Mat& m_predicted_labels){
-//void Partitioning::calc_performance_measure(Mat& m_TD, Mat& m_avg_center, Mat& m_predicted_labels, summary& result_summary){
 void Partitioning::calc_performance_measure(Mat& m_TD, std::vector<Mat>& v_mat_avg_center,
                                             std::vector<Mat>& v_mat_predicted_labels, summary& result_summary){
     // read the target labels from m_TD to a vector(test data matrix has the labels in the first column)
@@ -831,7 +816,7 @@ void Partitioning::calc_performance_measure(Mat& m_TD, std::vector<Mat>& v_mat_a
 
     /// - - - - - - - - calc predicted labels - - - - - - - -
     // it would be different techniques to calculate the final predicted labels
-    std::vector<double> v_final_predicted_label(num_points);  // same for all methods
+    std::vector<double> v_final_predicted_label(num_points,0);  // same for all methods
 
 
     switch(Config_params::getInstance()->get_pr_maj_voting_id()){
@@ -839,22 +824,22 @@ void Partitioning::calc_performance_measure(Mat& m_TD, std::vector<Mat>& v_mat_a
             calc_majority_voting(v_mat_predicted_labels, num_points, v_final_predicted_label);
             break;
         case 2:             // 2- majority voting with inverse Euclidean distance weight (to avg_centers)
-//            calc_majority_voting_distance_weight(m_predicted_labels, num_points, m_TD, m_avg_center, 1, v_final_predicted_label);
             calc_majority_voting_distance_weight(v_mat_predicted_labels, num_points, m_TD, v_mat_avg_center, 2, v_final_predicted_label);
             break;
         case 3:             // 3- majority voting with inverse Euclidean distance weight to the 2nd power (to avg_centers)
-//            calc_majority_voting_distance_weight(m_predicted_labels, num_points, m_TD, m_avg_center, 2, v_final_predicted_label);
             calc_majority_voting_distance_weight(v_mat_predicted_labels, num_points, m_TD, v_mat_avg_center, 3, v_final_predicted_label);
             break;
         case 4:             // 4- majority voting with inverse Manhatan distance weight (to avg_centers)
-//            calc_majority_voting_distance_weight(m_predicted_labels, num_points, m_TD, m_avg_center, 3, v_final_predicted_label);
             calc_majority_voting_distance_weight(v_mat_predicted_labels, num_points, m_TD, v_mat_avg_center, 4, v_final_predicted_label);
+            break;
+        case 5:             // not implemented yet
+            calc_majority_voting_nearest(v_mat_predicted_labels, num_points, m_TD, v_mat_avg_center, 5, v_final_predicted_label);
             break;
 
     }
-//    std::cout << "[PR][CPM] v_final_predicted_label.size() "<< v_final_predicted_label.size() <<
-//                 " v_final_predicted_label[0]: " << v_final_predicted_label[0] <<std::endl;
-//    exit(1);
+    std::cout << "[PR][CPM] v_final_predicted_label.size() "<< v_final_predicted_label.size() <<
+                 " v_final_predicted_label[0]: " << v_final_predicted_label[0] <<std::endl;
+    exit(1);
     /// - - - - - - - - compare the target labels and predicted - - - - - - - -
     int correct = 0;
     double tp =0, tn =0, fp =0, fn=0;
@@ -904,6 +889,109 @@ void Partitioning::calc_performance_measure(Mat& m_TD, std::vector<Mat>& v_mat_a
     result_summary.C = 0;
     result_summary.gamma = 0;
 }
+
+
+
+
+
+
+
+
+// I decided to not use the below method, which needs to overload other functions I called
+
+///*
+// * this overload is create at 021517-1300 specifically for [RF] with partitioning
+// * Evaluate the performance quality over the validation data from multiple models which is recoreded inside the v_mat_predicted_labels
+// * The validation data is not required since the size of them are passed and the prediction are exist in v_mat_predicted_labels as mentioned above
+// */
+//void Partitioning::calc_performance_measure(PetscInt num_VD_p, PetscInt num_VD_n, std::vector<Mat>& v_mat_avg_center,
+//                                            std::vector<Mat>& v_mat_predicted_labels, summary& result_summary){
+//    // read the target labels only needs the size of validation data for each class
+//    /// - - - - - - - - get validation data labels  - - - - - - - -
+//    PetscInt i=0, ncols=0, num_points = num_VD_p+num_VD_n;
+//    std::vector<double> v_target_labels(num_points);
+
+//    for (i=0; i< num_VD_p;i++){
+//        v_target_labels[i] = 1;             //label of minority class is +1
+//    }
+
+//    for (i=0; i< num_VD_n;i++){
+//        v_target_labels[num_VD_p + i] = 1;             //label of minority class is -1
+//    }
+
+//    /// - - - - - - - - calc predicted labels - - - - - - - -
+//    // it would be different techniques to calculate the final predicted labels
+//    std::vector<double> v_final_predicted_label(num_points);  // same for all methods
+
+//    switch(Config_params::getInstance()->get_pr_maj_voting_id()){
+//        case 1:             // 1- majority voting all the same
+//            calc_majority_voting(v_mat_predicted_labels, num_points, v_final_predicted_label);
+//            break;
+//        case 2:             // 2- majority voting with inverse Euclidean distance weight (to avg_centers)
+//            calc_majority_voting_distance_weight(v_mat_predicted_labels, num_points, m_TD, v_mat_avg_center, 2, v_final_predicted_label);
+//            break;
+//        case 3:             // 3- majority voting with inverse Euclidean distance weight to the 2nd power (to avg_centers)
+//            calc_majority_voting_distance_weight(v_mat_predicted_labels, num_points, m_TD, v_mat_avg_center, 3, v_final_predicted_label);
+//            break;
+//        case 4:             // 4- majority voting with inverse Manhatan distance weight (to avg_centers)
+//            calc_majority_voting_distance_weight(v_mat_predicted_labels, num_points, m_TD, v_mat_avg_center, 4, v_final_predicted_label);
+//            break;
+
+//    }
+
+//    /// - - - - - - - - compare the target labels and predicted - - - - - - - -
+//    int correct = 0;
+//    double tp =0, tn =0, fp =0, fn=0;
+
+//    for(int i=0; i < num_points; i++){
+//#if dbl_PR_CPM >= 5
+//        std::cout << "[PR][CPM] labels =>  target: "<< v_target_labels[i] << " predicted: " << v_final_predicted_label[i] <<std::endl;
+//#endif
+//        if(v_target_labels[i] == 1){                            // ++++ positive class ++++
+//            if (v_final_predicted_label[i] >= 0)
+//                tp++;                   // true positive
+//            else
+//                fn++;
+//        }else{                                                  // ---- predict negative ----
+//            if (v_final_predicted_label[i] < 0)
+//                tn++;                   // true negative
+//            else
+//                fp++;                   // false positive
+//        }
+//    }
+//    /// - - - - - - - - calc different performance measures (Acc, Gmean,...)  - - - - - - - -
+//    correct = tp+tn;                //sum both True
+////    std::map<measures,double> results_;
+//    result_summary.perf[Sens] = tp / (tp+fn) ;
+//    result_summary.perf[Spec] = tn / (tn+fp) ;
+//    result_summary.perf[Gmean] = sqrt(result_summary.perf[Sens] * result_summary.perf[Spec]);
+//    result_summary.perf[Acc] = (double)correct / (num_points) ;
+
+//    if(tp+fp == 0)              //prevent nan case
+//        result_summary.perf[PPV] = 0;
+//    else
+//        result_summary.perf[PPV] = tp/ (tp+fp);
+
+//    if(tn+fn == 0)              //prevent nan case
+//        result_summary.perf[NPV] = 0;
+//    else
+//        result_summary.perf[NPV] = tn/ (tn+fn);
+
+//    result_summary.perf[F1] = 2*tp / (2*tp+fp+fn);
+//    result_summary.perf[TP] = tp;
+//    result_summary.perf[FP] = fp;
+//    result_summary.perf[TN] = tn;
+//    result_summary.perf[FN] = fn;
+
+//    result_summary.num_SV_p = 0;    //to ignore them
+//    result_summary.num_SV_n = 0;
+//    result_summary.C = 0;
+//    result_summary.gamma = 0;
+//}
+
+
+
+
 
 
 
@@ -1007,8 +1095,6 @@ void Partitioning::calc_majority_voting_distance_weight(std::vector<Mat>& v_mat_
         MatDestroy(&m_PLt);
 
         std::cout << "[PR][CMVDW] iter:" << iter << std::endl;      //$$debug
-//if(iter == 0)
-//exit(1);
     }// end of iterations
 
     // - - - - - - average the predictions over multiple iterations and filter them - - - -
@@ -1027,4 +1113,73 @@ void Partitioning::calc_majority_voting_distance_weight(std::vector<Mat>& v_mat_
 }
 
 
+
+/* 051917-2350
+ * @input:
+ * so far the distance_id is not used (it could be used in future to try different distances rather than Euclidean distance)
+ * std::vector<Mat>& v_mat_predicted_labels this should be modify to 1 matrix rather than vector of matrices, but since
+ *      the refinement has not modified yet, I keep it like this for now
+ * the predicted labels have been calculated by all the models and now we just need to select/filter/aggregate them to one label
+ * @output: vector of labels is the output (v_final_predicted_label)
+ */
+void Partitioning::calc_majority_voting_nearest(std::vector<Mat>& v_mat_predicted_labels, int num_TD, Mat& m_TD,
+                                        std::vector<Mat>& v_mat_AC, int distance_id, std::vector<double>& v_final_predicted_label ){
+
+    ETimer t_cmvdw;
+    PetscInt            i,j, ncols_TD, ncols_AC, ncols_PLt, num_AC;
+    const PetscInt      *cols_TD, *cols_AC, *cols_PLt;
+    const PetscScalar   *vals_TD, *vals_AC, *vals_PLt;
+    unsigned int num_iter = v_mat_predicted_labels.size();
+    CommonFuncs cf;
+
+
+    std::vector<double> v_sum_norm_prediction(num_TD,0.0);// the default is also initialize it with zeros
+    // loop over multiple prediction matrix and avg_center
+    for(unsigned int iter =0; iter < num_iter; iter++){
+        MatGetSize(v_mat_AC[iter], &num_AC, NULL);
+        std::cout << "[PR][CMVN] [DEBUG] m_AC_num_row:" << num_AC << " num_TD_row:" << num_TD  <<
+                     " v_mat_AC.size():" << v_mat_AC.size() << std::endl;        //$$debug
+        Mat m_PLt;
+        //Transpose the PL, to get predicted labels for TD points as row
+        MatTranspose(v_mat_predicted_labels[iter],MAT_INITIAL_MATRIX,&m_PLt);
+
+        //debug
+        CommonFuncs cf;
+        const std::string m_fname = "m_PLt.dat";
+        cf.exp_matrix(m_PLt, "./data/", m_fname, "calc_majority_voting_nearest");
+
+        double tmp_dist;        //keep the temporary distance value
+        double min_distance;
+
+        //Find the nearest avg_center to the test data point
+        for(i=0; i< num_TD; i++){
+            MatGetRow(m_TD,i,&ncols_TD, &cols_TD, &vals_TD);        //Test Data points
+            MatGetRow(m_PLt,i,&ncols_PLt, &cols_PLt, &vals_PLt);    //Predicted Labels
+            min_distance= std::numeric_limits<double>::max();       //set the min_distance to +infinity for each data point
+            for(j=0; j< num_AC; j++){           //number of models
+                MatGetRow(v_mat_AC[iter],j,&ncols_AC, &cols_AC, &vals_AC);    //Average Centers
+                //calculate the distance of current test point to avg_center of current level
+                tmp_dist = cf.calc_euclidean_dist(ncols_TD, ncols_AC, cols_TD, cols_AC, vals_TD, vals_AC); //get distance
+                std::cout << "[PR][CMVN] [DEBUG] i:"<<i<<", j:"<<j<<", tmp_dist:" << tmp_dist << ", min_dist:" << min_distance;        //$$debug
+                std::cout << ", v_final_predicted_label[i]:" << v_final_predicted_label[i] << std::endl;        //$$debug
+                if(tmp_dist <= min_distance){
+                    min_distance = tmp_dist;                        // update the minimum
+                    //make sure the i is the test point id which is predicted current model (we are in the right row for sure)
+                    v_final_predicted_label[i] = vals_PLt[i];      // update the final label
+                    std::cout << "[PR][CMVN] [DEBUG] update the label with closer model, new lable" << v_final_predicted_label[i] <<
+                                 ", vals_PLt[i]:" << vals_PLt[i] << ",ncols_PLt:" << ncols_PLt <<
+                                 ", cols_PLt[i]:" << cols_PLt[i] << std::endl;        //$$debug
+                }
+                MatRestoreRow(v_mat_AC[iter],j,&ncols_AC, &cols_AC, &vals_AC);
+            }
+            std::cout << "[PR][CMVN] [DEBUG] final prediction -> v_final_predicted_label[i]:" << v_final_predicted_label[i] << std::endl;        //$$debug
+            MatRestoreRow(m_PLt,i,&ncols_PLt, &cols_PLt, &vals_PLt);
+            MatRestoreRow(m_TD,i,&ncols_TD, &cols_TD, &vals_TD);
+        } // end of prediction for all the test data points
+        MatDestroy(&m_PLt);
+        exit(1);
+        std::cout << "[PR][CMVN] iter:" << iter << std::endl;      //$$debug
+    }// end of iterations
+    t_cmvdw.stop_timer("[PR] calc_majority_nearest");
+}
 

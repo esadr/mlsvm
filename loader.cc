@@ -1,11 +1,12 @@
 #include "loader.h"
+#include "common_funcs.h"
 //#include "//    ETimer.h"
 
 //Loader::Loader(const char * f_indices_file_name, const char * f_dists_file_name){
-Loader::Loader(const std::string f_indices_file_name, const std::string f_dists_file_name){
+Loader::Loader(const std::string &f_indices_file_name, const std::string &f_dists_file_name){
     f_indices_name_ = f_indices_file_name.c_str();
     f_dists_name_   = f_dists_file_name.c_str();
-
+    std::cout << "[LD][Constructor] indice file: "<< f_indices_file_name <<std::endl;
 }
 
 /**
@@ -37,7 +38,7 @@ Mat Loader::load_WA_binary(const char * f_name){    //Import WA directly
     t_read_matrices.stop_timer("[Loader::load_WA_binary] reading WA matrix");
 
     MatGetSize(WA_,&num_row,0);    //m returns the number of rows globally
-    size_ = num_row;
+//    size_ = num_row;
 
 #if dbl_LD_LWAB >= 7
 //    printf("WA Matrix:\n");                                               //$$debug
@@ -64,7 +65,7 @@ Mat Loader::load_WA_binary(const char * f_name){    //Import WA directly
 
 
 
-Mat Loader::load_flann_binary(){                        //the current method July 2015
+Mat Loader::load_flann_binary_old(){                        //deprecated Jan 20, 2017
     Mat             m_ind_, m_dis_,m_ind_t_, m_dis_t_, WA;
     PetscViewer     viewer_ind_, viewer_dis_;
 //    PetscBool      flg;
@@ -74,6 +75,12 @@ Mat Loader::load_flann_binary(){                        //the current method Jul
 //load indices vector
 //    ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,f_indices_name_,FILE_MODE_READ,&viewer_ind_);
     std::cout <<  "[LD][LFB] f_indices_name_ :"<< f_indices_name_ << std::endl;
+    
+//    std::string test = Config_params::getInstance()->get_p_indices_f_name();
+//    f_indices_name_ = test.data();
+//    std::cout <<  "[LD][LFB] f_indices_name_ :"<< f_indices_name_ << std::endl;
+//    std::cout <<  "[LD][LFB] f_indices_name_  in string format:"<< Config_params::getInstance()->get_p_indices_f_name() << std::endl;
+//    exit(1);
     PetscViewerBinaryOpen(PETSC_COMM_WORLD,f_indices_name_,FILE_MODE_READ,&viewer_ind_);
 //    CHKERRQ(ierr);
     MatCreate(PETSC_COMM_WORLD,&m_ind_);
@@ -110,23 +117,22 @@ Mat Loader::load_flann_binary(){                        //the current method Jul
     const PetscScalar *vals_ind, *vals_dis;
     PetscScalar weight_ = 0;    //for differnet distance
     MatGetSize(m_ind_t_,&num_row,0);    //m returns the number of rows globally = number of nodes
-    size_ = num_row;
+//    size_ = num_row;
     printf("number of rows(nodes) in matrix: %d \n",num_row);  //$$debug
 
 /// ------------- Create the WA matrix ----------------------
+    //Create Matrix WA : Weighted Adjancency
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, Config_params::getInstance()->get_pre_init_loader_matrix(),PETSC_NULL, &WA);
 
-    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row,
-                    Config_params::getInstance()->get_pre_init_loader_matrix(),
-                    PETSC_NULL, &WA);  //Create Matrix WA : Weighted Adjancency
-//    pre_init_loader_matrix is defined on the config_params
     ETimer t_init_WA;
+    CommonFuncs cf;
+    cf.set_weight_type(Config_params::getInstance()->get_ld_weight_type(), Config_params::getInstance()->get_ld_weight_param());
     for(i =0; i <num_row; i++){                         //i would be the row number
         MatGetRow(m_ind_t_,i,&ncols_ind,&cols_ind,&vals_ind);             //ncols : number if non-zeros in the row
         MatGetRow(m_dis_t_,i,&ncols_dis,&cols_dis,&vals_dis);
 
         for (j=0; j<ncols_ind; j++) {//Notice: as I use indices for j, for dists I should reduce it by one
-
-            weight_ = calc_distance(vals_dis[j-1]);
+            weight_ = cf.convert_distance_to_weight(vals_dis[j-1]);
 
             if(i != (vals_ind[j] - 1)  ){   //if it's not a loop to itself
                 if (vals_ind[j] - 1 > i ){      //if it's in upper triangular
@@ -168,20 +174,193 @@ Mat Loader::load_flann_binary(){                        //the current method Jul
 }
 
 
-PetscScalar Loader::calc_distance(PetscScalar raw_weight){  // for now it suppose the input is:  (Euclidean Dist)^2
-    if(this->weight_type == 1 ){ //Flann (square Euclidean distance)
-#if dbl_LD_CD >=3
-        printf("[LD][CD] raw distance:%g, calculated distance:%g \n",raw_weight, 1 / (sqrt(raw_weight) + 0.00001 ));
+
+
+Mat Loader::load_flann_binary(){
+    Mat             m_ind_, m_dis_, WA;
+    PetscViewer     viewer_ind_, viewer_dis_;
+
+    ETimer t_read_matrices;
+//load indices vector
+    std::cout <<  "[LD][LFB] f_indices_name_ :"<< f_indices_name_ << std::endl;
+
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD,f_indices_name_,FILE_MODE_READ,&viewer_ind_);
+    MatCreate(PETSC_COMM_WORLD,&m_ind_);
+    MatLoad(m_ind_,viewer_ind_);
+    PetscViewerDestroy(&viewer_ind_);        //destroy the viewer
+
+//load dists vector
+    std::cout <<  "[LD][LFB] f_dists_name_ :"<< f_dists_name_ << std::endl;
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD,f_dists_name_,FILE_MODE_READ,&viewer_dis_);
+    MatCreate(PETSC_COMM_WORLD,&m_dis_);
+    MatLoad(m_dis_,viewer_dis_);
+    PetscViewerDestroy(&viewer_dis_);        //destroy the viewer
+    t_read_matrices.stop_timer("[Loader::load_flann_binary] reading both matrices");
+
+
+#if dbl_LD_LFB >= 7
+    printf("m_ind Matrix:\n");                                               //$$debug
+    MatView(m_ind_,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+
+    printf("m_dis Matrix:\n");                                               //$$debug
+    MatView(m_dis_,PETSC_VIEWER_STDOUT_WORLD);                                //$$debu
 #endif
-        return ( 1 / (sqrt(raw_weight) + 0.00001 ) );    //
+
+    PetscInt num_row=0,i,j, ncols_ind,ncols_dis;
+    const PetscInt    *cols_ind, *cols_dis;                        //if not NULL, the column numbers
+    const PetscScalar *vals_ind, *vals_dis;
+    PetscScalar weight_ = 0;    //for differnet distance
+    MatGetSize(m_ind_,&num_row,0);    //m returns the number of rows globally = number of nodes
+//    size_ = num_row;
+    printf("number of rows(nodes) in matrix: %d \n",num_row);  //$$debug
+
+/// ------------- Create the WA matrix ----------------------
+    //Create Matrix WA : Weighted Adjancency
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, Config_params::getInstance()->get_pre_init_loader_matrix(),PETSC_NULL, &WA);
+
+    ETimer t_init_WA;
+    CommonFuncs cf;
+    cf.set_weight_type(Config_params::getInstance()->get_ld_weight_type(), Config_params::getInstance()->get_ld_weight_param());
+    for(i =0; i <num_row; i++){                         //i would be the row number
+        MatGetRow(m_ind_,i,&ncols_ind,&cols_ind,&vals_ind);             //ncols : number if non-zeros in the row
+        MatGetRow(m_dis_,i,&ncols_dis,&cols_dis,&vals_dis);
+
+        for (j=0; j<ncols_ind; j++) {//Notice: as I use indices for j, for dists I should reduce it by one
+            weight_ = cf.convert_distance_to_weight(vals_dis[j-1]);
+
+            if(i != (vals_ind[j] - 1)  ){   //if it's not a loop to itself
+                if (vals_ind[j] - 1 > i ){      //if it's in upper triangular
+                    MatSetValue(WA,i,vals_ind[j] - 1 ,weight_,INSERT_VALUES);
+                }else{
+                    MatSetValue(WA,vals_ind[j] - 1, i ,weight_,INSERT_VALUES);  // switched item (needed when I fill only a triangular)
+                }
+            }
+        }
+        MatRestoreRow(m_ind_,i,&ncols_ind,&cols_ind,&vals_ind);
+        MatRestoreRow(m_dis_,i,&ncols_dis,&cols_dis,&vals_dis);
     }
 
-    if(this->weight_type == 2 ){ // Gaussian distance)
-//        std::cout << "[LD][calc_distance] exit" << std::endl;
-//        exit(1);
-        return ( exp((-1) * raw_weight * this->weight_gamma)  );    //
-    }
+    MatAssemblyBegin(WA,MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(WA,MAT_FINAL_ASSEMBLY);
+#if dbl_LD_LFB >=3
+    printf("[LD][LFB] insert values to WA is finished\n");      //$$debug
+    #if dbl_LD_LFB >= 9
+        printf("WA Matrix (only triangular part):\n");                                               //$$debug
+        MatView(WA,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+    #endif
+#endif
+    t_init_WA.stop_timer("insert triangular part of WA");
+
+    ETimer t_WA_complete;
+    Mat WA_t;
+    MatTranspose(WA,MAT_INITIAL_MATRIX,&WA_t);
+    MatAYPX(WA,1,WA_t,DIFFERENT_NONZERO_PATTERN);
+    t_WA_complete.stop_timer("t_WA_complete");
+    MatDestroy(&WA_t);
+#if dbl_LD_LFB >=3
+    #if dbl_LD_LFB >= 7
+        printf("WA Matrix After add to it's transpose:\n");                   //$$debug
+        MatView(WA,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+    #endif
+    printf("[loader] WA is created completely \n");
+#endif
+    return WA;
 }
+
+
+
+
+
+
+
+void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::string& info,bool debug_status){
+    ETimer t_all;
+
+    PetscInt num_row=0,i,j, ncols_ind,ncols_dis;
+    const PetscInt    *cols_ind, *cols_dis;                        //if not NULL, the column numbers
+    const PetscScalar *vals_ind, *vals_dis;
+    PetscScalar weight_ = 0;    //for differnet distance
+    MatGetSize(m_NN_idx,&num_row,0);    //m returns the number of rows globally = number of nodes
+    printf("[LD][CWAM] number of rows(nodes) in NN matrix: %d \n",num_row);  //$$debug
+
+    if(debug_status){
+        printf("m_NN_idx Matrix :\n");                   //$$debug
+        MatView(m_NN_idx,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+
+        printf("m_NN_dis Matrix :\n");                   //$$debug
+        MatView(m_NN_dis,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+    }
+
+
+// ------------- Create the WA matrix ----------------------
+    //Create Matrix WA : Weighted Adjancency
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, Config_params::getInstance()->get_pre_init_loader_matrix(),PETSC_NULL, &m_WA);
+
+    ETimer t_init_WA;
+    CommonFuncs cf;
+    cf.set_weight_type(Config_params::getInstance()->get_ld_weight_type(), Config_params::getInstance()->get_ld_weight_param());
+    for(i =0; i <num_row; i++){                         //i would be the row number
+        MatGetRow(m_NN_idx,i,&ncols_ind,&cols_ind,&vals_ind);             //ncols : number if non-zeros in the row
+        MatGetRow(m_NN_dis,i,&ncols_dis,&cols_dis,&vals_dis);
+
+        for (j=0; j<ncols_ind; j++) {//Notice: as I use indices for j, for dists I should reduce it by one
+            weight_ = cf.convert_distance_to_weight(vals_dis[j-1]);
+//            std::cout << "[LD][CWAM] i:"<< i <<", j"<< j << ",(vals_ind[j] - 1):" << (vals_ind[j] - 1) << std::endl;
+            if(i != (vals_ind[j] - 1)  ){   //if it's not a loop to itself
+                if (vals_ind[j] - 1 > i ){      //if it's in upper triangular
+                    MatSetValue(m_WA,i,vals_ind[j] - 1 ,weight_,INSERT_VALUES);
+                }else{
+                    MatSetValue(m_WA,vals_ind[j] - 1, i ,weight_,INSERT_VALUES);  // switched item (needed when I fill only a triangular)
+                }
+            }
+        }
+
+        MatRestoreRow(m_NN_idx,i,&ncols_ind,&cols_ind,&vals_ind);
+        MatRestoreRow(m_NN_dis,i,&ncols_dis,&cols_dis,&vals_dis);
+    }
+if(debug_status) exit(1);
+    MatAssemblyBegin(m_WA,MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_WA,MAT_FINAL_ASSEMBLY);
+#if dbl_LD_CWAM >=3
+    printf("[LD][CWAM] insert values to m_WA is finished\n");      //$$debug
+    #if dbl_LD_CWAM >= 7
+        printf("[LD][CWAM] WA Matrix (only triangular part):\n");                                               //$$debug
+        MatView(m_WA,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+    #endif
+#endif
+    t_init_WA.stop_timer("insert triangular part of WA");
+
+    ETimer t_WA_complete;
+    Mat m_WA_t;
+    MatTranspose(m_WA,MAT_INITIAL_MATRIX,&m_WA_t);
+    MatAYPX(m_WA,1,m_WA_t,DIFFERENT_NONZERO_PATTERN);
+    t_WA_complete.stop_timer("t_m_WA_complete");
+    MatDestroy(&m_WA_t);
+#if dbl_LD_CWAM >=3
+    #if dbl_LD_CWAM >= 7
+        printf("[LD][CWAM] WA Matrix After add to it's transpose:\n");                   //$$debug
+        MatView(m_WA,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+    #endif
+    printf("[LD][CWAM] WA is created completely \n");
+#endif
+    t_all.stop_timer("[LD][CWAM] whole WA matrix for class ", info);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -214,28 +393,26 @@ Mat Loader::load_norm_data_sep(const std::string f_name){    //load normalized d
 
 
 
-
-Vec Loader::init_volume(PetscScalar val){
-    /*
-     * This will be used for the first level of coarsening to initialize the volume (usually with 1)
-     * @param val
-     * PetscScalar type that use to initialize all components of the vector
-     * @return
-     * vector with size that come from load_flann and the value of all components are val
-     */
+/*
+ * This will be used for the first level of coarsening to initialize the volume (usually with 1)
+ * @param val
+ * PetscScalar type that use to initialize all components of the vector
+ * @return
+ * vector with size that come from load_flann and the value of all components are val
+ */
+Vec Loader::init_volume(PetscScalar val, PetscInt num_elements){
     Vec vol_;
-    VecCreateSeq(PETSC_COMM_SELF,size_,&vol_);
+    VecCreateSeq(PETSC_COMM_SELF, num_elements,&vol_);
     VecSet(vol_,val);           //Sets all components of a vector to a single scalar value.
     VecAssemblyBegin(vol_);
     VecAssemblyEnd(vol_);
-
     return vol_;
 }
 
-Vec Loader::init_volume(PetscScalar val, int pref_size){
-    this->size_ = pref_size;
-    return init_volume(val);
-}
+//Vec Loader::init_volume(PetscScalar val, int pref_size){
+//    this->size_ = pref_size;
+//    return init_volume(val);
+//}
 
 
 Mat Loader::load_test_data(const char * f_name, int& num_node, int& num_elem){    //load data

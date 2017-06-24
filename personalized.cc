@@ -190,7 +190,9 @@ void personalized::calc_statistics(int id, Mat& m_stats, std::vector<int>& v_tar
 
 
 
-
+/*
+ * Remove diagonal from the NN matrix which separate the test data (a test point at each row) from the training data
+ */
 void personalized::filter_test_point(Mat& m_NN, Mat& m_filtered_NN){
 
     PetscInt i, ncols;

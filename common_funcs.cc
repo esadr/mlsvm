@@ -1,5 +1,11 @@
 #include "common_funcs.h"
 #include "config_logs.h"
+#include <algorithm>    /* random_shuffle*/
+#include <cmath>
+
+#include <memory>   /* shared_ptr*/
+//#include <stdexcept>
+
 /*
  * Export matrix to a file
  */
@@ -10,7 +16,7 @@ void CommonFuncs::exp_matrix(Mat& A, std::string file_path, std::string file_nam
 void CommonFuncs::exp_matrix(Mat& A, std::string file_path, std::string file_name, std::string sender_func){
 #if debug_export == 1
     PetscViewer     viewer;
-    std::string     full_file = file_path +"/" +file_name;
+    std::string     full_file = (file_path == "")? file_name : file_path +"/" +file_name;   //if the file_path is empty, don't add /
     PetscViewerBinaryOpen(PETSC_COMM_WORLD,full_file.c_str(),FILE_MODE_WRITE,&viewer);
     MatView(A,viewer);  // petsc binary format
 
@@ -29,7 +35,7 @@ void CommonFuncs::exp_vector(Vec& A, std::string file_path, std::string file_nam
 void CommonFuncs::exp_vector(Vec& A, std::string file_path, std::string file_name, std::string sender_func){
 #if debug_export == 1
     PetscViewer     viewer;
-    std::string     full_file = file_path +"/" +file_name;
+    std::string     full_file = (file_path == "")? file_name : file_path +"/" +file_name;   //if the file_path is empty, don't add /
     PetscViewerBinaryOpen(PETSC_COMM_WORLD,full_file.c_str(),FILE_MODE_WRITE,&viewer);
     VecView(A,viewer);  // petsc binary format
 
@@ -132,6 +138,25 @@ double CommonFuncs::calc_manhatan_dist(const PetscInt ncols_A, const PetscInt nc
 }
 
 
+void CommonFuncs::set_weight_type(int new_weight_type, double aux_param){
+    this->weight_type = new_weight_type;
+    if(new_weight_type == 2){ // for guassian distance, it reads the gamma from param.xml
+        this->weight_gamma = aux_param;//Config_params::getInstance()->get_ld_weight_param();
+    }
+}
+
+double CommonFuncs::convert_distance_to_weight(double distance){
+    switch (weight_type) {
+    case 1:                 //Flann default distance (square Euclidean distance)
+//        printf("[LD][CD] raw distance:%g, calculated distance:%g \n",distance, 1 / (sqrt(distance) + 0.00001 ));
+        return ( 1 / (sqrt(distance) + 0.00001 ) );    //
+    case 2:                 // Gaussian distance)
+        return ( exp((-1) * distance * weight_gamma)  );
+    }
+}
+
+
+
 /*
  * calculate the dot product of vector A and B
  * vector A is a row of a matrix
@@ -174,6 +199,7 @@ template <typename T>
 PetscScalar CommonFuncs::mean_vector(const std::vector<T>& vec_In){
     return ( sum_vector(vec_In) / (float) vec_In.size());
 }
+
 
 //template <class T>
 //PetscScalar CommonFuncs::STD_array(T *arrayIn, unsigned int array_size, PetscScalar& mean){
@@ -292,3 +318,130 @@ template PetscScalar CommonFuncs::STD_array(PetscScalar *arrayIn, unsigned int a
 template void CommonFuncs::zscore_array(int *arrayIn, unsigned int array_size);
 template void CommonFuncs::zscore_array(float *arrayIn, unsigned int array_size);
 template void CommonFuncs::zscore_array(PetscScalar *arrayIn, unsigned int array_size);
+
+
+/*
+ * Get the size of the data from local variables (num_mXX_points) which are set during the divide_data
+ * Create a random sequence of numbers for them and store them in local vectors (mXX_shuffled_indices_)
+ * The seed for srand comes from the config params and it is recorded in output for debug
+ */
+Mat CommonFuncs::sample_data(Mat& m_org_data, float sample_size_fraction, std::string preferred_srand){
+    Mat m_sampled_data;
+    // Random generator without duplicates
+    PetscInt i, num_row_org_data;
+    MatGetSize(m_org_data, &num_row_org_data, NULL);
+//    std::cout << "[CF][SampleData] number of rows in original data are: " << num_row_org_data << std::endl; //$$debug
+    std::vector<PetscInt> shuffled_indices_;
+    shuffled_indices_.reserve(num_row_org_data);
+
+    //create a vector of all possible indices, normal call to rand could generate duplicate values
+    for (i=0; i < num_row_org_data; i++){
+        shuffled_indices_.push_back(i);
+    }
+
+    srand(std::stoll(preferred_srand));
+    std::random_shuffle( shuffled_indices_.begin(), shuffled_indices_.end() ); //shuffle all nodes
+//    std::cout << "[CF][SampleData] indices are shuffled" << std::endl; //$$debug
+
+    PetscInt num_row_sampled_data = ceil(num_row_org_data * sample_size_fraction);
+//    std::cout << "[CF][SampleData] sample_size_fraction:" << sample_size_fraction << std::endl; //$$debug
+//    std::cout << "[CF][SampleData] num_row_sampled_data:" << num_row_sampled_data << std::endl; //$$debug
+    IS              is_sampled_;
+    PetscInt        * ind_sampled_;
+    PetscMalloc1(num_row_sampled_data, &ind_sampled_);
+    for(i=0; i < num_row_sampled_data; i++){
+        ind_sampled_[i] = shuffled_indices_[i];
+    }
+//    std::cout << "[CF][SampleData] sample indices are selected" << std::endl; //$$debug
+
+    // ind_sample should sort
+    std::sort(ind_sampled_, ind_sampled_ + num_row_sampled_data);   //this is critical for MatGetSubMatrix method
+    ISCreateGeneral(PETSC_COMM_SELF,num_row_sampled_data,ind_sampled_,PETSC_COPY_VALUES,&is_sampled_);
+    PetscFree(ind_sampled_);
+
+    MatGetSubMatrix(m_org_data,is_sampled_, NULL,MAT_INITIAL_MATRIX,&m_sampled_data);
+    PetscInt check_num_row_sampled_data;
+    MatGetSize(m_sampled_data, &check_num_row_sampled_data, NULL);
+//    std::cout << "[CF][SampleData] number of rows in sampled data are: " << check_num_row_sampled_data << std::endl; //$$debug
+
+//    std::cout << "[CF][SampleData] submatrix is created" << std::endl; //$$debug
+    ISDestroy(&is_sampled_);
+
+//    printf("[CF][SampleData] sample matrix:\n");                   //$$debug
+//    MatView(m_sampled_data,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+
+    return m_sampled_data;
+}
+
+
+
+std::string CommonFuncs::run_ext_command(const std::string ext_cmd){
+    //ref: http://stackoverflow.com/a/478960/2674061
+    char buffer[128];
+    std::string result = "";
+    std::shared_ptr<FILE> pipe(popen(ext_cmd.c_str(), "r"), pclose);
+    if (!pipe) throw std::runtime_error("[CF][run_ext_command] popen() failed! Command:" + ext_cmd );
+    while (!feof(pipe.get())) {
+        std::cout << "while inside run_ext_command!\n";
+        if (fgets(buffer, 128, pipe.get()) != NULL)
+            result += buffer;
+    }
+    return result;
+}
+
+
+std::string CommonFuncs::run_ext_command_single_output(const std::string ext_cmd){
+    //ref: http://stackoverflow.com/a/478960/2674061
+    char buffer[128];
+    std::string result = "";
+    std::shared_ptr<FILE> pipe(popen(ext_cmd.c_str(), "r"), pclose);
+    if (!pipe) throw std::runtime_error("[CF][run_ext_command] popen() failed! Command:" + ext_cmd );
+    while (!feof(pipe.get())) {
+//        std::cout << "while inside run_ext_command!\n";
+        if (fgets(buffer, 128, pipe.get()) != NULL)
+            result += buffer;
+    }
+    char del= '\n';
+    int i =0;
+    while(i < result.size())
+    {
+        if(result[i] != del)
+            i++;
+        else
+            break;
+    }
+    result = result.substr(0,i);
+
+    return result;
+}
+
+
+//tested 040517-1325
+void CommonFuncs::get_unique_random_id(int start_range, int end_range, int number_random_id, std::string preferred_srand, std::vector<int>& v_rand_idx){
+    /// - - - - check valid request - - - -
+    if(number_random_id > (end_range - start_range + 1)){
+        std::cout << "Error: [CF][GURI] out of range request for random indices, Exit!"<< std::endl;
+        exit(1);
+    }
+    /// - - - - create full vector - - - -
+    std::vector<int> v_full_idx;
+    v_full_idx.reserve(end_range - start_range );
+    for(int i=start_range; i< end_range; i++){
+        v_full_idx.push_back(i);
+//        std::cout << i << ",";
+    }
+//    std::cout << std::endl;
+    ///  - - - - shuffle it - - - -
+//    std::cout << "\nrandome seed:" << preferred_srand << std::endl;
+    srand(std::stoll(preferred_srand));
+    std::random_shuffle(v_full_idx.begin(), v_full_idx.end() ); //shuffle all
+    /// - - - - select specific number of them - - - -
+    v_rand_idx.reserve(number_random_id);
+//    std::cout << "\nin randome vector:\n";
+    for(int i=0; i< number_random_id; i++){
+        v_rand_idx.push_back(v_full_idx[i]);
+//        std::cout << "index:" << i << ",";
+    }
+//    std::cout << std::endl;
+}
+

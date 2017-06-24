@@ -8,18 +8,27 @@
 
 //#include "utility.h"
 
+//#define boundary_points 1       //experiment Jan 9, 2017: 1 means, the boundary points are fractioned in multiple aggregates
+
 struct cs_info{
     PetscInt num_point;
     PetscInt num_edge;
     PetscInt min_num_edge;
-    PetscInt avg_num_edge;
+    PetscScalar avg_num_edge;
     PetscInt max_num_edge;
+    PetscScalar median_num_edge;
 };
 
 class Coarsening {
 private:
     PetscInt num_coarse_points = 0;
     std::string cc_name;        // classifier_class_name for printing
+
+    struct pair_hash{
+        inline std::size_t operator()(const std::pair<PetscInt,PetscInt> &v) const{
+            return v.first * 31 + v.second;
+        }
+    };
 public:
     Coarsening() {}
 
@@ -34,9 +43,11 @@ public:
      * @return
      *      P matrix
      */
-    Mat calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info);
+    Mat calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info, bool debug=0);
 
-
+    /*
+     * calculate the P matrix without coarsening, the minority class start using this instead of usual when its size is reduced to acceptable size
+     */
     Mat calc_P_without_shrinking(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info);
 
 //    Mat calc_aggregate_data(Mat& P, Mat& data, Vec& v_vol);
@@ -68,7 +79,9 @@ public:
      * @return
      *      vector of volumes for the nodes (next level)
      */
-    void filter_weak_edges(Mat & A, double alfa);
+    void filter_weak_edges(Mat & A, double alfa, int level);
+
+    Mat calc_real_weight(Mat& m_WA_c, Mat& m_data_c);
 };
 
 

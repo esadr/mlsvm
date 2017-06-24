@@ -18,7 +18,13 @@ Mat& Preprocessor::readData(const char * f_name){
     return data_mat_;
 }
 
+/*
+ * Notice 1: the data should not be saved in CSR format for since it would be hard to use optimized methods on each column
+ * Notice 2: if data is separated, both (muptiple) oarts whould be considered in min, max, std.
+ * the above have not fixed 050717-1330
+ */
 Mat Preprocessor::normalizeDataZscore(Mat& raw_mat){
+
     Mat norm_data_;
     PetscInt i, j, num_row, num_col, ncols;
     PetscInt num_nnz=0;           //number of non zero components

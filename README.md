@@ -35,8 +35,23 @@ To run the mlsvm on dataset X, you create the files in datasets folder regards t
 
 The rest of parameters are explained in the param.xml file, however the shortcuts for overriding them through the command prompt will explain later.
 
+
+List of Tools:
+-------------
+Save_flann which divides the data to two classes and calculate the k-NN using FLANN library. It saves the output for each class in indices and dists files. The mlsvm use these files to create a adjacency matrix for the multi level framework.
+You can create it using 
+`make save_flann`
+The parameters are filename, number of nearest neighbors and type of distances which are passed by -f, --nn_n, --nn_d respectively.
+The default parameter for --nn_n is 10 and for --nn_n is 10 which are set in the param.xml file.
+The filename is the name of dataset without any extension like filename_zsc_data.dat.
+For example for twonorm dataset you can use `./save_flann -f twonorm --nn_n 10 --nn_d 1`
+
+
+
 Contact
 -------------
-For question or suggestion email me at esadrfa@g.clemson.edu
+For questions or suggestions please email me at esadrfa@g.clemson.edu 
+
+
 
 

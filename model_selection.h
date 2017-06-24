@@ -26,12 +26,9 @@ public:
     void uniform_design(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n, bool inh_params,
                         double param_C, double param_G, int level, solution & udc_sol);
 
-    void uniform_design_separate_validation(Mat& m_train_data_p, Vec& v_train_vol_p, Mat& m_train_data_n, Vec& v_train_vol_n, bool inh_params,
-                            double param_C, double param_G, int level, solution & udc_sol, std::vector<ref_results>& v_ref_results);
-//    void uniform_design_coarsest(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n, bool inh_params,
-//                                 double param_C, double param_G, int level, solution & udc_sol);
-
-
+    void uniform_design_separate_validation(Mat& m_train_data_p, Vec& v_train_vol_p, Mat& m_train_data_n, Vec& v_train_vol_n,
+                                            bool inh_params, double param_C, double param_G, Mat& m_VD_p, Mat& m_VD_n, int level,
+                                            solution & udc_sol, std::vector<ref_results>& v_ref_results);
 
 
     void uniform_design_index_base(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n, bool inh_params, double last_c,
@@ -57,7 +54,7 @@ public:
                             bool inh_params, double last_c, double last_gamma,int level,
                             std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
                             std::unordered_set<PetscInt>& uset_SV_index_p, std::unordered_set<PetscInt>& uset_SV_index_n,
-                            Mat& m_VD_p, Mat& m_VD_n, Mat& m_testdata, int classifier_id, Mat& m_all_predict);
+                            Mat& m_VD_p, Mat& m_VD_n, Mat& m_VD_both, Mat& m_all_predict_VD, Mat& m_testdata, int classifier_id, Mat& m_all_predict_TD);
 private :
 
     ms_range range_c;     // range of C
@@ -72,6 +69,7 @@ protected:
     std::vector<ud_point> ud_param_generator(int stage, bool inh_param, double param_C, double param_G);
     int select_best_model(std::vector<summary> map_summary, int level, int stage);
 
+    void add_debug_parameters(std::vector<ud_point>& v_initialized_params);
 };
 #endif // MODEL_SELECTION_H
 

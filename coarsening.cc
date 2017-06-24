@@ -3,25 +3,29 @@
 #include "config_params.h"
 #include "config_logs.h"
 #include <set>
+#include "common_funcs.h"
+#include <unordered_map>
+#include <iomanip>  //for setprecision
 
 
-Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info) {
+Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info, bool debug) {
 
     PetscInt num_row;
     MatGetSize(WA,&num_row,0);    //num_row returns the number of rows globally
 //    printf("number of nodes : %d\n",num_row );        //$$debug
     ETimer t_WD;
-    Vec     D_vec;
+    Vec     D_vec;                  //sum of neighbors' weight for each node in the WA matrix
     PetscInt vol_rstart, vol_rend, i,j,D_vec_rstart, D_vec_rend,ncols;
     PetscScalar * vol_array, * D_vec_array;
 
     VecCreateSeq(PETSC_COMM_SELF,num_row,&D_vec);
-//    MatGetDiagonal(WA,D_vec);                                 //Calculate sum of each row of W matrix
-    MatGetRowSum(WA,D_vec);
+//    MatGetDiagonal(WA,D_vec);
+    MatGetRowSum(WA,D_vec);                                 //Calculate sum of each row of W matrix
 #if dbl_CO_calcP >= 7
     printf("[Coarsening] D_vec Vector:\n");
     VecView(D_vec,PETSC_VIEWER_STDOUT_WORLD);
 #endif
+
     VecGetOwnershipRange(vol,&vol_rstart,&vol_rend);        //read the volume from vol vector
     VecGetArray(vol,&vol_array);
 
@@ -66,13 +70,12 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
             else {
                 tmp_fut_vol += vertexs.getNode(cols[j]).getVolume();
             }
-//            vertexs.getNode(i).setFutureVolume(tmp_fut_vol);
         }
         vertexs.getNode(i).setFutureVolume(tmp_fut_vol);
         MatRestoreRow(WA,i,&ncols,&cols,&vals);       //Frees any temporary space allocated by MatGetRow()
         sum_future_volume += tmp_fut_vol;
 #if dbl_CO_calcP >= 9
-        printf("[CO][calc_p]row: %d Fv: %g \n",i,vertexs.getNode(i).getFutureVolume());
+        printf("[CO][calc_p]row: %d Fv: %.4f \n",i,vertexs.getNode(i).getFutureVolume());
 #endif
     }//end of for each row (num_row)
 
@@ -85,10 +88,15 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
     std::sort(stat_degree_.begin(), stat_degree_.end(), std::greater<tmp_degree>());     //Sort all edges in descending order
 
     ref_info.min_num_edge = stat_degree_[num_row-1].degree_;
-    ref_info.avg_num_edge = (sum_nnz/2) / num_row;
+    ref_info.avg_num_edge = (PetscScalar)sum_nnz / (PetscScalar)num_row;    // this is average degree of nodes, which I should not consider unique edges
     ref_info.max_num_edge = stat_degree_[0].degree_;
+    if(num_row%2)   //odd number of rows
+        ref_info.median_num_edge =  stat_degree_[num_row/2].degree_;
+    else            //even number of rows
+        ref_info.median_num_edge =  (stat_degree_[num_row/2 - 1].degree_ + stat_degree_[num_row/2 ].degree_) / 2;
     std::cout <<"[CO][calc_p]{" << this->cc_name <<"} Degrees\t Max:" << ref_info.max_num_edge <<
-                "\t\tMin:" << ref_info.min_num_edge << "\t\tAvg:"<< ref_info.avg_num_edge  <<  std::endl;
+                "\t\tMin:" << ref_info.min_num_edge << "\t\tAvg:"<< ref_info.avg_num_edge  <<
+                "\t\tMedian:"<< ref_info.median_num_edge  << std::endl;
 #endif
 
     vertexs.setAvgFutureVolume( sum_future_volume / vertexs.getSize());
@@ -122,26 +130,21 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 //            printf("recalc fv at i:%d Vi:%g\n",i,vertexs.getNode(i).getVolume());     //$$debug
             MatGetRow(WA,i,&ncols,&cols,&vals);                                         //ncols : number if non-zeros in the row
             for (j=0; j<ncols; j++) {                           // SIGMA (j belong to F)
-//                if(i != cols[j]){        //added Sep 4 - 1325
-                    if(!vertexs.getNode(cols[j]).getIsSeed()){      // check that it is not a seed (check: j belong to F)
-                        if(vertexs.getNode(cols[j]).getSumNeighborsWeight() != 0){  // SIGMA W_jk (prevent Division by zero)
-                            tmp_fut_vol += vertexs.getNode(cols[j]).getVolume() *
-                                    ( vals[j] / vertexs.getNode(cols[j]).getSumNeighborsWeight() );
-//                            tmp_fut_vol += vertexs.getNode(cols[j]).getVolume() *
-//                                    ( (-vals[j]) / vertexs.getNode(cols[j]).getSumNeighborsWeight() );
+                if(!vertexs.getNode(cols[j]).getIsSeed()){      // check that it is not a seed (check: j belong to F)
+                    if(vertexs.getNode(cols[j]).getSumNeighborsWeight() != 0){  // SIGMA W_jk (prevent Division by zero)
+                        tmp_fut_vol += vertexs.getNode(cols[j]).getVolume() *
+                                ( vals[j] / vertexs.getNode(cols[j]).getSumNeighborsWeight() );
 #if dbl_CO_calcP >=9
-                            printf("recalc fv at i:%d j:%d Vj:%g Wji:%g Sigma Wjk:%g\n",i,j,
-                                    vertexs.getNode(cols[j]).getVolume(), vals[j],
-                                    vertexs.getNode(cols[j]).getSumNeighborsWeight());
+//                        printf("recalc fv at row:%d col:%d V_j(vol):%g Wji:%g Sigma Wjk:%g\n",i,j,
+//                                vertexs.getNode(cols[j]).getVolume(), vals[j], vertexs.getNode(cols[j]).getSumNeighborsWeight());
 #endif
-                        }
-                        else {
-                            tmp_fut_vol += vertexs.getNode(cols[j]).getVolume();
-                        }
                     }
-//                }
+                    else {
+                        tmp_fut_vol += vertexs.getNode(cols[j]).getVolume();
+                    }
+                }
             }
-            MatRestoreRow(WA,i,&ncols,&cols,&vals);     //missing part updated Dec 3, 2015 - 14:22
+            MatRestoreRow(WA,i,&ncols,&cols,&vals);
             vertexs.getNode(i).setFutureVolume(tmp_fut_vol);
             F_nodes_.push_back(tmp_future_volume(i,tmp_fut_vol));
         }
@@ -196,50 +199,66 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 #endif
 
     if (num_row < Config_params::getInstance()->get_coarse_threshold() ){       //when the data doesn't need coarsening anymore, move all nodes to C
+        printf("[CO][calc_p]\t\t *** Notice *** \nnumber of seeds are equal to number of fine points due to small size of this class!!!\n");
         for (auto it = F_nodes_.begin(); it != F_nodes_.end(); ++it) {                      //go through all F_nodes
             vertexs.getNode(it->node_index).setSeed(1);         //set all nodes to seed
         }
     }
-//    printf("[CO][calc_p]after select all seeds\n");
 //========================= List Seeds indices ===========================
     std::map<int,int> seeds_indices;
     int num_seeds = 0;
     vertexs.getSeedsIndices(seeds_indices,num_seeds);
     this->num_coarse_points = (PetscInt) num_seeds;;        //used also in other methods
 
-//    v_seeds_indices = vertexs.find_seed_indices(num_seeds);       // this was not by reference
     v_seeds_indices.reserve(num_seeds);
     vertexs.find_seed_indices(v_seeds_indices);
 
 #if dbl_CO_calcP >= 3
     printf("[CO][calc_p]after find seeds indices\n");
 #endif
+
 //========================= Create the P matrix ===========================
 // rows : fine points        => row_dimension : num_rows
-// columns : coarse points   => col_dimension : count the coarse points => num_col
+// columns : coarse points   => col_dimension : number of the coarse points => num_col
     Mat         P;
     std::vector<tmp_filter_p> filter_nodes_p;
 
     double sigma_w_ik=0 , sigma_filter_p=0;
     int max_fraction=0;          // find the maximum number of fraction for each node in P table (Bug #1)
+//    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, Config_params::getInstance()->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
+    float threshold=Config_params::getInstance()->get_cs_boundary_points_threshold();    //Experiment boundary points (Jan 9, 2017);
+    size_t ultimate_estimated_fractions=Config_params::getInstance()->get_cs_boundary_points_max_num();    //Experiment boundary points (Jan 9, 2017)
+    std::cout << "[CO][calc_p] DEBUG boundary points t:" << threshold << ", max fractions:" << ultimate_estimated_fractions << std::endl;
+    
+//#if boundary_points == 0    //Experiment boundary points (Jan 9, 2017)
+    bool is_boundary_points_active = Config_params::getInstance()->get_cs_boundary_points_status();
+    std::cout << "[CO][calc_p] DEBUG boundary points status:" << is_boundary_points_active << std::endl;
+    if(! is_boundary_points_active){
+        MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, Config_params::getInstance()->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
+        std::cout << "[CO][calc_p] DEBUG P matrix is created with fixed number of fractions (no boundary) nnz:" << Config_params::getInstance()->get_coarse_r() << std::endl;
+//#else       //boundary_points == 1 , 20 is constant as the maximum number of estimated fractions for a fine point
+    }else{
+        MatCreateSeqAIJ(PETSC_COMM_SELF,num_row, this->num_coarse_points, ultimate_estimated_fractions, PETSC_NULL, &P);
+        std::cout << "[CO][calc_p] DEBUG P matrix is created for boundary points with nnz:" << ultimate_estimated_fractions << std::endl;
+    }
+//#endif
 
-
-    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, Config_params::getInstance()->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
 #if dbl_CO_calcP >= 3
     printf("[CO][calc_p]after MatCreate for P matrix\n");
 #endif
-#if dbl_CO_calcP >= 5
+#if dbl_CO_calcP >= 3
     printf("[CO][calc_p]{Create the P matrix} MatCreateSeqAIJ num_row:%d num_coarse_points:%d nnz(coarse_r):%d\n",
            num_row,this->num_coarse_points,Config_params::getInstance()->get_coarse_r());
 #endif
-    for(i =0; i <num_row; ++i){                           //All nodes in V (i == node id )
-        if(vertexs.getNode(i).getIsSeed()){             //if the node is seed ==> value = 1
+    for(i =0; i <num_row; ++i){                             //All nodes in V (i == node id )
+        if(debug) std::cout << i << ", ";
+        if(vertexs.getNode(i).getIsSeed()){                 //if the node is seed ==> value == 1
             MatSetValue(P,i,seeds_indices[i],1,INSERT_VALUES);
-//                printf("Seed %d real index is : %d\n",seeds_indices[i],i);
         }
-        else{                                       //nodes belongs to F
-            MatGetRow(WA,i,&ncols,&cols,&vals);     //ncols : number if non-zeros in the row
-//                 $$Alert: This should be less than "r"
+        else{                                       //nodes belongs to F (not seed)
+            MatGetRow(WA,i,&ncols,&cols,&vals);     //ncols : number of non-zeros in the row
+
+            //     $$Alert: This should be less than "r"
             sigma_w_ik = 0;             //reset for each new node
             sigma_filter_p = 0 ;        //clear the filter from last value
             filter_nodes_p.clear();     //clear the vector from last values
@@ -251,54 +270,102 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
             }
             for (j=0; j<ncols; j++) {
                 if(vertexs.getNode(cols[j]).getIsSeed()){           //if J belongs to N_i
-                    filter_nodes_p.push_back(  tmp_filter_p(seeds_indices[cols[j]], vals[j]/sigma_w_ik)  );         // add the node_index and the value to a vector       // changed at 0716-1710 (this one is based on 2-sum paper)
+                    // add the node_index and the value to a vector       // changed at 071616-1710 (this one is based on 2-sum paper)
+                    filter_nodes_p.push_back( tmp_filter_p(seeds_indices[cols[j]], vals[j]/sigma_w_ik) ); //equation 2 at page 242 min 2-sum paper Safro
                 }
             }
+
     //Sort all nodes_values in descending order
              std::sort(filter_nodes_p.begin(), filter_nodes_p.end(), std::greater<tmp_filter_p>());
 
-    // Find the max number of fractions
-            if( Config_params::getInstance()->get_coarse_r() <   (filter_nodes_p.end() - filter_nodes_p.begin())    ){
-                max_fraction = Config_params::getInstance()->get_coarse_r();
-            }
-            else{
-                max_fraction = (filter_nodes_p.end() - filter_nodes_p.begin());
-            }
+//             #if boundary_points == 0    //Experiment boundary points (Jan 9, 2017)
+             if(! is_boundary_points_active){
+        // Find the max number of fractions
+                if( Config_params::getInstance()->get_coarse_r() <   (filter_nodes_p.end() - filter_nodes_p.begin())    ){
+                    max_fraction = Config_params::getInstance()->get_coarse_r();
+                }
+                else{
+                    max_fraction = (filter_nodes_p.end() - filter_nodes_p.begin());
+                }
 
-    // Select the "max number" of them
-            for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.begin()+max_fraction; it++) {
-                sigma_filter_p += it->p_value;
-            }
-    // Normalize them
-            for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.begin()+max_fraction; it++) {
-                MatSetValue(P,i,it->seed_index,( it->p_value  / sigma_filter_p ) ,INSERT_VALUES);       //Insert (( W_ij / sigma_E_ik ) / sigma_filter_p ) to normalize the values that make sum of all of them equal to 1
-            }
+        // Select the "max number" of them
+                for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.begin()+max_fraction; it++) {
+                    sigma_filter_p += it->p_value;
+                }
+        // Normalize them
+                for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.begin()+max_fraction; it++) {
+                    //Insert (( W_ij / sigma_E_ik ) / sigma_filter_p ) to normalize the values that make sum of all of them equal to 1
+                    MatSetValue(P,i,it->seed_index,( it->p_value  / sigma_filter_p ) ,INSERT_VALUES);
+                }
+             }else{
+//            #else       //boundary_points == 1
+                //check the entropy
+                float entropy=0;
+
+                for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.begin()+max_fraction; it++) {
+                    entropy -= (it->p_value) * log2(it->p_value);
+                }
+                if(entropy > threshold){ //select all of the fractions
+                    max_fraction = std::min(filter_nodes_p.size() -1 , ultimate_estimated_fractions);  // it should not go beyound ultimate number of fractions which cause memory preallocation error in PETSc matrix
+//                    for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.end(); it++) {
+//                        MatSetValue(P,i,it->seed_index,( it->p_value ) ,INSERT_VALUES);
+//                        if(debug) std::cout << "[CO][calc_p] inside filter nodes, i: " << i <<
+//                                               ", seed index:" << it->seed_index  <<
+//                                               ", value:" << it->p_value  << std::endl;
+//                    }
+//                    if(debug) std::cout << "[CO][calc_p] fine row: " << i << " max_fraction:" << max_fraction << std::endl;
+
+                }else{  // Find the max number of fractions
+                    if( Config_params::getInstance()->get_coarse_r() <  (filter_nodes_p.end() - filter_nodes_p.begin()) ){
+                        max_fraction = Config_params::getInstance()->get_coarse_r();
+                    }
+                    else{
+                        max_fraction = (filter_nodes_p.end() - filter_nodes_p.begin());
+                    }
+//                    // Select the "max number" of them
+//                    for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.begin()+max_fraction; it++) {
+//                        sigma_filter_p += it->p_value;
+//                    }
+//                    // Normalize them
+//                    for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.begin()+max_fraction; it++) {
+//                        //Insert (( W_ij / sigma_E_ik ) / sigma_filter_p ) to normalize the values that make sum of all of them equal to 1
+//                        MatSetValue(P,i,it->seed_index,( it->p_value  / sigma_filter_p ) ,INSERT_VALUES);
+//                    }
+                }
+
+                // Select the "max number" of them
+                for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.begin()+max_fraction; it++) {
+                    sigma_filter_p += it->p_value;
+                }
+                // Normalize them
+                for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.begin()+max_fraction; it++) {
+                    //Insert (( W_ij / sigma_E_ik ) / sigma_filter_p ) to normalize the values that make sum of all of them equal to 1
+                    MatSetValue(P,i,it->seed_index,( it->p_value  / sigma_filter_p ) ,INSERT_VALUES);
+                }
+             }
+
+
+//            #endif
+
             MatRestoreRow(WA,i,&ncols,&cols,&vals);        //Frees any temporary space allocated by MatGetRow()
         }
     }
+//    exit(1);
 #if dbl_CO_calcP >= 3
-    printf("[CO][calc_p]before Assembly for P matrix\n");
+    printf("[CO][calc_p] before Assembly for P matrix\n");
 #endif
+
     MatAssemblyBegin(P,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(P,MAT_FINAL_ASSEMBLY);
+
 #if dbl_CO_calcP >=7
     printf("[CO][calc_p] P Matrix:\n");                                               //$$debug
     MatView(P,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
 #endif
 
-//#if dbl_CO_calcP >= 9
-////export the P matrix
-//    PetscViewer     viewer_P;
-//    PetscViewerBinaryOpen(PETSC_COMM_WORLD,"./data/P_export_l6.dat",FILE_MODE_WRITE,&viewer_P);
-//    MatView(P,viewer_P);
-//    PetscViewerDestroy(&viewer_P);        //destroy the viewer
-//    printf("\tP Matrix exported:\n");
-//#endif
-
 #if dbl_CO_calcP >=5
-    PetscInt m,n;
-    MatGetSize(P,&m,&n);                            // m is the number of rows (current number of nodes)
-                                                    // n is the number of columns/seeds (number of rows for next level)
+    PetscInt m,n;                                   // m is the number of rows (current number of nodes)
+    MatGetSize(P,&m,&n);                            // n is the number of columns/seeds (number of rows for next level)
     printf("[CO][calc_p] P dim [%d,%d]\n",m,n);                            //$$debug
 #endif
     return P;
@@ -669,7 +736,8 @@ Vec Coarsening::calc_coarse_volumes(Mat & P, Vec & vol){
 /*
  * Output is filtered matrix which is passed as input A
  */
-void Coarsening::filter_weak_edges(Mat &A, double alfa){
+
+void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
     ETimer t_fwe;
     PetscInt num_row, num_col;
     MatGetSize(A,&num_row, &num_col);
@@ -696,26 +764,46 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa){
     PetscMalloc1(num_row, &a_sum_row);
     PetscMalloc1(num_row, &a_nnz_per_row);
     VecGetArray(v_sum_row,&a_sum_row);
-//    std::cout << "[CS][FWE] save edges" << std::endl;
+    std::unordered_map<std::pair<PetscInt,PetscInt>, bool, pair_hash> umap_marked;
+    umap_marked.reserve(num_row*10);      //reserve the space for all rows  // 10 is not optimized
+//    t_fwe.stop_timer("[CO][FWE] checkpoint 1: sum of rows are calculated");
+//    ETimer t_mark_weak_edges;
+//    std::cout << "[CO][FWE] save edges" << std::endl;
     double trs_=0.00001;
     // - - - - 1st round on matrix to find weak edges - - - -
-    for(int i=0; i<num_row; i++){
+    for(PetscInt i=0; i<num_row; i++){
         MatGetRow(A,i,&ncols,&cols,&vals);
-        int nnz_real=0;
-        for(int j=0; j<ncols; j++){
-            if( fabs(vals[j]) > trs_ ) {   nnz_real++;    }
-        }
-        avg_weight = a_sum_row[i] / nnz_real;  //calc average edge weight
-//        std::cout << "[CS][FWE] average edge weight"<<avg_weight << std::endl;
-        a_nnz_per_row[i] = nnz_real;                        // this is not ultimate num_nnz because, the weak edges are going to be removed later
+        int nnz_real=0;                                             //not needed if I don't create another matrix in the end
+//        for(int k=0; k<ncols; k++){
+//            if( fabs(vals[k]) > trs_ ) {   nnz_real++;    }
+//        }
+
+//        avg_weight = a_sum_row[i] / nnz_real;  //calc average edge weight
+//        std::cout << "[CO][FWE] average edge weight"<<avg_weight << std::endl;
+//        a_nnz_per_row[i] = nnz_real;                        // this is not ultimate num_nnz because, the weak edges are going to be removed later
+        a_nnz_per_row[i] = ncols;                        // this is not ultimate num_nnz because, the weak edges are going to be removed later
 #if dbl_CO_FWE >=9
-        std::cout << " alfa * aveg_weight:"<< alfa * avg_weight <<", nnz_real:"<<nnz_real<< std::endl;
+//        std::cout << " alfa * aveg_weight:"<< alfa * avg_weight <<", nnz_real:"<<nnz_real<< std::endl;
+        std::cout << "alfa * sum_weigth:"<< alfa * a_sum_row[i] << std::endl;
 #endif
         for(int j=0; j<ncols; j++){
 //            std::cout << "i:"<<i<<" vals[j]:"<< vals[j] << std::endl;
-            if( (i != cols[j]) && (vals[j] < (alfa * avg_weight)) ){
+//            if( (i != cols[j]) && (vals[j] < (alfa * avg_weight)) ){
+            if( (i != cols[j]) && (vals[j] < (alfa * a_sum_row[i])) ){      //since I don't need to divide it to degree of node which is nnz_real
                 //add to ds (i, cols[j])
-                v_weak_edge[i].insert(cols[j]);
+//                v_weak_edge[i].insert(cols[j]);
+                std::pair<PetscInt,PetscInt> edge_pair;
+                if(i < cols[j])                                   //keep one element for both (i,j) and (j,i)
+                    edge_pair = std::make_pair(i,cols[j]);
+                else
+                    edge_pair = std::make_pair(cols[j],i);
+
+                auto ismarked = umap_marked.find(edge_pair);
+                if(ismarked != umap_marked.end())
+                    umap_marked[edge_pair] = true;
+                else
+                    umap_marked[edge_pair] = false;
+
 #if dbl_CO_FWE >=9
                 std::cout << "(i:"<< i<<",j:"<< cols[j] <<")\n";
 #endif
@@ -723,42 +811,50 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa){
         }
         MatRestoreRow(A,i,&ncols,&cols,&vals);
     }
+//    t_mark_weak_edges.stop_timer("[CO][FWE] only marking weak edges");
+//    t_fwe.stop_timer("[CO][FWE] checkpoint 2: all the weak edges are marked, no update on matrix yet");
 
     VecRestoreArray(v_sum_row,&a_sum_row);
     PetscFree(a_sum_row);
 
     VecDestroy(&v_sum_row);
     int cnt_filtered=0;
-//    std::cout << "[CS][FWE] keep strong edges" << std::endl;
-    for(int i=0; i<num_row; i++){
-        for(auto it=v_weak_edge[i].begin(); it !=v_weak_edge[i].end(); it++){
-//            std::cout << "("<< i<<","<<*it <<"), v[*it]:"<< *(v_weak_edge[*it].find(i)) << "\n";
-            if( (v_weak_edge[i].find(*it) != v_weak_edge[i].end()) && (v_weak_edge[*it].find(i) != v_weak_edge[*it].end() )  ){
-#if dbl_CO_FWE >=9
-                std::cout << "("<< i<<","<<*it <<")\n";
-#endif
-                MatSetValue(A,i,*it,0,INSERT_VALUES);
-                MatSetValue(A,*it,i,0,INSERT_VALUES);
-                cnt_filtered++;
-            }
+//    ETimer t_zero_weak_edges;
+    for(auto it=umap_marked.begin(); it!=umap_marked.end(); ++it){
+        if(it->second){
+            MatSetValue(A,it->first.first,it->first.second,0,INSERT_VALUES);    //#optimization : this is not optimize
+            MatSetValue(A,it->first.second,it->first.first,0,INSERT_VALUES);
+            a_nnz_per_row[it->first.first]--;   //as an edge is removed from row i, in case another matrix is created based on this info
+            cnt_filtered++;
+        #if dbl_CO_FWE >=9
+            std::cout << "(i:"<< it->first.first<<",j:"<< it->first.second <<") is removed and vice versa\n";
+        #endif
+
         }
     }
+//    t_zero_weak_edges.stop_timer("[CO][FWE] zero weak edges in original adjacency matrix (without Assembly)");
+//    t_fwe.stop_timer("[CO][FWE] checkpoint 3: iterate through map to find all weaks(both side weak) and update on matrix, before assembly");
+
+//    ETimer t_zero_weak_edges_assemble;
     MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);
+//    t_zero_weak_edges_assemble.stop_timer("[CO][FWE] zero weak edges in original adjacency (only Assembly part)");
+//    t_fwe.stop_timer("[CO][FWE] checkpoint 4: after assembly");
 #if dbl_CO_FWE >=3
-
-    std::cout << "[CO][FWE] "<< cnt_filtered <<" edges are filtered from WA_c (coarser level)" << std::endl;
+//    std::cout << "[CO][FWE]{" << this->cc_name <<"} "<< cnt_filtered /2 <<" edges are filtered from WA_c (coarser level)" << std::endl;
     #if dbl_CO_FWE >=7
         printf("[CO][FWE] filtered matrix:\n");                                     //$$debug
         MatView(A,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
     #endif
 #endif
+//    ETimer t_create_new_WA_matrix;
     PetscInt num_real_non_zero=0;
     Mat m_Anz;
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, PETSC_NULL, a_nnz_per_row, &m_Anz);
     PetscFree(a_nnz_per_row);
     MatGetSize(m_Anz,&num_row, &num_col);
-//    std::cout << "[CS][FWE] final matrix dimension is ("<<num_row <<"x"<<num_col<<")" << std::endl; // it is a symmetric matrix
+//    std::cout << "[CO][FWE] final matrix dimension is ("<<num_row <<"x"<<num_col<<")" << std::endl; // it is a symmetric matrix
+    t_fwe.stop_timer("[CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements");
     // - - - - 2nd round : create clean matrix - - - -
     for(int i=0; i<num_row; i++){
         MatGetRow(A,i,&ncols,&cols,&vals);
@@ -770,11 +866,21 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa){
         }
         MatRestoreRow(A,i,&ncols,&cols,&vals);
     }
+//    t_fwe.stop_timer("[CO][FWE] checkpoint 6: all elements are copied, before assembly");
     MatAssemblyBegin(m_Anz,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_Anz,MAT_FINAL_ASSEMBLY);
+//    t_fwe.stop_timer("[CO][FWE] checkpoint 7: after assembly");
     A=m_Anz;
+//    t_create_new_WA_matrix.stop_timer("[CO][FWE] create new WA matrix by moving all elements one by one (not optimized)");
 #if dbl_CO_FWE >=3
-    std::cout << "[CO][FWE] real number of edges in WA_c (coarser level) are "<< num_real_non_zero << std::endl;
+    PetscInt filtered_edges_ = cnt_filtered /2;
+    PetscInt total_edges_ = filtered_edges_ + (num_real_non_zero /2);
+    float percentage_ = ((double)filtered_edges_ / (double)total_edges_ ) * 100 ;
+    std::cout << "[CO][FWE]{" << this->cc_name << "} level:"<< level << ", all edges:"<< total_edges_ <<", filtered:"
+              << filtered_edges_ << ", remained:" << num_real_non_zero /2 << ", filtered:" << std::fixed << std::setprecision(2) << percentage_  <<"%\n" ;
+
+
+//    PetscPrintf(PETSC_COMM_WORLD, (", %2f\%\n", percentage_ );
     #if dbl_CO_FWE >=7
         printf("[CO][FWE] final matrix:\n");                                     //$$debug
         MatView(A,PETSC_VIEWER_STDOUT_WORLD);
@@ -782,6 +888,7 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa){
 #endif
 
     t_fwe.stop_timer("[CO][FWE] filter weak edges takes");
+//    t_fwe.stop_timer("[CO][FWE] checkpoint 8: end");
 }
 
 
@@ -798,7 +905,38 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa){
 
 
 
+Mat Coarsening::calc_real_weight(Mat& m_WA_c, Mat& m_data_c) {
+    ETimer t_crw;
+    PetscInt num_row,i,k, ncols_WA_c, ncols_dtc_i, ncols_dtc_k;
+    MatGetSize(m_WA_c,&num_row,NULL);
+    Mat m_tmp_WA;
+    MatDuplicate(m_WA_c,MAT_DO_NOT_COPY_VALUES, &m_tmp_WA); //create an empty matrix with same non zero structure
 
+    CommonFuncs cf;
+
+    const PetscInt    *cols_WA_c, *cols_dtc_i, *cols_dtc_k;
+    const PetscScalar *vals_WA_c, *vals_dtc_i, *vals_dtc_k;
+
+    for(i =0; i <num_row; i++){
+        MatGetRow(m_WA_c,i,&ncols_WA_c,&cols_WA_c,&vals_WA_c);
+        MatGetRow(m_data_c,i,&ncols_dtc_i,&cols_dtc_i,&vals_dtc_i); //get data at row i
+
+        for (k=0; k<ncols_WA_c; k++) {
+            MatGetRow(m_data_c,k,&ncols_dtc_k,&cols_dtc_k,&vals_dtc_k); //get data at row k
+            //calc the distance between i, k
+            double distance = cf.calc_euclidean_dist(ncols_dtc_i, ncols_dtc_k, cols_dtc_i, cols_dtc_k, vals_dtc_i, vals_dtc_k);
+            MatRestoreRow(m_data_c,k,&ncols_dtc_k,&cols_dtc_k,&vals_dtc_k);
+            MatSetValue(m_tmp_WA, i, cols_WA_c[k], cf.convert_distance_to_weight(distance), INSERT_VALUES);
+        }
+        MatRestoreRow(m_data_c,i,&ncols_dtc_i,&cols_dtc_i,&vals_dtc_i);
+        MatRestoreRow(m_WA_c,i,&ncols_WA_c,&cols_WA_c,&vals_WA_c);
+    }
+    MatAssemblyBegin(m_tmp_WA,MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_tmp_WA,MAT_FINAL_ASSEMBLY);
+    MatCopy(m_tmp_WA, m_WA_c, SAME_NONZERO_PATTERN);    //copy the temporary WA matrix to m_WA_c
+    MatDestroy(&m_tmp_WA);                               //free the temporary matrix
+    t_crw.stop_timer("[CO][CRW] calc real weight");
+}
 
 
 

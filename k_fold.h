@@ -4,6 +4,7 @@
 #include <string>
 #include "petscmat.h"
 #include <vector>
+#include <unordered_set>
 
 class k_fold{
 private:
@@ -13,7 +14,27 @@ private:
     std::vector<PetscInt> maj_shuffled_indices_;
     PetscInt num_data_points_, num_min_points, num_maj_points;
 
+    void cross_validation_class(int curr_iter,int total_iter, Mat& m_full_data, Mat& m_train_data, Mat& m_test_data,
+                                PetscInt * arr_idx_train, PetscInt& train_size, std::unordered_set<PetscInt>& uset_test_indices,
+                                std::vector<PetscInt>& v_full_idx_to_train_idx, const std::string& info,
+                                const std::vector<PetscInt>& v_shuffled_indices, bool debug_status=false);
+
+
+
+
+    void filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unordered_set<PetscInt>& uset_test_indices,
+                           PetscInt * arr_train_indices, PetscInt& train_size, std::vector<PetscInt>& v_full_idx_to_train_idx,
+                           Mat& m_filtered_NN_indices, Mat& m_filtered_NN_dists, const std::string& info,bool debug_status=false);
 public:
+
+
+    /*
+     * I guess I should skip this in future, but for now it is very similar to what I have in the model selection
+     * It gets 2 test matrices for both classes and add the labels to the first column of a new matrix
+     * which contains both of them
+     * Note: the dt_test_p, dt_test_n will destroy in the end of this function because they are not needed anymore
+     */
+    void combine_two_classes_in_one(Mat& test_total, Mat& dt_test_p, Mat& dt_test_n, bool destroy_input_matrices=true);
 
 
     /*
@@ -25,19 +46,41 @@ public:
      */
     void read_in_data(std::string input_train_data="", std::string input_train_label="");
 
+
+    /*
+     * read the input data from file and load it into m_min_data_ matrix and m_maj_data_
+     * the ds_path and ds_name are read from config_params
+     * the _data.dat, _label.dat are used to postfix to the ds_name for data and label files
+     */
+    void read_in_divided_data(Mat& m_min_data, Mat& m_maj_data);
+
+    /*
+     * read 2 matrices for each class, totally 4 matrices
+     */
+    void read_in_full_NN(Mat& m_min_NN_indices,Mat& m_min_NN_dists,Mat& m_maj_NN_indices,Mat& m_maj_NN_dists);
+
     /*
      * Only devide the input data to 2 separate classes
      * I don't need the original data and labels after this
      * so, I release them and keep m_min_data_, m_maj_data_
      */
-    void divide_data();
+    void divide_data(bool export_file=false);
+
+    /*
+     * Get the size of the data from local variables (num_mXX_points) which are set during the divide_data/read_in_divided_data
+     * initialize two local vectors (min_shuffled_indices_ , maj_shuffled_indices_)
+     * this happens only once for many Exp and many iterations since the size of data in each class will not change
+     */
+
+    void initialize_vectors();
+
 
     /*
      * Get the size of the data from local variables (num_mXX_points) which are set during the divide_data
      * Create a random sequence of numbers for them and store them in local vectors (mXX_shuffled_indices_)
      * The seed for srand comes from the config params and it is recorded in output for debug
      */
-    void shuffle_data(std::string preferred_srand="");
+    void shuffle_data(std::string preferred_srand="",bool debug_status=false);
 
     /*
      * Get the random sequence from local vectors for both class
@@ -53,6 +96,10 @@ public:
                           std::string p_data_fname="",
                           std::string n_data_fname="",
                           std::string test_data_fname="");
+
+
+
+
     /*
      * for debugging a specific train and test data, we write the output of divide data to files
      * This make it possible for Flann to read the data and calculate the K-NN
@@ -71,13 +118,6 @@ public:
                                  Mat& m_train_data_p, Mat& m_train_data_n, Mat& m_test_data,
                                  Vec& v_train_vol_p, Vec& v_train_vol_n);
 
-    /*
-     * I guess I should skip this in future, but for now it is very similar to what I have in the model selection
-     * It gets 2 test matrices for both classes and add the labels to the first column of a new matrix
-     * which contains both of them
-     * Note: the dt_test_p, dt_test_n will destroy in the end of this function because they are not needed anymore
-     */
-    void combine_test_data(Mat& test_total, Mat& dt_test_p, Mat& dt_test_n);
 
     /*
      * I won't need this after I call Flann directly, but till then I need to export the
@@ -94,6 +134,12 @@ public:
 //        MatDestroy(&m_in_data_);
 //        VecDestroy(&v_in_label_);
 //    }
+
+
+    void prepare_data_for_iteration(int current_iteration,int total_iterations,
+                                    Mat& m_min_full_data,Mat& m_min_train_data,Mat& m_min_full_NN_indices,Mat& m_min_full_NN_dists,Mat& m_min_WA,Vec& v_min_vol,
+                                    Mat& m_maj_full_data,Mat& m_maj_train_data,Mat& m_maj_full_NN_indices,Mat& m_maj_full_NN_dists,Mat& m_maj_WA,Vec& v_maj_vol,
+                                    bool debug_status=false);
 
 };
 
