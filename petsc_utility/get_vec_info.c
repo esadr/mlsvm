@@ -19,7 +19,7 @@ int main(int argc,char **args)
     PetscErrorCode  ierr;
     
 
-    ierr = PetscOptionsGetString(NULL,"-in_file",in_filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
+    ierr = PetscOptionsGetString(NULL,NULL,"-in_file",in_filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
     if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate an input file name with the -in_file option");
     
     PetscViewerBinaryOpen(PETSC_COMM_WORLD, in_filename,FILE_MODE_READ,&viewer_data_);
