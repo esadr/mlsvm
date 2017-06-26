@@ -22,6 +22,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
     }
 
     level++;
+    Config_params::getInstance()->set_main_current_level_id(level);
     int c_limit = Config_params::getInstance()->get_coarse_threshold();
     Mat p_data_c,p_WA_c, n_data_c, n_WA_c,m_P_p,m_P_n;  //data_c is aggregated data (coarse data point)
     Vec p_vol_c, n_vol_c;
@@ -41,7 +42,13 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         solution sol_coarsest;
 
         Refinement rf;
+
+        std::cout << "[MR][main] DEBUG level id before calling rf.process_coarsest_level:" +
+                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
         rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n, level ,sol_coarsest, v_ref_results);
+
+        std::cout << "[MR][main] DEBUG level id after calling rf.process_coarsest_level:" +
+                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
 
         // free resources
         MatDestroy(&p_data);

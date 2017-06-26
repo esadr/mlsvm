@@ -23,6 +23,7 @@ struct selected_agg
 solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
                           Mat& m_data_n, Mat& m_P_n, Vec& v_vol_n, Mat&m_WA_n, Mat& m_VD_p, Mat& m_VD_n,
                           solution& sol_coarser,int level, std::vector<ref_results>& v_ref_results){
+    Config_params::getInstance()->set_main_current_level_id(level);
 #if dbl_RF_main >=5
     PetscInt num_row_p_data =0, num_row_n_data =0;
     MatGetSize(m_data_p,&num_row_p_data,NULL);

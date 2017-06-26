@@ -2211,8 +2211,16 @@ void Solver::prepare_solution_single_model(svm_model * model_, int num_point_p, 
 #endif
 
 #if export_SVM_models       //export the models
-
-
+    //save the models in a local folder
+    //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
+    //append the model to summary file after each export
+    //make sure to close and open the summary file at each level to prevent losing models in the case of crash or error
+    std::string output_file = "./svm_models/" + Config_params::getInstance()->get_ds_name()+
+            "_exp_" + std::to_string(Config_params::getInstance()->get_main_current_exp_id()) +
+            "_kf_" + std::to_string(Config_params::getInstance()->get_main_current_kf_id()) +
+            "_level_" + std::to_string(Config_params::getInstance()->get_main_current_level_id()) + ".svmmodel";
+    svm_save_model(output_file.c_str(), local_model);
+    printf("model %s is saved\n", output_file.c_str());
 #endif
 
 

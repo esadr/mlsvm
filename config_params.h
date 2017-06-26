@@ -43,6 +43,9 @@ private:
     //======= main ========
     int         main_num_repeat_exp;
     int         main_num_kf_iter;
+    int         main_current_exp_id;        //for export models
+    int         main_current_kf_id;         //for export models
+    int         main_current_level_id;      //for export models
     int         multi_level_status;
     std::string exp_info;
 
@@ -198,7 +201,13 @@ public:
     std::string get_cpp_srand_seed()        const { return options_["cpp_srand_seed"];}
     int    get_main_num_repeat_exp()        const { return stoi(options_["main_num_repeat_exp"]);}
     int    get_main_num_kf_iter()           const { return stoi(options_["main_num_kf_iter"]);}
-    int    get_multi_level_status()         const { return stoi(options_["multi_level_status"]); }
+    int    get_multi_level_status()         const { return stoi(options_["multi_level_status"]); }    
+    int    get_main_current_exp_id()        const {return main_current_exp_id;}        //for export models
+    int    get_main_current_kf_id()         const {return main_current_kf_id;}         //for export models
+    int    get_main_current_level_id()      const {return main_current_level_id;}      //for export models
+    int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+    int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+    int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
 
     // Loader
     bool   get_inverse_weight()     const { return inverse_weight; }

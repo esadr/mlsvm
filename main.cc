@@ -44,11 +44,13 @@ int main(int argc, char **argv)
     #if Multiple_Runs == 1          /// - - - - - - - - - - - - Multiple runs - - - - - - - - - - - -
         // - - - - - - Repeat the expriment for multiple times - - - - - -
         for(int r=0; r< num_repeat_exp_; r++){
+            Config_params::getInstance()->set_main_current_exp_id(r);
             Config_params::getInstance()->update_srand_seed();   // new experiment seed is different from the earlier experiments
             kf.shuffle_data();              // creat vector of indices for 1 complete iteration including multiple v-cycle
 
             /// - - - - - - Run a whole cross validation (k-fold)) over the training data - - - - - -
             for (int i=0; i < num_kf_iter_; i++){
+                Config_params::getInstance()->set_main_current_kf_id(i);
                 ETimer t_iteration;
                 printf("\n\n====Exp:%d, Iteration %d==== \n\n",r,i);
                 Mat m_min_train_data,m_min_WA;

@@ -33,7 +33,7 @@
 #define dbl_LD_CD                   0           // 0 Default, 3 print raw and calculated distance
 #define dbl_LD_LNDS                 0           // 0 Default, 5 print size of data
 //---- Coarsening ----
-#define dbl_CO_calcP                3          // 1 normal with #edges
+#define dbl_CO_calcP                1           // 1 normal with #edges
 #define dbl_CO_vNorm                0           // calculate the normalized vector
 #define dbl_CO_cInv                 0           // calculate the inverse vector
 #define dbl_CO_CAD                  0           // 0 Default [Calculate Aggregate data]
@@ -49,10 +49,10 @@
 #define dbl_MR_calc_performance     0           // 0 Default
 //---- Refinement ----
 #define dbl_RF_main                 1           // 1 Default
-#define dbl_RF_main_with_partition  3           // 1 Default, 3 report steps
+#define dbl_RF_main_with_partition  1           // 1 Default, 3 report steps
 #define dbl_RF_main_no_partition    1           // 1 Default
 #define dbl_RF_fSN                  1           // 1 Default find_SV_neighbors
-#define dbl_RF_ABM                  3           // 0 Default, 3 report different levels results after sort, 5 report before and after sort
+#define dbl_RF_ABM                  0           // 0 Default, 3 report different levels results after sort, 5 report before and after sort
 
 //---- Partitioning ----
 #define dbl_PR_get_parts            5           // 0 Default (Metis), 1 #parts, 5 report the metis response, 7 print parts
@@ -74,7 +74,7 @@
 #define dbl_MS_ud_param_generator   0           // 0 Default, 3 shows new parameters
 #define dbl_MS_cross_fold           0           // 0 Default
 #define dbl_MS_PS                   0           // 0 Default
-#define dbl_MS_SB1                  3           // 0 Default, 3 prints after sort, 5 prints prints before and after sort
+#define dbl_MS_SB1                  0           // 0 Default, 3 prints after sort, 5 prints prints before and after sort
 #define dbl_MS_set_weights          0           // 0 Default, 1 shows the weight in the WSVM
 #define dbl_MS_UDC                  1           // 1 Default
 
@@ -89,13 +89,13 @@
 #define dbl_SV_PDSWSPIB             0           // 0 Default    //PD_set_weights_sum_num_point_IB
 #define dbl_SV_TM                   0           // 0 Default    1 prints C, gamma
 #define dbl_SV_PDTMIB               0           // 0 Default    1 prints C, gamma
-#define dbl_SV_TM_report_time       1           // 0 Default    1 prints time of train_model
+#define dbl_SV_TM_report_time       0           // 0 Default    1 prints time of train_model
 #define dbl_SV_test_predict         0           // 0 Default    1 prints the details        3 prints the test data summary
 #define dbl_SV_TPIB                 0           // 0 Default    1 prints the details        //1 cause many nan in partitioning mode
-#define dbl_SV_predict_label        3           // 0 Default    3 prints the both labels
-#define dbl_SV_predict_VD	    0           // 0 Default    3 prints the both labels
-#define dbl_SV_predict_VD_rpt_time  1           // 0 Default    1 prints time
-#define dbl_SV_predict_label1       3           // 0 Default    3 prints the both labels
+#define dbl_SV_predict_label        0           // 0 Default    3 prints the both labels
+#define dbl_SV_predict_VD           0           // 0 Default    3 prints the both labels
+#define dbl_SV_predict_VD_rpt_time  0           // 0 Default    1 prints time
+#define dbl_SV_predict_label1       0           // 0 Default    3 prints the both labels
 #define dbl_SV_PSSM                 0           // 0 Default    3 prints number of support vectors
 #define dbl_SV_PD_predict_a_label   0           // 0 Default    3 prints the both labels
 //----- Reports --------
