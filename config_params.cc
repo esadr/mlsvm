@@ -573,6 +573,11 @@ void Config_params::add_final_summary(summary current_summary, int selected_leve
     std::cout << "[Config_params] summary added to all_summary" << std::endl;
 }
 
+int  Config_params::get_best_level() const{
+    int curr_id = get_main_current_exp_id() * get_main_num_kf_iter() + get_main_current_kf_id();
+    return all_summary[curr_id].selected_level;
+}
+
 
 void Config_params::print_summary(const summary& summary_in, std::string caller_method, int level, int iter, int stage, int fold) const{
     printf("%s, ",caller_method.c_str());
@@ -682,4 +687,50 @@ void Config_params::print_ref_result(const std::vector<ref_results>& v_ref_resul
 }
 
 
+void Config_params::set_master_models_info(){
+    int master_size = get_main_num_repeat_exp() * get_main_num_kf_iter();
+    std::cout << "master size:" << std::to_string(master_size) << std::endl;
+    master_models_info.resize(master_size);
+    std::cout << "master models info's size:" << std::to_string(master_models_info.size()) << std::endl;
+}
 
+//void Config_params::check_models_info(){
+//    std::cout << "set models metadata, size of vector:" << std::to_string(tmp_models_info.size()) << std::endl;
+
+//}
+/*
+ * it is called at the coarsest level which has the maximum level id (inside current_level_id)
+ */
+void Config_params::set_levels_models_info(){
+//    int curr_id = get_main_current_exp_id() * get_main_num_kf_iter() + get_main_current_kf_id();
+    levels_models_info.resize(get_main_current_level_id());
+//    master_models_info[curr_id].resize(get_main_current_level_id());
+//    master_models_info.push_back(curr_models);
+}
+
+
+void Config_params::update_levels_models_info(int level_id, int num_models){
+
+    levels_models_info[level_id] = num_models;
+    std::cout << "update levels models info, size of vector:" << levels_models_info.size()
+              << ",level:" << level_id << ", number of models: "<< levels_models_info[level_id]  << std::endl;
+}
+
+
+void Config_params::update_master_models_info(){
+    int curr_id = get_main_current_exp_id() * get_main_num_kf_iter() + get_main_current_kf_id();
+    int best_level = get_best_level();
+    master_models_info[curr_id] = std::make_pair(best_level, levels_models_info[best_level]);
+    std::cout << "update master models info, size of vector:" << master_models_info.size()
+              << ",level:" << best_level << ", number of models: " << levels_models_info[best_level] << std::endl;
+}
+
+void Config_params::export_models_metadata(){
+    std::cout << "Start exporting the models, master_models_info size:" <<
+              master_models_info.size() <<std::endl;
+    for(unsigned int i = 0; i < master_models_info.size(); i++){
+        std::cout << "i:"<< i << ", best level:" << master_models_info[i].first
+                     << ", number of models:" << master_models_info[i].second <<std::endl;
+    }
+    std::cout << "End exporting the models" <<std::endl;
+}

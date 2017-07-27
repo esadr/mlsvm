@@ -883,6 +883,21 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
 
     best_sv.predict_test_data_in_matrix_output(m_testdata, classifier_id, m_all_predict_TD);
 
+#if export_SVM_models       //export the model (we save a model at a time)
+    //save the models in a local folder
+    //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
+    //append the model to summary file after each export
+    //make sure to close and open the summary file at each level to prevent losing models in the case of crash or error
+    std::string output_file = "./svm_models/" + Config_params::getInstance()->get_ds_name()+
+            "_exp_" + std::to_string(Config_params::getInstance()->get_main_current_exp_id()) +
+            "_kf_" + std::to_string(Config_params::getInstance()->get_main_current_kf_id()) +
+            "_level_" + std::to_string(Config_params::getInstance()->get_main_current_level_id()) + ".svmmodel";
+//    svm_save_model(output_file.c_str(), local_model);
+//    printf("model %s is saved\n", output_file.c_str());
+
+#endif
+
+
     for(auto it=v_solver.begin(); it!= v_solver.end(); ++it){
         it->free_solver("[MS][UDIBSepVal] ");   //free all solvers
     }

@@ -107,6 +107,8 @@ private:
     float   rf_add_fraction;
     bool    rf_add_distant_point_status;
     int     rf_weight_vol;
+    std::vector<std::pair<int,int>> master_models_info;
+    std::vector<int> levels_models_info;
     //========== Partitioning ==========
     int     pr_start_partitioning;
     int     pr_partition_max_size;
@@ -174,6 +176,8 @@ public:
     std::string get_test_ds_f_name() const {return test_ds_f_name;}
 
     void add_final_summary(summary current_summary, int selected_level);
+    int  get_best_level() const;  //in current k-fold
+
     void print_summary(const summary& summary_in, std::string caller_method, int level=-1, int iter=-1, int stage=-1, int fold=-1) const;
     void set_best_parameters(measures preferred_measure=Gmean);
     bool get_best_params_status() const{ return this->best_params_are_set; }
@@ -259,11 +263,17 @@ public:
     bool    get_rf_add_distant_point_status()   const { return (bool) stoi(options_["rf_add_distant_point_status"]); }
     float   get_rf_add_fraction()               const { return  stof(options_["rf_add_fraction"]); }
     int     get_rf_weight_vol()                 const { return  stoi(options_["rf_weight_vol"]); }
-    int     get_pr_start_partitioning()         const { return  stoi(options_["pr_start_partitioning"]); }
-    int     get_pr_partition_max_size()         const { return  stoi(options_["pr_partition_max_size"]); }
+    void    set_master_models_info();
+    void    set_levels_models_info();
+//    void    check_models_metadata();        //for debug
+    void    update_levels_models_info(int level_id, int num_models);
+    void    update_master_models_info();
+    void    export_models_metadata();
 
     // Partioning
     int     get_pr_maj_voting_id() const         { return  stoi(options_["pr_maj_voting_id"]); }
+    int     get_pr_start_partitioning()         const { return  stoi(options_["pr_start_partitioning"]); }
+    int     get_pr_partition_max_size()         const { return  stoi(options_["pr_partition_max_size"]); }
 };
 
 #endif // CONFIG_PARAMS_H

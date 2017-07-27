@@ -25,6 +25,9 @@ int main(int argc, char **argv)
     ///*********************************************************************
     case 0: //Classification
     {
+        Config_params::getInstance()->set_master_models_info();
+//        Config_params::getInstance()->check_models_metadata();
+//        exit(1);
         int num_repeat_exp_ = Config_params::getInstance()->getInstance()->get_main_num_repeat_exp();
         int num_kf_iter_ = Config_params::getInstance()->getInstance()->get_main_num_kf_iter();
         int total_iter_ = num_repeat_exp_ * num_kf_iter_;
@@ -115,6 +118,9 @@ int main(int argc, char **argv)
                 t_iteration.stop_timer("[Main] Vcycle (including loading datasets) at iteration ",std::to_string(i));
                 Config_params::getInstance()->print_final_results();
 
+                //save the final metadata for models of the current k-fold   @072617-1157
+                Config_params::getInstance()->update_master_models_info();
+
                 std::string test_file = Config_params::getInstance()->get_test_ds_f_name();
                 if( remove(test_file.c_str())==0)
                     std::cout << "[Main] test data file is removed successfully from " << test_file << std::endl;
@@ -135,6 +141,8 @@ int main(int argc, char **argv)
 
         t_all.stop_timer("[Main] whole test including all iterations");
         printf("[Main] total number of iterations:%d \n",total_iter_);
+
+        Config_params::getInstance()->export_models_metadata();
 
 
     //    Config_params::getInstance()->print_params();

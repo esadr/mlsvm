@@ -38,11 +38,10 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         printf("[MR][main] num points P:%d, N:%d\n",p_num_row, n_num_row);      //$$debug
 //        printf("[MR][main] start to solve SVM for level:%d\n",level);      //$$debug
 
-
+        //reserve the space in master_models_info for all levels in refinement
+        Config_params::getInstance()->set_levels_models_info();
         solution sol_coarsest;
-
         Refinement rf;
-
         std::cout << "[MR][main] DEBUG level id before calling rf.process_coarsest_level:" +
                      std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
         rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n, level ,sol_coarsest, v_ref_results);

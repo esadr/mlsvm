@@ -229,6 +229,7 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
 
             }
 
+            Config_params::getInstance()->update_levels_models_info(level, v_groups.size());        // @072617
             t_all_parts_training.stop_timer("[RF][main] training for all partitions");
 
             /// - - - - - - - calculate the quality of the models on Validation Data (boosting, majority voting,...) - - - - - - -
@@ -264,22 +265,8 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
             MatDestroy(&v_mat_all_predict_TD[iter]);
         }
 
-
-//        if(level == 1){
-////            Config_params::getInstance()->add_final_summary(summary_TD);
-//            // - - - - - select best model from all level of refinement and record that - - - - -
-////            int best_model_of_all_levels = select_best_model(v_ref_results);
-//            Config_params::getInstance()->print_ref_result(v_ref_results);
-//            std::cout << "[RF][main] line:248  is not completed, EXIT!" << std::endl;
-//            exit(1);
-////            Config_params::getInstance()->add_final_summary(v_perf_per_level_refinement[best_model_of_all_levels]);
-//            Config_params::getInstance()->print_summary(summary_TD, "[RF][main] TD",level,-2);
-//        }else{
-//        #if rpt_TD_only_l1 == 0
-            Config_params::getInstance()->print_summary(curr_level_validation_summary, "[RF][main] VD",level,-2);
-            Config_params::getInstance()->print_summary(summary_TD, "[RF][main] TD",level,-2);
-//        #endif
-//        }
+        Config_params::getInstance()->print_summary(curr_level_validation_summary, "[RF][main] VD",level,-2);
+        Config_params::getInstance()->print_summary(summary_TD, "[RF][main] TD",level,-2);
 
         // - - - - - - - - - - prepare the solution - - - - - - - - - -  #7
         if(level > 1 ){
@@ -316,11 +303,6 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
     #if dbl_RF_main_with_partition >= 3
         std::cout << "\n[MS][PS] ------------ end of partitioning at level " << level << " ------------\n" << std::endl;
     #endif
-
-//        std::cout << "[RF][main] L:317 , Exit!!!!" << std::endl;
-//        exit(1);
-
-
     }
     else
     {
@@ -351,6 +333,7 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
 //            v_perf_per_level_refinement.push_back(summary_TD);           //collect the final best model at each level
             sv_refine.prepare_solution_single_model(trained_model,num_neigh_row_p_,sol_refine);
             sv_refine.free_solver("[RF]");
+            // models are exported in the solver class if it is needed
         }
 
     #if dbl_RF_main >=5

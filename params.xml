@@ -5,7 +5,7 @@
 							                     1: Regression (has not developed) -->
   
 
-  <mlsvm_version stringVal="0.0.43"/> 
+  <mlsvm_version stringVal="0.0.44"/> 
   <!-- ****************** Main ********************-->
   <cpp_srand_seed stringVal= ""/>	 	    <!--for real runs should be empty string ""-->
   
