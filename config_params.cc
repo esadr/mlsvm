@@ -77,7 +77,7 @@ Config_params* Config_params::getInstance() {
     return instance;
 }
 
-void Config_params::print_classification_params(){
+void Config_params::print_classification_training_params(){
     std::cout << "mlsvm_version:" << mlsvm_version << std::endl;
     std::cout << "============= dataset=============" <<
                  "\nds_path: "              << get_ds_path()          <<
@@ -160,6 +160,18 @@ void Config_params::print_classification_params(){
                  std::endl;
 }
 
+void Config_params::print_classification_prediction_params(){
+    std::cout << "mlsvm_version:" << mlsvm_version << std::endl;
+    std::cout << "============= dataset=============" <<
+                 "\nds_path: "              << get_ds_path()          <<
+                 "\nds_name: "              << get_ds_name()          <<
+                 "\ntmp_path: "             << get_tmp_path()         <<    std::endl;
+
+    std::cout << "--- Multiple models ---" <<
+                 "\npr_maj_voting_id: "           << get_pr_maj_voting_id()             <<
+                 std::endl;
+}
+
 void Config_params::print_flann_params(){
     std::cout << "--- NN Paramters ---"         <<
                  "\nnn_number_of_classes: "     << get_nn_number_of_classes()   <<
@@ -232,9 +244,9 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
 
         switch(main_function){
         case 0:
-            read_classification_parameters(root, argc, argv);
+            read_classification_training_parameters(root, argc, argv);
             set_inputs_file_names();
-            print_classification_params();
+            print_classification_training_params();
             break;
         case 1:
 
@@ -242,6 +254,12 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
         case 2:
             std::cout << "start reading clustering parameters\n";
             read_clustering_parameters(root, argc, argv);
+            break;
+
+        case 3:
+            read_classification_prediction_parameters(root, argc, argv);
+            set_inputs_file_names();
+            print_classification_prediction_params();
             break;
         }
     }
@@ -257,7 +275,7 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
 
 
 
-void Config_params::read_classification_parameters(pugi::xml_node& root,int argc, char * argv[]){
+void Config_params::read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]){
 
     /// Set debug parameters
     debug_exp_CS       = root.child("debug_exp_CS").attribute("intVal").as_int();
@@ -386,6 +404,30 @@ void Config_params::read_classification_parameters(pugi::xml_node& root,int argc
     std::cout << "[Config_params] input parameters are read" << std::endl;
 }
 
+
+void Config_params::read_classification_prediction_parameters(pugi::xml_node& root,int argc, char * argv[]){
+
+
+    mlsvm_version = root.child("mlsvm_version").attribute("stringVal").value();
+
+    /// read the parameters from the XML file (params.xml)
+    ds_path             = root.child("ds_path").attribute("stringVal").value();
+    ds_name             = root.child("ds_name").attribute("stringVal").value();
+    tmp_path            = root.child("tmp_path").attribute("stringVal").value();
+    ms_print_untouch_reuslts    = root.child("ms_print_untouch_reuslts").attribute("intVal").as_int();
+    pr_maj_voting_id      = root.child("pr_maj_voting_id").attribute("intVal").as_int();
+
+    /// read the parameters from input arguments ()
+    parser_.add_option("--ds_p")                             .dest("ds_path")  .set_default(ds_path);
+    parser_.add_option("-f", "--ds_f", "--file")             .dest("ds_name")  .set_default(ds_name);
+    parser_.add_option("--tmp_p")                            .dest("tmp_path")  .set_default(tmp_path);
+    parser_.add_option("-p", "--ms_prt")                     .dest("ms_print_untouch_reuslts")  .set_default(ms_print_untouch_reuslts);
+    parser_.add_option("--mv_id")                            .dest("pr_maj_voting_id")     .set_default(pr_maj_voting_id);
+
+    this->options_ = parser_.parse_args(argc, argv);
+    std::vector<std::string> args = parser_.args();
+    std::cout << "[Config_params] input parameters are read" << std::endl;
+}
 
 
 void Config_params::read_clustering_parameters(pugi::xml_node& root,int argc, char * argv[]){

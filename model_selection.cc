@@ -779,15 +779,16 @@ void ModelSelection::uniform_design_index_base(Mat& p_data, Vec& v_vol_p, Mat& n
 
 
 /*
- *
- *
- *  sum_all_vol_p, sum_all_vol_n is used to set the instance weights for each point in training
+ * sum_all_vol_p, sum_all_vol_n is used to set the instance weights for each point in training
+ * classifier_id: the loop counter for the groups of training data
  */
 void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n,
                         bool inh_params, double last_c, double last_gamma,int level,
                         std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
                         std::unordered_set<PetscInt>& uset_SV_index_p, std::unordered_set<PetscInt>& uset_SV_index_n,
-                        Mat& m_VD_p, Mat& m_VD_n, Mat& m_VD_both, Mat& m_all_predict_VD, Mat& m_testdata, int classifier_id, Mat& m_all_predict_TD){
+                        Mat& m_VD_p, Mat& m_VD_n, Mat& m_VD_both, Mat& m_all_predict_VD, Mat& m_testdata,
+                        int classifier_id, Mat& m_all_predict_TD){
+
     ETimer t_sv_ps;
     srand(std::stoll(Config_params::getInstance()->get_cpp_srand_seed()));
     std::random_shuffle( v_p_index.begin(), v_p_index.end() ); //shuffle all nodes
@@ -891,9 +892,10 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
     std::string output_file = "./svm_models/" + Config_params::getInstance()->get_ds_name()+
             "_exp_" + std::to_string(Config_params::getInstance()->get_main_current_exp_id()) +
             "_kf_" + std::to_string(Config_params::getInstance()->get_main_current_kf_id()) +
-            "_level_" + std::to_string(Config_params::getInstance()->get_main_current_level_id()) + ".svmmodel";
-//    svm_save_model(output_file.c_str(), local_model);
-//    printf("model %s is saved\n", output_file.c_str());
+            "_level_" + std::to_string(Config_params::getInstance()->get_main_current_level_id()) +
+            "_gid_" + std::to_string(classifier_id) + ".svmmodel";
+    svm_save_model(output_file.c_str(), best_model);
+    printf("model %s is saved\n", output_file.c_str());
 
 #endif
 

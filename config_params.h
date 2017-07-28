@@ -133,7 +133,8 @@ public:
     static Config_params* getInstance();
     int  get_main_function() const { return main_function;  }
 
-    void print_classification_params();
+    void print_classification_training_params();
+    void print_classification_prediction_params();
     void read_flann_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void print_flann_params();
 
@@ -148,7 +149,8 @@ public:
 
     void init_to_default();
     void read_params(std::string XML_FILE_PATH,int argc, char * argv[], program_parts caller_func=main);
-    void read_classification_parameters(pugi::xml_node& root,int argc, char * argv[]);
+    void read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]);
+    void read_classification_prediction_parameters(pugi::xml_node& root,int argc, char * argv[]);
 
     void read_clustering_parameters(pugi::xml_node& root,int argc, char * argv[]);
 
