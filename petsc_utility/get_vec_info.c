@@ -1,7 +1,7 @@
 static char help[] = "Load the input vector from a file.\n"
   "Print it and print its dimension.\n"
   "The command line options are:\n"
-  "  -in_file <filename>, where <filename> = input vector file in PETSc binary form.\n\n";
+  "-i <filename>, where <filename> = input vector file in PETSc binary form.\n\n";
 
 #include <petscvec.h>
 
@@ -19,8 +19,8 @@ int main(int argc,char **args)
     PetscErrorCode  ierr;
     
 
-    ierr = PetscOptionsGetString(NULL,NULL,"-in_file",in_filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
-    if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate an input file name with the -in_file option");
+    ierr = PetscOptionsGetString(NULL,NULL,"-i",in_filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
+    if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate an input file name with the -i option");
     
     PetscViewerBinaryOpen(PETSC_COMM_WORLD, in_filename,FILE_MODE_READ,&viewer_data_);
     VecCreate(PETSC_COMM_WORLD,&m_input);

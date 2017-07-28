@@ -1,5 +1,6 @@
 #include "config_params.h"
 #include <iostream>
+#include <fstream>          // export models information to file
 #include "pugixml.hpp"
 #include <time.h>
 #include <chrono>
@@ -726,11 +727,21 @@ void Config_params::update_master_models_info(){
 }
 
 void Config_params::export_models_metadata(){
-    std::cout << "Start exporting the models, master_models_info size:" <<
-              master_models_info.size() <<std::endl;
-    for(unsigned int i = 0; i < master_models_info.size(); i++){
-        std::cout << "i:"<< i << ", best level:" << master_models_info[i].first
-                     << ", number of models:" << master_models_info[i].second <<std::endl;
+
+    std::string fname_metadata {"./svm_models/" + get_ds_name() + "_models.summary"};
+    std::ofstream outfile;
+    outfile.open (fname_metadata);
+    if(outfile.fail()){
+        std::cerr << "[CP][export_models_metadata] failed to open the " << fname_metadata << " file" << std::endl;
+        return ;
     }
-    std::cout << "End exporting the models" <<std::endl;
+
+    std::cout << "[CP][EMM] Start exporting the models' summary in " << fname_metadata << " file" << std::endl;
+
+    for(unsigned int i = 0; i < master_models_info.size(); i++){
+        outfile << "l:"<< master_models_info[i].first << ", n:" << master_models_info[i].second <<std::endl;
+    }
+    outfile.close();
+
+    std::cout << "The models' summary are exported successfully" <<std::endl;
 }

@@ -16,10 +16,10 @@ Examples are as follow:
 4- Run "make"
 If the program compiled correctly, it is ready to use.
 
-To use the program, you can run it using below command and parameters. 
+To use the MLSVM program, you can run it using below command and parameters. 
 `./main -f twonorm -x 1 -k 5 -q 0.4 -r 4`
 
-The parameters could be set inside the `param.xml` file. You can find the details for parameters in the document.
+The parameters could be set inside the `param.xml` file. You can find the details for parameters in the user guide document.
 
 Input files (Training data set)
 -------------

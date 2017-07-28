@@ -26,8 +26,6 @@ int main(int argc, char **argv)
     case 0: //Classification
     {
         Config_params::getInstance()->set_master_models_info();
-//        Config_params::getInstance()->check_models_metadata();
-//        exit(1);
         int num_repeat_exp_ = Config_params::getInstance()->getInstance()->get_main_num_repeat_exp();
         int num_kf_iter_ = Config_params::getInstance()->getInstance()->get_main_num_kf_iter();
         int total_iter_ = num_repeat_exp_ * num_kf_iter_;
