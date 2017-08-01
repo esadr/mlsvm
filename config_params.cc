@@ -161,15 +161,13 @@ void Config_params::print_classification_training_params(){
 }
 
 void Config_params::print_classification_prediction_params(){
-    std::cout << "mlsvm_version:" << mlsvm_version << std::endl;
-    std::cout << "============= dataset=============" <<
-                 "\nds_path: "              << get_ds_path()          <<
-                 "\nds_name: "              << get_ds_name()          <<
-                 "\ntmp_path: "             << get_tmp_path()         <<    std::endl;
-
-    std::cout << "--- Multiple models ---" <<
-                 "\npr_maj_voting_id: "           << get_pr_maj_voting_id()             <<
-                 std::endl;
+    std::cout << "mlsvm_version:"           << mlsvm_version           <<
+                 "\nds_path: "              << get_ds_path()           <<
+                 "\nds_name: "              << get_ds_name()           <<
+                 "\ntmp_path: "             << get_tmp_path()          <<
+                 "\nexperiment_id: "        << get_experiment_id()     <<
+                 "\nds_name: "              << get_kfold_id()          <<
+                 "\npr_maj_voting_id: "     << get_pr_maj_voting_id()  << std::endl;
 }
 
 void Config_params::print_flann_params(){
@@ -256,12 +254,6 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
             read_clustering_parameters(root, argc, argv);
             break;
 
-        case 3:
-            read_classification_prediction_parameters(root, argc, argv);
-            set_inputs_file_names();
-            print_classification_prediction_params();
-            break;
-        }
     }
         break;
     case flann:
@@ -269,6 +261,11 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
         read_flann_parameters(root, argc, argv);
         set_file_names_for_save_flann();
         print_flann_params();
+        break;
+    }
+    case prediction:
+        read_classification_prediction_parameters(root, argc, argv);
+        print_classification_prediction_params();
         break;
     }
 }
@@ -400,7 +397,7 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
 //    set_inputs_file_names();           // set all the dataset files        //because of exp_info, file name's should set after parsing the argv
-    check_input_parameters();
+    check_input_distance_parameters();
     std::cout << "[Config_params] input parameters are read" << std::endl;
 }
 
@@ -416,17 +413,23 @@ void Config_params::read_classification_prediction_parameters(pugi::xml_node& ro
     tmp_path            = root.child("tmp_path").attribute("stringVal").value();
     ms_print_untouch_reuslts    = root.child("ms_print_untouch_reuslts").attribute("intVal").as_int();
     pr_maj_voting_id      = root.child("pr_maj_voting_id").attribute("intVal").as_int();
-
+    experiment_id = -1;
+    kfold_id = -1;
     /// read the parameters from input arguments ()
-    parser_.add_option("--ds_p")                             .dest("ds_path")  .set_default(ds_path);
-    parser_.add_option("-f", "--ds_f", "--file")             .dest("ds_name")  .set_default(ds_name);
-    parser_.add_option("--tmp_p")                            .dest("tmp_path")  .set_default(tmp_path);
-    parser_.add_option("-p", "--ms_prt")                     .dest("ms_print_untouch_reuslts")  .set_default(ms_print_untouch_reuslts);
-    parser_.add_option("--mv_id")                            .dest("pr_maj_voting_id")     .set_default(pr_maj_voting_id);
+    parser_.add_option("--ds_p")                       .dest("ds_path")             .set_default(ds_path);
+    parser_.add_option("-f", "--ds_f", "--file")       .dest("ds_name")             .set_default(ds_name);
+    parser_.add_option("--tmp_p")                      .dest("tmp_path")            .set_default(tmp_path);
+    parser_.add_option("--mv_id")                      .dest("pr_maj_voting_id")    .set_default(pr_maj_voting_id);
+    parser_.add_option("-x")                           .dest("experiment_id")       .set_default(experiment_id);
+    parser_.add_option("-k")                           .dest("kfold_id")            .set_default(kfold_id);
 
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
-    std::cout << "[Config_params] input parameters are read" << std::endl;
+    if(experiment_id < 0 || kfold_id < 0) {
+        std::cout << "[Config_params] The experiment id or k-fold_id is invalid or not specified!"<<
+                     "\nPlease check the user guide for more information." << std::endl;
+    }
+    std::cout << "[Config_params] input prediction parameters are read" << std::endl;
 }
 
 
@@ -494,7 +497,7 @@ void Config_params::read_clustering_parameters(pugi::xml_node& root,int argc, ch
     std::vector<std::string> args = parser_.args();
 //    set_inputs_file_names();           // set all the dataset files        //because of exp_info, file name's should set after parsing the argv
 
-    check_input_parameters();
+    check_input_distance_parameters();
     std::cout << "[Config_params] input parameters for clustering are read" << std::endl;
 
 }
@@ -541,7 +544,7 @@ void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * 
 
 
 
-void Config_params::check_input_parameters(){
+void Config_params::check_input_distance_parameters(){
     if(get_nn_distance_type() > 8 || get_nn_distance_type() <1){
         std::cout << "[Config_params] supported distance types are from 1 to 8!" << std::endl;
         exit(1);
@@ -780,6 +783,7 @@ void Config_params::export_models_metadata(){
 
     std::cout << "[CP][EMM] Start exporting the models' summary in " << fname_metadata << " file" << std::endl;
 
+    outfile << "e:" << get_main_num_repeat_exp() << ", k:" << get_main_num_kf_iter() << std::endl;
     for(unsigned int i = 0; i < master_models_info.size(); i++){
         outfile << "l:"<< master_models_info[i].first << ", n:" << master_models_info[i].second <<std::endl;
     }

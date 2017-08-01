@@ -121,15 +121,23 @@ private:
     double best_gamma;
     bool best_params_are_set;
 
+    //======= Classificaiton Prediction ========
+    int experiment_id;
+    int kfold_id;
 
-    void check_input_parameters();
+    // Methods
+    void check_input_distance_parameters();
+//    void check_input_prediction_parameters();
 
+    void read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]);
+    void read_classification_prediction_parameters(pugi::xml_node& root,int argc, char * argv[]);
+    void read_clustering_parameters(pugi::xml_node& root,int argc, char * argv[]);
 
 
 
 
 public:
-    enum program_parts {main, flann, svm, clustring} ;
+    enum program_parts {main, flann, svm, prediction, clustring} ;
     static Config_params* getInstance();
     int  get_main_function() const { return main_function;  }
 
@@ -149,10 +157,7 @@ public:
 
     void init_to_default();
     void read_params(std::string XML_FILE_PATH,int argc, char * argv[], program_parts caller_func=main);
-    void read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]);
-    void read_classification_prediction_parameters(pugi::xml_node& root,int argc, char * argv[]);
 
-    void read_clustering_parameters(pugi::xml_node& root,int argc, char * argv[]);
 
     void update_srand_seed();
     void debug_only_set_srand_seed(std::string new_seed);
@@ -276,6 +281,10 @@ public:
     int     get_pr_maj_voting_id() const         { return  stoi(options_["pr_maj_voting_id"]); }
     int     get_pr_start_partitioning()         const { return  stoi(options_["pr_start_partitioning"]); }
     int     get_pr_partition_max_size()         const { return  stoi(options_["pr_partition_max_size"]); }
+
+    // - - - - - Classification prediction  - - - - -
+    int    get_experiment_id()      const { return stoi(options_["experiment_id"]);}
+    int    get_kfold_id()           const { return stoi(options_["kfold_id"]);}
 };
 
 #endif // CONFIG_PARAMS_H

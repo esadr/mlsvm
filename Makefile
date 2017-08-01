@@ -31,6 +31,9 @@ SATIW_OBJS = $(SATIW_SRCS:.cc=.o)
 SAP_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_weighted.cc solver.cc ./tools/single_svm_predict.cc
 SAP_OBJS = $(SAP_SRCS:.cc=.o)
 
+PREDICT_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_weighted.cc solver.cc ./tools/mlsvm_predict.cc
+PREDICT_OBJS = $(PREDICT_SRCS:.cc=.o)
+
 PERS_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_unweighted.cc solver.cc model_selection.cc personalized.cc personalized_main.cc
 PERS_OBJS = $(PERS_SRCS:.cc=.o)
 
@@ -105,6 +108,10 @@ sap: $(SAP_OBJS) chkopts
 	-${CLINKER} $(SAP_OBJS)  ${PETSC_MAT_LIB} -o sap 
 	${RM} sap.o 
 	
+mlsvm_predict: $(PREDICT_OBJS) chkopts
+	-${CLINKER} $(PREDICT_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_predict
+	${RM} mlsvm_predict.o 
+
 pers: $(PERS_OBJS) chkopts
 	-${CLINKER} $(PERS_OBJS)  ${PETSC_MAT_LIB} -o pers
 	${RM} pers.o 
