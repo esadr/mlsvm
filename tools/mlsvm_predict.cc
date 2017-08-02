@@ -12,6 +12,20 @@ int main(int argc, char **argv){
     //read XML parameters
 //    Config_params::getInstance()->init_to_default();
     Config_params::getInstance()->read_params("./params.xml", argc, argv, Config_params::prediction );
+    const std::string models_path = "./svm_models/";
+
+
+    // check the input is passed
+    int req_exp = Config_params::getInstance()->get_experiment_id();
+    int req_kf = Config_params::getInstance()->get_kfold_id();
+    if(req_exp < 0){
+        std::cout << "Please specify the experiment id using -x!\n Exit" << std::endl;
+        exit(1);
+    }
+    if(req_kf < 0){
+        std::cout << "Please specify the k-fold id using -k!\n Exit" << std::endl;
+        exit(1);
+    }
 
 
     // we suppose the name of the test data set is dsname_test_data.dat
@@ -31,24 +45,56 @@ int main(int argc, char **argv){
 
     //find the level in the summary
     std::fstream in_file;
-    std::string fname = "./svm_models/" + Config_params::getInstance()->get_ds_name() + "_models.summary";
+    std::string fname = models_path + Config_params::getInstance()->get_ds_name() + "_models.summary";
+//    std::cout << fname << std::endl;
+//exit(1);
     in_file.open(fname);
-    std::vector<std::string> v_lines;
+    std::vector<std::pair<int,int>> v_lines;
     std::string line;
-    while(in_file >> line){
-        v_lines.push_back(line);
-    }
 
+    while(std::getline(in_file, line)){
+        std::size_t pos1, pos2, pos3 =0;
+        pos1 = line.find(':');
+        pos2 = line.find(':',pos1+1);
+        pos3 = line.find(',');
+//        std::cout << pos1 << " , " << pos3 << " , " << pos2 << std::endl;
+//        std::cout << line.substr(pos1+1, pos3-pos1-1) << " -- " << line.substr(pos2+1, line.length()) << std::endl;
+        if((pos1 > line.length() || pos2 > line.length() || pos3> line.length() )){
+            std::cout << "Wrong line at index "<< v_lines.size() << " in the summary file!" << std::endl;
+            exit(1);
+        }
+        int tmp_level_id = stoi(line.substr(pos1+1, pos3-pos1-1));
+        int tmp_num_models = stoi(line.substr(pos2+1, line.length()));
+//        std::cout << "l:" << tmp_level_id << ",n:" << tmp_num_models << std::endl;
+        v_lines.push_back(std::make_pair(tmp_level_id, tmp_num_models));
+    }
     in_file.close();
 
-    for(auto it = v_lines.begin(); it != v_lines.end(); it++){
-        std::cout << *it << std::endl;
+//    exit(1);
+
+    int total_exp = v_lines[0].first;
+    int total_kf = v_lines[0].second;
+    std::cout << "Te:" << total_exp<< ",Re:" << req_exp << ",Tk:" << total_kf<< ",Rk:" << req_kf << std::endl;
+
+    //check the input exp_id and kf_id
+    if(total_exp < req_exp){
+        std::cerr << "experiment id is larger than expected! \n Exit" << std::endl;
+        exit(1);
     }
-    //make the name for the in_model
+    if(total_kf < req_kf){
+        std::cerr << "k-fold id is larger than expected! \n Exit" << std::endl;
+        exit(1);
+    }
+
+    // all the indices start from 0
+    int line_id = req_exp * total_kf + req_kf + 1; //1 adds for the first line of summary
+    int level_id = v_lines[line_id].first;
+    int num_models = v_lines[line_id].second;
+    std::cout << "line_id:"<< line_id << ",l:" << level_id << ",n:" << num_models << std::endl;
     exit(1);
 
 
-    std::string in_model = "./debug/sat_svm.model";
+    std::string in_model = "./svm_models/";
 
     // for 1 model
 
