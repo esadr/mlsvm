@@ -423,6 +423,10 @@ void Config_params::read_classification_prediction_parameters(pugi::xml_node& ro
     parser_.add_option("-x")                           .dest("experiment_id")       .set_default(experiment_id);
     parser_.add_option("-k")                           .dest("kfold_id")            .set_default(kfold_id);
 
+
+
+    probability = root.child("svm_probability").attribute("intVal").as_int();       //the solver constructor has this
+    parser_.add_option("--ms_probability")                   .dest("probability")  .set_default(probability);
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
     if(experiment_id < 0 || kfold_id < 0) {

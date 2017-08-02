@@ -120,8 +120,8 @@ int main(int argc, char **argv)
                 Config_params::getInstance()->update_master_models_info();
 
                 std::string test_file = Config_params::getInstance()->get_test_ds_f_name();
-                if( remove(test_file.c_str())==0)
-                    std::cout << "[Main] test data file is removed successfully from " << test_file << std::endl;
+//                if( remove(test_file.c_str())==0)
+//                    std::cout << "[Main] test data file is removed successfully from " << test_file << std::endl;
 
             }   // end of for loop for "Whole cross fold"
         }   // end of for loop for "Repeat the experiment"
