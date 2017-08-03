@@ -145,34 +145,37 @@ int main(int argc, char **argv){
                 "_level_" +  std::to_string(level_id) + ".svmmodel";
         svm_model * trained_model = svm_load_model(model_name.c_str());
         std::cout << "model name:" << model_name << ", nSV:" << *(trained_model->nSV) <<"\n";
-
-//        exit(1);
         summary final_summary;
-//exit(1);
         Solver sv;
-//exit(1);
         sv.set_local_model(trained_model);
         sv.test_predict(m_test_data, final_summary );
         Config_params::getInstance()->print_summary(final_summary,"stand alone predict");
 
     }else{      //multiple models
         std::cout << "Start prediction for multiple models\n";
+        std::cout << "Not supported yet!\n Exit\n";
         exit(1);
+        for(int i=0; i< num_models; i++){
+            std::string model_name = models_path + Config_params::getInstance()->get_ds_name() +
+                    "_exp_" + std::to_string(Config_params::getInstance()->get_experiment_id()) +
+                    "_kf_" + std::to_string(Config_params::getInstance()->get_kfold_id()) +
+                    "_level_" +  std::to_string(level_id) +
+                    "_gid_" +  std::to_string(i) + ".svmmodel";
+
+            // save the avg_calc during the training phase
+            // load the avg_calc here
+            // load a model and predict all the TD points (probably a matrix- each column/row for a model)
+            // calculate the the distance of each TD point to all the avg_calc or vise versa (another matrix)
+            // pass the predicted labels and distance matrices to majority voting function to calc the final label
+
+
+
+        }
+        //print the results
+//        Config_params::getInstance()->print_summary(final_summary,"stand alone predict");
     }
-//exit(1);
 
-
-    // for many models
-
-
-//    svm_model * trained_model = svm_load_model(in_model.c_str());
-
-//    summary final_summary;
-//    Solver sv;
-//    sv.set_local_model(trained_model);
-//    sv.test_predict(m_test_data, final_summary );
-//    Config_params::getInstance()->print_summary(final_summary,"stand alone predict");
-    std::cout << "Single SVM predict finished successfully!\n";
+    std::cout << "MLSVM predict finished successfully!\n";
     PetscFinalize();
     return 0;
 }
