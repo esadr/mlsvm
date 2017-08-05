@@ -198,12 +198,13 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
 
             // - - - - - - - - - - calc_avg_center - - - - - - - - - -  #5
             pt.calc_avg_center(m_centers_p, m_centers_n, v_groups, v_sum_vol_parts_p, v_sum_vol_parts_n, v_mat_avg_centers[iter]);
-
+            //#performance #bottleneck (the matrix is column major order) @080417-2343
             MatCreateSeqDense(PETSC_COMM_SELF, num_part_p+num_part_n, num_row_TD,NULL, &v_mat_all_predict_TD[iter]);
 
 
 
 //            MatCreateSeqDense(PETSC_COMM_SELF, num_part_p+num_part_n, num_VD_p+num_VD_n ,NULL, &v_mat_all_predict_validation[iter]);
+            //#performance #bottleneck (the matrix is column major order) @080417-2343
             MatCreateSeqDense(PETSC_COMM_SELF, num_part_p+num_part_n, num_VD_both, NULL, &v_mat_all_predict_validation[iter]);
 
 

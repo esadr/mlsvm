@@ -17,8 +17,9 @@ private:
 public:
     Mat& readData(const char *);
     Mat normalizeDataZscore(Mat&);
-    void separateData(Mat&, const char *);
-    void export_data();
+    Mat normalizeDataZscore_Transposed(Mat& raw_mat);
+//    void separateData(Mat&, const char *);
+//    void export_data();
 };
 
 

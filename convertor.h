@@ -15,6 +15,8 @@ public:
     void Adj_matrix_to_edgelist(std::string in_fname, std::string out_fname);
 
     void Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_data, Vec& v_lbl, PetscInt num_row =-1, PetscInt num_col=-1);
+
+    void CSV_file_to_PETSc_format();
 };
 
 #endif // CONVERTOR_H

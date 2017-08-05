@@ -131,20 +131,24 @@ private:
 
     void read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_classification_prediction_parameters(pugi::xml_node& root,int argc, char * argv[]);
+    void read_convert_files_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_clustering_parameters(pugi::xml_node& root,int argc, char * argv[]);
 
 
 
 
 public:
-    enum program_parts {main, flann, svm, prediction, clustring} ;
+    enum program_parts {main, convert_files, zscore, flann, svm, prediction, clustring} ;
     static Config_params* getInstance();
     int  get_main_function() const { return main_function;  }
 
     void print_classification_training_params();
     void print_classification_prediction_params();
+    void print_convert_files_params();
     void read_flann_parameters(pugi::xml_node& root,int argc, char * argv[]);
+    void read_zscore_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void print_flann_params();
+    void print_zscore_params();
 
 //    void set_inputs(std::string const ds_name, std::string const ds_version );
     void set_inputs_file_names();

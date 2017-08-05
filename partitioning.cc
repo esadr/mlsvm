@@ -453,6 +453,7 @@ void Partitioning::calc_center(Mat& m_neigh_Data, Vec& v_neigh_vol, std::vector<
  *       - - - - - - - -
  */
 void Partitioning::calc_distances(int num_part_p, int num_part_n, Mat& m_centers_p,Mat& m_centers_n, Mat& m_dist){
+    //#performance #bottleneck (the matrix is column major order) @080417-2343
     MatCreateSeqDense(PETSC_COMM_SELF,num_part_p+num_part_n,num_part_p+num_part_n,NULL, &m_dist);
     PetscInt            i, j, ncols_p, ncols_n;
     const PetscInt      *cols_p, *cols_n;

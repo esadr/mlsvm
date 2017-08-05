@@ -34,6 +34,13 @@ SAP_OBJS = $(SAP_SRCS:.cc=.o)
 PREDICT_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_weighted.cc solver.cc ./tools/mlsvm_predict.cc
 PREDICT_OBJS = $(PREDICT_SRCS:.cc=.o)
 
+ZSCORE_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc preprocessor.cc ./tools/mlsvm_zscore.cc
+ZSCORE_OBJS = $(ZSCORE_SRCS:.cc=.o)
+
+CSV_PETSC_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc convertor.cc loader.cc k_fold.cc  ./tools/mlsvm_csv_petsc.cc
+CSV_PETSC_OBJS = $(CSV_PETSC_SRCS:.cc=.o)
+
+
 PERS_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_unweighted.cc solver.cc model_selection.cc personalized.cc personalized_main.cc
 PERS_OBJS = $(PERS_SRCS:.cc=.o)
 
@@ -84,12 +91,9 @@ ut_main: $(UT_OBJS) chkopts
 	-${CLINKER} $(UT_OBJS)  ${PETSC_MAT_LIB} -o ut_main 
 	${RM} ut_main.o 
 	
-	
-	
 main_test: $(MLSVM_OBJS) chkopts
 	-${CLINKER}  $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o main $(LIBS)
 	${RM} main.o 
-
 
 cv: $(CV_OBJS) chkopts
 	-${CLINKER} $(CV_OBJS)  ${PETSC_MAT_LIB} -o cv 
@@ -110,7 +114,15 @@ sap: $(SAP_OBJS) chkopts
 	
 mlsvm_predict: $(PREDICT_OBJS) chkopts
 	-${CLINKER} $(PREDICT_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_predict
-	${RM} mlsvm_predict.o 
+	${RM} mlsvm_predict.o
+
+mlsvm_zscore: $(ZSCORE_OBJS) chkopts
+	-${CLINKER} $(ZSCORE_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_zscore
+	${RM} mlsvm_zscore.o
+
+mlsvm_csv_petsc: $(CSV_PETSC_OBJS) chkopts
+	-${CLINKER} $(CSV_PETSC_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_csv_petsc
+	${RM} mlsvm_csv_petsc.o
 
 pers: $(PERS_OBJS) chkopts
 	-${CLINKER} $(PERS_OBJS)  ${PETSC_MAT_LIB} -o pers

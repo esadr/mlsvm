@@ -4,15 +4,19 @@
 #include "common_funcs.h"
 #include "ut_common.h"
 #include <fstream>      //read and write from/to files
-
+#include "loader.h"
 
 void Convertor::Adj_matrix_to_edgelist(std::string in_fname, std::string out_fname)
 {
-    UT_Common ut_com;
+    //depreacted
+    // @080517-1135 modified to use loader class instead during developing the CSV_PETSc
+//    UT_Common ut_com;
+//    ut_com.load_matrix(in_fname.c_str(), m_data, 0);
+
+    Loader ld;
+    ld.load_norm_data_sep(in_fname);
+
     Mat m_data;
-    ut_com.load_matrix(in_fname.c_str(), m_data, 0);
-
-
     PetscInt i, ncols, num_row, num_col;
     const PetscInt    *cols;
     const PetscScalar *vals;
@@ -111,4 +115,74 @@ void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_dat
     VecDestroy(&v_lbl);
 }
 
+
+
+
+
+
+void Convertor::CSV_file_to_PETSc_format(){
+    //find the level in the summary
+    std::fstream in_file;
+//    std::string fname = models_path + Config_params::getInstance()->get_ds_name() + "_models.summary";
+//    const std::string fname = "./datasets/Wimbledon-men-2013_NoMissing.csv";
+    const std::string fname = "./datasets/b.csv";
+    //    std::cout << fname << std::endl;
+    in_file.open(fname);
+
+    if(!in_file.is_open()){
+        std::cout << "[RCF] failed to open" << fname <<" file! \nExit";
+        exit(1);
+    }
+    //    std::vector<std::pair<int,int>> v_lines;
+    std::string line;
+
+    std::vector<std::vector<double>> vv_data;
+    while(std::getline(in_file, line)){
+        std::stringstream sep(line);
+        std::string item;
+        vv_data.push_back(std::vector<double>());
+        while (std::getline(sep, item, ',')) {
+            vv_data.back().push_back(stod(item));
+        }
+    }
+    in_file.close();
+
+    Mat m_data;
+    PetscInt num_row= vv_data.size();
+    PetscInt num_col= vv_data[0].size();    //number of items in the first row
+    std::cout << "num_rows: "<<num_row<< ", num_cols:" << num_col << std::endl;
+
+    Vec v_lbl;
+    VecCreateSeq(PETSC_COMM_SELF,num_row,&v_lbl);
+    // Notice the Dense matrix is column major order. I need to fill the columns
+    // For performance, I insert each row of a file to a column in matrix
+    // In the end, I transpose the matrix before save to file
+
+    MatCreateSeqDense(PETSC_COMM_SELF, num_col-1, num_row, NULL, &m_data);
+//    exit(1);
+
+    for(int i=0; i< num_row; i++ ){
+        VecSetValue(v_lbl, i, vv_data[i][0], INSERT_VALUES);
+        for(int j=0; j< num_col-1; j++){
+            MatSetValue(m_data,j ,i , vv_data[i][j+1], INSERT_VALUES);
+        }
+    }
+    VecAssemblyBegin(v_lbl);
+    VecAssemblyEnd(v_lbl);
+    MatAssemblyBegin(m_data, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_data, MAT_FINAL_ASSEMBLY);
+
+    Mat m_data_t;
+    MatTranspose(m_data,MAT_INITIAL_MATRIX,&m_data_t);
+    MatDestroy(&m_data);
+
+//    std::cout  << "[MCP][RDF] m_data_t matrix:\n";                       //$$debug
+//    MatView(m_data_t, PETSC_VIEWER_STDOUT_WORLD);
+
+    CommonFuncs cf;
+    cf.exp_matrix(m_data_t, "", fname + "_data.dat", "CSV_PETSc" );
+    cf.exp_vector(v_lbl, "", fname + "_label.dat", "CSV_PETSc" );
+    MatDestroy(&m_data_t);
+    VecDestroy(&v_lbl);
+}
 

@@ -170,6 +170,13 @@ void Config_params::print_classification_prediction_params(){
                  "\npr_maj_voting_id: "     << get_pr_maj_voting_id()  << std::endl;
 }
 
+void Config_params::print_convert_files_params(){
+    std::cout << "mlsvm_version:"           << mlsvm_version           <<
+                 "\nds_path: "              << get_ds_path()           <<
+                 "\nds_name: "              << get_ds_name()           <<
+                 "\ntmp_path: "             << get_tmp_path()          << std::endl;
+}
+
 void Config_params::print_flann_params(){
     std::cout << "--- NN Paramters ---"         <<
                  "\nnn_number_of_classes: "     << get_nn_number_of_classes()   <<
@@ -184,13 +191,18 @@ void Config_params::print_flann_params(){
         std::cout << "--- Input File names ---"    <<
                  "\ndata: "                         << get_single_norm_data_f_name() << std::endl;
     }
+}
 
-
+void Config_params::print_zscore_params(){
+    std::cout << "mlsvm_version:"           << mlsvm_version           <<
+                 "\nds_path: "              << get_ds_path()           <<
+                 "\nds_name: "              << get_ds_name()           <<
+                 "\ntmp_path: "             << get_tmp_path()          << std::endl;
 }
 
 void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[], program_parts caller_func){
 
-    PetscBool       flg; //@@ 040417-2130
+    PetscBool       flg; //@ 040417-2130
     PetscInt        temp;
 //    PetscOptionsGetInt(NULL,NULL,"-help",&temp,&flg);			//newer versions of  PETSc
 //    if (!flg){
@@ -229,43 +241,47 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
 
     switch(caller_func){
     case main:
-    {
         /// - - - - - check the ml_function - - - - -
-//        main_function       = root.child("main_function").attribute("intVal").as_int();
-//        parser_.add_option("-d") .dest("main_function")  .set_default(main_function);
-
-
-//        this->options_ = parser_.parse_args(argc, argv);
-//        std::vector<std::string> args = parser_.args();
-
-    //    std::cout << "main function:" << get_main_function() << std::endl;
-
         switch(main_function){
-        case 0:
+        case 0:     // classification
             read_classification_training_parameters(root, argc, argv);
             set_inputs_file_names();
             print_classification_training_params();
             break;
-        case 1:
 
+        case 1:     // regression
             break;
+
         case 2:
             std::cout << "start reading clustering parameters\n";
             read_clustering_parameters(root, argc, argv);
             break;
+        }
+        break;      // end of main functions (classification, regression, clustering)
 
-    }
+    case zscore:
+        std::cout << "start reading zscore parameters\n";
+        read_zscore_parameters(root, argc, argv);
+        //set the output file name
+        single_norm_data_f_name  = get_ds_path() + get_ds_name() + "_zsc_data.dat";
+        print_zscore_params();
         break;
+
     case flann:
         std::cout << "start reading clustering parameters\n";
         read_flann_parameters(root, argc, argv);
         set_file_names_for_save_flann();
         print_flann_params();
         break;
-    }
+
     case prediction:
         read_classification_prediction_parameters(root, argc, argv);
         print_classification_prediction_params();
+        break;
+
+    case convert_files:
+        read_convert_files_parameters(root, argc, argv);//@080517-1120
+        print_convert_files_params();
         break;
     }
 }
@@ -437,6 +453,27 @@ void Config_params::read_classification_prediction_parameters(pugi::xml_node& ro
 }
 
 
+void Config_params::read_convert_files_parameters(pugi::xml_node& root,int argc, char * argv[]){
+
+
+    mlsvm_version = root.child("mlsvm_version").attribute("stringVal").value();
+
+    /// read the parameters from the XML file (params.xml)
+    ds_path             = root.child("ds_path").attribute("stringVal").value();
+    ds_name             = root.child("ds_name").attribute("stringVal").value();
+    tmp_path            = root.child("tmp_path").attribute("stringVal").value();
+    /// read the parameters from input arguments ()
+    parser_.add_option("--ds_p")                       .dest("ds_path")             .set_default(ds_path);
+    parser_.add_option("-f", "--ds_f", "--file")       .dest("ds_name")             .set_default(ds_name);
+    parser_.add_option("--tmp_p")                      .dest("tmp_path")            .set_default(tmp_path);
+
+
+    this->options_ = parser_.parse_args(argc, argv);
+    std::vector<std::string> args = parser_.args();
+    std::cout << "[Config_params] input convert_files parameters are read" << std::endl;
+}
+
+
 void Config_params::read_clustering_parameters(pugi::xml_node& root,int argc, char * argv[]){
 
 
@@ -509,7 +546,7 @@ void Config_params::read_clustering_parameters(pugi::xml_node& root,int argc, ch
 
 
 
-void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * argv[]){ //@@ 040317-1842
+void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * argv[]){ //@ 040317-1842
     // read XML values
     nn_number_of_classes    = root.child("nn_number_of_classes").attribute("intVal").as_int();
     nn_number_of_neighbors  = root.child("nn_number_of_neighbors").attribute("intVal").as_int();
@@ -794,4 +831,19 @@ void Config_params::export_models_metadata(){
     outfile.close();
 
     std::cout << "The models' summary are exported successfully" <<std::endl;
+}
+
+
+void Config_params::read_zscore_parameters(pugi::xml_node& root,int argc, char * argv[]){ //@ 080317-1354
+    // read XML values
+    ds_path             = root.child("ds_path").attribute("stringVal").value();
+    ds_name             = root.child("ds_name").attribute("stringVal").value();
+    tmp_path            = root.child("tmp_path").attribute("stringVal").value();
+    parser_.add_option("--ds_p")                             .dest("ds_path")  .set_default(ds_path);
+    parser_.add_option("-f", "--ds_f", "--file")             .dest("ds_name")  .set_default(ds_name);
+    parser_.add_option("--tmp_p")                            .dest("tmp_path")  .set_default(tmp_path);
+
+    this->options_ = parser_.parse_args(argc, argv);
+    std::vector<std::string> args = parser_.args();
+    std::cout << "[Config_params] z-score parameters are read" << std::endl;
 }
