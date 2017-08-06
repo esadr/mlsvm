@@ -91,75 +91,86 @@ Mat Preprocessor::normalizeDataZscore(Mat& raw_mat){
  * Each column is normalized separately
  * return matrix is in CSC format
  */
-Mat Preprocessor::normalizeDataZscore_Transposed(Mat& raw_mat){
+Mat Preprocessor::normalizeDataZscore_Transposed(Mat& m_raw_data){
 
-    Mat norm_data_;
+    Mat m_norm_data_;
     PetscInt i, j, num_row, num_col, ncols;
     PetscInt num_nnz=0;           //number of non zero components
-    PetscScalar sigma_val=0, mean=0;
-    PetscScalar std=0;                  //standard deviation
     const PetscInt    *cols;                        //if not NULL, the column numbers
     const PetscScalar *vals;
-    float variance_= 0;
+
+//    printf("m_raw_data transpose:\n");                                        //$$debug
+//    MatView(m_raw_data,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+
+    MatGetSize(m_raw_data,&num_row,&num_col);
 
     Vec v_sum_;
-    MatGetRowSum(raw_mat, v_sum_);
-    printf("vector sum:\n");                                               //$$debug
-    VecView(v_sum_,PETSC_VIEWER_STDOUT_WORLD);                                  //$$debug
+    VecCreateSeq(PETSC_COMM_SELF, num_row, &v_sum_);
+    MatGetRowSum(m_raw_data, v_sum_);
+//    printf("vector sum:\n");                                               //$$debug
+//    VecView(v_sum_,PETSC_VIEWER_STDOUT_WORLD);                                  //$$debug
 
-    return norm_data_;
-////Calculate the Mean
-//    MatGetSize(raw_mat,&num_row,&num_col);
-//    for (i=0;i<num_row;++i){
-//        MatGetRow(raw_mat,i,&ncols,&cols,&vals); //ncols : number if non-zeros in the row
+//Calculate the Mean
+    std::vector<double> v_mean(num_row,0);
+
+    PetscScalar     *arr_sum_;
+    PetscMalloc1(num_row, &arr_sum_);
+
+    VecGetArray(v_sum_,&arr_sum_);
+    for(i = 0; i< num_row; i++){
+        v_mean[i] = arr_sum_[i] / double(num_col);
+//        std::cout << "mean[i]:"    << v_mean[i] << std::endl;
+    }
+    VecRestoreArray(v_sum_,&arr_sum_);
+    PetscFree(arr_sum_);
+    VecDestroy(&v_sum_);
+
+
+//Calculate the Standard Deviation
+    std::vector<double> v_std(num_row,0);
+    std::cout << "num_col:" << num_col << std::endl;
+    for (i=0;i<num_row;++i){
+        double variance_ = 0;
+        MatGetRow(m_raw_data,i,&ncols,&cols,&vals); //ncols : number if non-zeros in the row
+        for (j=0; j<ncols; j++) {
+                variance_ += pow((vals[j] - v_mean[i]), 2);
+            }
+        // #bug  the zero values might be far away from mean, but are not considered in the internal loop
+        // Fix: add the variance for zero values in raw data:  sum( Z*(0-mean)^2)
+        variance_ += (num_col - ncols) * pow(v_mean[i], 2);
+        v_std[i] = sqrt(variance_ / (double) (num_col-1));
+//        std::cout << "ncols:" << ncols <<",std[i]:"    << v_std[i] << std::endl;
+        MatRestoreRow(m_raw_data,i,&ncols,&cols,&vals);
+    }
+
+//Calculate the Z score
+
+//    MatDuplicate(m_raw_data,MAT_SHARE_NONZERO_PATTERN,&m_norm_data_); //duplicate the structure, not copy the values
+
+    //the normalized data could be dense while the raw data is sparse
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row ,num_col ,num_col,PETSC_NULL, &m_norm_data_);
+    for (i=0;i<num_row;++i){
+        MatGetRow(m_raw_data,i,&ncols,&cols,&vals); //ncols : number if non-zeros in the row
 //            for (j=0; j<ncols; j++) {
-//                ++num_nnz;
-//                sigma_val += vals[j];
-//            }
-//        MatRestoreRow(raw_mat,i,&ncols,&cols,&vals);
-//    }
-//    mean = sigma_val / num_nnz;                     //calculate the Mean for all non-zero values
-//    printf("sigma : %g, num_nnz: %d\n",sigma_val,num_nnz);
-//    printf("mean is :%g\n",mean);       //$$debug
-
-
-////Calculate the Standard Deviation
-//    sigma_val = 0;
-//    for (i=0;i<num_row;++i){
-//        MatGetRow(raw_mat,i,&ncols,&cols,&vals); //ncols : number if non-zeros in the row
-//            for (j=0; j<ncols; j++) {
-//                variance_ = vals[j] - mean;
-//                sigma_val +=  variance_ * variance_ ;
-//            }
-//        MatRestoreRow(raw_mat,i,&ncols,&cols,&vals);
-//    }
-//    std = sqrt(sigma_val / num_nnz);
-//    printf("std is :%g\n",std);       //$$debug
-
-
-
-
-
-
-
-////Calculate the Z score
-
-//    MatDuplicate(raw_mat,MAT_SHARE_NONZERO_PATTERN,&norm_data_); //duplicate the structure, not copy the values
-
-//    for (i=0;i<num_row;++i){
-//        MatGetRow(raw_mat,i,&ncols,&cols,&vals); //ncols : number if non-zeros in the row
-//            for (j=0; j<ncols; j++) {
-////                (vals[j] - mean) / std
-//                MatSetValue(norm_data_,i,cols[j], ( (vals[j]-mean) / std  ) ,INSERT_VALUES);
-//            }
-//        MatRestoreRow(raw_mat,i,&ncols,&cols,&vals);
-//    }
-//    //Assembly Matrices
-//    MatAssemblyBegin(norm_data_,MAT_FINAL_ASSEMBLY);
-//    MatAssemblyEnd(norm_data_,MAT_FINAL_ASSEMBLY);
-////    printf("norm_data Matrix:\n");                                               //$$debug
-////    MatView(norm_data_,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
-//    return norm_data_;
+        int tmp_nnz_indices=0;
+        double norm_value = 0;
+        for (j=0; j<num_col; j++) {
+            if(j < ncols && j==cols[tmp_nnz_indices]){
+                norm_value = (vals[j] - v_mean[i]) / v_std[i];
+                tmp_nnz_indices++;
+            }else{
+                norm_value = -(v_mean[i]) / v_std[i];
+            }
+            MatSetValue(m_norm_data_,i,j, norm_value,INSERT_VALUES);
+        }
+        MatRestoreRow(m_raw_data,i,&ncols,&cols,&vals);
+    }
+    //Assembly Matrices
+    MatAssemblyBegin(m_norm_data_,MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_norm_data_,MAT_FINAL_ASSEMBLY);
+//    printf("norm_data Matrix:\n");                                               //$$debug
+//    MatView(m_norm_data_,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+    return m_norm_data_;
 }
 
 

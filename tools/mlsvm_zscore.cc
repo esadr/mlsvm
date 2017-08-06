@@ -1,6 +1,7 @@
 #include "../config_params.h"
 #include "../preprocessor.h"
 #include "../loader.h"
+#include "../common_funcs.h"
 
 Config_params* Config_params::instance = NULL;
 
@@ -22,11 +23,10 @@ int main(int argc, char **argv){
     MatTranspose(m_raw_data,MAT_INITIAL_MATRIX,&m_raw_data_T);
     MatDestroy(&m_raw_data);
 
-
     Preprocessor pr;
     m_normalized_T = pr.normalizeDataZscore_Transposed(m_raw_data_T);
     MatDestroy(&m_raw_data_T);
-    exit(1);
+
     // transpose the normalized transposed data matrix
     MatTranspose(m_normalized_T,MAT_INITIAL_MATRIX,&m_normalized);
     MatDestroy(&m_normalized_T);
@@ -36,8 +36,11 @@ int main(int argc, char **argv){
                     Config_params::getInstance()->get_ds_name() + "_zsc_data.dat";
 
 
+    CommonFuncs cf;
+    cf.exp_matrix(m_normalized, "", normalized_file_path_name , "mlsvm_zscore" );
+    MatDestroy(&m_normalized);
 
-    std::cout << "MLSVM predict finished successfully!\n";
+    std::cout << "Data is normalized successfully!\n";
     PetscFinalize();
     return 0;
 }

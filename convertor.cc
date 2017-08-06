@@ -123,9 +123,10 @@ void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_dat
 void Convertor::CSV_file_to_PETSc_format(){
     //find the level in the summary
     std::fstream in_file;
-//    std::string fname = models_path + Config_params::getInstance()->get_ds_name() + "_models.summary";
+    std::string fname = Config_params::getInstance()->get_ds_path()
+                        + Config_params::getInstance()->get_ds_name() + ".csv";
 //    const std::string fname = "./datasets/Wimbledon-men-2013_NoMissing.csv";
-    const std::string fname = "./datasets/b.csv";
+//    const std::string fname = "./datasets/b.csv";
     //    std::cout << fname << std::endl;
     in_file.open(fname);
 
@@ -179,9 +180,11 @@ void Convertor::CSV_file_to_PETSc_format(){
 //    std::cout  << "[MCP][RDF] m_data_t matrix:\n";                       //$$debug
 //    MatView(m_data_t, PETSC_VIEWER_STDOUT_WORLD);
 
+    std::string out_fname = Config_params::getInstance()->get_ds_path()
+                            + Config_params::getInstance()->get_ds_name();
     CommonFuncs cf;
-    cf.exp_matrix(m_data_t, "", fname + "_data.dat", "CSV_PETSc" );
-    cf.exp_vector(v_lbl, "", fname + "_label.dat", "CSV_PETSc" );
+    cf.exp_matrix(m_data_t, "", out_fname + "_data.dat", "CSV_PETSc" );
+    cf.exp_vector(v_lbl, "", out_fname + "_label.dat", "CSV_PETSc" );
     MatDestroy(&m_data_t);
     VecDestroy(&v_lbl);
 }
