@@ -6,7 +6,7 @@ LOCDIR   = .
 MAIN 	 = main.cc
 MANSEC   = Mat
 
-LIBS= -lpugixml -lm
+LIBS= -lpugixml -lm -lflann
 
 MLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc main.cc
 MLSVM_OBJS = $(MLSVM_SRCS:.cc=.o)
@@ -40,6 +40,8 @@ ZSCORE_OBJS = $(ZSCORE_SRCS:.cc=.o)
 CSV_PETSC_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc convertor.cc loader.cc k_fold.cc  ./tools/mlsvm_csv_petsc.cc
 CSV_PETSC_OBJS = $(CSV_PETSC_SRCS:.cc=.o)
 
+KNN_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc ./tools/mlsvm_knn.cc
+KNN_OBJS = $(KNN_SRCS:.cc=.o)
 
 PERS_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_unweighted.cc solver.cc model_selection.cc personalized.cc personalized_main.cc
 PERS_OBJS = $(PERS_SRCS:.cc=.o)
@@ -124,6 +126,10 @@ mlsvm_csv_petsc: $(CSV_PETSC_OBJS) chkopts
 	-${CLINKER} $(CSV_PETSC_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_csv_petsc
 	${RM} mlsvm_csv_petsc.o
 
+mlsvm_knn: $(KNN_OBJS) chkopts
+	-${CLINKER} $(KNN_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_knn
+	${RM} mlsvm_knn.o
+	
 pers: $(PERS_OBJS) chkopts
 	-${CLINKER} $(PERS_OBJS)  ${PETSC_MAT_LIB} -o pers
 	${RM} pers.o 
