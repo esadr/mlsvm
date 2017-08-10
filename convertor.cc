@@ -160,7 +160,6 @@ void Convertor::CSV_file_to_PETSc_format(){
     // In the end, I transpose the matrix before save to file
 
     MatCreateSeqDense(PETSC_COMM_SELF, num_col-1, num_row, NULL, &m_data);
-//    exit(1);
 
     for(int i=0; i< num_row; i++ ){
         VecSetValue(v_lbl, i, vv_data[i][0], INSERT_VALUES);
