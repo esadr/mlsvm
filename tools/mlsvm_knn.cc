@@ -1,9 +1,12 @@
 #include "../config_params.h"
 #include <flann/flann.hpp>
+#include <flann/util/serialization.h>
 #include "../loader.h"
 #include "../common_funcs.h"
 
 Config_params* Config_params::instance = NULL;
+
+//using namespace flann;
 
 void run_flann(Mat m_data);
 
@@ -22,7 +25,7 @@ int main(int argc, char **argv){
         Mat m_data = ld.load_norm_data_sep(Config_params::getInstance()->get_single_norm_data_f_name());
         run_flann(m_data);
 
-//        /* ------------------------- Run FLANN ---------------------------- */
+        /* ------------------------- Run FLANN ---------------------------- */
 //        std::cout << "[Main] sh_command for 1 class:" << sh_command << std::endl;
 //        system(sh_command.c_str());
     }else{  // two classes
@@ -87,15 +90,15 @@ void run_flann(Mat m_data){
 
 
     //call flann
-    flann::Index<flann::L2<float> > index(data, flann::KDTreeIndexParams(16));
-    index.buildIndex();
+    flann::Index<flann::L2<float> > index_(data, flann::KDTreeIndexParams(16));
+    index_.buildIndex();
 
     std::vector<std::vector<int> > indicies;
     std::vector<std::vector<float> > dists;
 
     flann::SearchParams params(128);
     params.cores = 0; //automatic core selection
-    index.knnSearch(data, indicies, dists, Config_params::getInstance()->get_nn_number_of_neighbors(),  params);
+    index_.knnSearch(data, indicies, dists, Config_params::getInstance()->get_nn_number_of_neighbors(),  params);
 
 
     //store the indices, dists to 2 separate matrices
