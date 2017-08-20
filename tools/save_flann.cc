@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 //    Config_params::program_parts prg_name;
 //    prg_name = Config_params::program_parts::flann;
 
-    Config_params::getInstance()->read_params("./params.xml", argc, argv, Config_params::flann;); //@ 040317-1842
+    Config_params::getInstance()->read_params("./params.xml", argc, argv, Config_params::flann); //@ 040317-1842
     /* ------------------------- Prepare FLANN Commands---------------------------- */
     std::string str_NN {std::to_string(Config_params::getInstance()->get_nn_number_of_neighbors())};
     std::string str_nn_distance_type {std::to_string(Config_params::getInstance()->get_nn_distance_type())};

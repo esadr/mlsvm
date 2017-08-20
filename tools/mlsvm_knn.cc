@@ -1,14 +1,15 @@
 #include "../config_params.h"
 #include <flann/flann.hpp>
-#include <flann/util/serialization.h>
+//#include <flann/util/serialization.h>
 #include "../loader.h"
 #include "../common_funcs.h"
+
 
 Config_params* Config_params::instance = NULL;
 
 //using namespace flann;
 
-void run_flann(Mat m_data);
+void run_flann(Mat& m_data, Mat& m_indices, Mat& m_dists);
 
 int main(int argc, char **argv){
     PetscInitialize(&argc, &argv, NULL, NULL);
@@ -23,7 +24,8 @@ int main(int argc, char **argv){
     Loader ld;
     if(Config_params::getInstance()->get_nn_number_of_classes() == 1){
         Mat m_data = ld.load_norm_data_sep(Config_params::getInstance()->get_single_norm_data_f_name());
-        run_flann(m_data);
+        Mat m_indices, m_dists;
+        run_flann(m_data, m_indices, m_dists);
 
         /* ------------------------- Run FLANN ---------------------------- */
 //        std::cout << "[Main] sh_command for 1 class:" << sh_command << std::endl;
@@ -59,7 +61,7 @@ int main(int argc, char **argv){
 }
 
 
-void run_flann(Mat m_data){
+void run_flann(Mat& m_data, Mat& m_indices, Mat& m_dists){
     // - - - - load the data into flann matrix - - - -
     PetscInt num_row, num_col;
     PetscInt i, j, ncols;
@@ -99,9 +101,18 @@ void run_flann(Mat m_data){
     flann::SearchParams params(128);
     params.cores = 0; //automatic core selection
     index_.knnSearch(data, indicies, dists, Config_params::getInstance()->get_nn_number_of_neighbors(),  params);
-
+    std::cout << "Number of nodes in the created graph:" << indicies.size() << std::endl;
 
     //store the indices, dists to 2 separate matrices
+//    for(unsigned row_idx =0; row_idx < num_row; row_idx++){
+    for(unsigned int row_idx =0; row_idx < 10; row_idx++){
+        for(unsigned int nn_idx = 0; nn_idx < indicies[row_idx].size(); nn_idx++){
+            unsigned int node_idx = indicies[row_idx][nn_idx];
+            double dist = dists[row_idx][nn_idx];
+            std::cout << "row_idx:" << row_idx << ", nn_idx:" << nn_idx << ", node_idx:"<< node_idx<< ", dist:"<< dist << std::endl;
+//            MatSetValue(m_indices,row_idx,j,,INSERT_VALUES);
+        }
+    }
 
     //end!
 }
