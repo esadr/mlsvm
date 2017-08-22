@@ -30,7 +30,9 @@ The tools are provided for converting the CSV and libSVM file format, normalizat
 They are explained in the tools sections.
 
 4- The overall steps are presented in the following figure.
-![alt text](https://user-images.githubusercontent.com/9002689/29581890-cbd7cc9a-8748-11e7-8d6f-df8b7d3096d0.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/9002689/29581890-cbd7cc9a-8748-11e7-8d6f-df8b7d3096d0.png" width="600"/>
+</p>
 
 
 To use the MLSVM program, you can run it using below command and parameters. 
