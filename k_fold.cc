@@ -1350,3 +1350,8 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
 
 
 
+void k_fold::free_resources(){
+    MatDestroy(&this->m_min_data_);
+    MatDestroy(&this->m_maj_data_);
+
+}

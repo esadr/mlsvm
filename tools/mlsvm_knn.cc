@@ -1,13 +1,12 @@
 #include "../config_params.h"
 #include <flann/flann.hpp>
-//#include <flann/util/serialization.h>
+//#include <flann/util/random.h>
 #include "../loader.h"
 #include "../common_funcs.h"
+#include "../k_fold.h"
 
 
 Config_params* Config_params::instance = NULL;
-
-//using namespace flann;
 
 void run_flann(Mat& m_data, Mat& m_indices, Mat& m_dists);
 
@@ -18,7 +17,12 @@ int main(int argc, char **argv){
     Config_params::getInstance()->read_params("./params.xml", argc, argv, Config_params::flann); //@ 040317-1842
     /* ------------------------- Prepare FLANN Commands---------------------------- */
     std::string str_NN {std::to_string(Config_params::getInstance()->get_nn_number_of_neighbors())};
-    std::string str_nn_distance_type {std::to_string(Config_params::getInstance()->get_nn_distance_type())};
+//    std::string str_nn_distance_type {std::to_string(Config_params::getInstance()->get_nn_distance_type())};
+    if(Config_params::getInstance()->get_nn_distance_type() != 1){
+        std::cout << "[main] Only Euclidean distance is supported using this tool, for other distances please refer to user manual. Exit!" << std::endl;
+        return 1;
+    }
+
 //    std::string str_NN_params {" " + str_NN + " "+ str_nn_distance_type} ;
 
     Loader ld;
@@ -27,31 +31,62 @@ int main(int argc, char **argv){
         Mat m_indices, m_dists;
         run_flann(m_data, m_indices, m_dists);
 
-        /* ------------------------- Run FLANN ---------------------------- */
-//        std::cout << "[Main] sh_command for 1 class:" << sh_command << std::endl;
-//        system(sh_command.c_str());
+        //export to file
+        std::string nn_indices_fname = Config_params::getInstance()->get_ds_path() +
+                        Config_params::getInstance()->get_ds_name() + "_norm_data_indices.dat";
+        std::string nn_dists_fname = Config_params::getInstance()->get_ds_path() +
+                        Config_params::getInstance()->get_ds_name() + "_norm_data_dists.dat";
+
+        CommonFuncs cf;
+        cf.exp_matrix(m_indices, "", nn_indices_fname , "mlsvm_knn");
+        cf.exp_matrix(m_dists, "", nn_dists_fname , "mlsvm_knn");
+        MatDestroy(&m_indices);
+        MatDestroy(&m_dists);
+        std::cout << "KNN results for 1 class is saved successfully!" << std::endl;
+
     }else{  // two classes
-//        /* ------------------------- Divide Data ---------------------------- */
-//        ETimer t_kf;
-//        k_fold kf;
-//        kf.read_in_data();
-//        kf.divide_data(true);   //true: export the divided data into files
-//        t_kf.stop_timer("[Main] reading and deviding data and writing to files in k-fold class");
+        /* ------------------------- Divide Data ---------------------------- */
+        ETimer t_kf;
+        k_fold kf;
+        kf.read_in_data();
+        kf.divide_data(false);   //false: don't export into files
+        Mat m_min_data = kf.get_m_min_data();
+        Mat m_maj_data = kf.get_m_maj_data();
+        t_kf.stop_timer("[Main] reading and deviding data in k-fold class");
 
+        //                                  ----- minority class -----
+        Mat m_min_indices, m_min_dists;
+        run_flann(m_min_data, m_min_indices, m_min_dists);
 
+        //export to file
+        std::string nn_min_indices_fname = Config_params::getInstance()->get_ds_path() +
+                        Config_params::getInstance()->get_ds_name() + "_min_norm_data_indices.dat";
+        std::string nn_min_dists_fname = Config_params::getInstance()->get_ds_path() +
+                        Config_params::getInstance()->get_ds_name() + "_min_norm_data_dists.dat";
 
-//        std::string min_command = py_path +"/python ./scripts/flann.py "+ Config_params::getInstance()->get_p_norm_data_f_name()+ str_NN_params;
-//        std::string maj_command = py_path +"/python ./scripts/flann.py "+ Config_params::getInstance()->get_n_norm_data_f_name()+ str_NN_params;
-//        /* ------------------------- Run FLANN ---------------------------- */
-//        ETimer t_flann_min;
-//        std::cout << "[Main] python min_command:" << min_command << std::endl;
-//        system(min_command.c_str());
-//        t_flann_min.stop_timer("[Main] flann for minority class");
+        CommonFuncs cf;
+        cf.exp_matrix(m_min_indices, "", nn_min_indices_fname , "mlsvm_knn");
+        cf.exp_matrix(m_min_dists, "", nn_min_dists_fname , "mlsvm_knn");
+        MatDestroy(&m_min_indices);
+        MatDestroy(&m_min_dists);
 
-//        ETimer t_flann_maj;
-//        std::cout << "[Main] maj_command:" << maj_command << std::endl;
-//        system(maj_command.c_str());
-//        t_flann_maj.stop_timer("[Main] flann for majority class");
+        //                                  ----- majority class -----
+        Mat m_maj_indices, m_maj_dists;
+        run_flann(m_maj_data, m_maj_indices, m_maj_dists);
+
+        //export to file
+        std::string nn_maj_indices_fname = Config_params::getInstance()->get_ds_path() +
+                        Config_params::getInstance()->get_ds_name() + "_maj_norm_data_indices.dat";
+        std::string nn_maj_dists_fname = Config_params::getInstance()->get_ds_path() +
+                        Config_params::getInstance()->get_ds_name() + "_maj_norm_data_dists.dat";
+
+        cf.exp_matrix(m_maj_indices, "", nn_maj_indices_fname , "mlsvm_knn");
+        cf.exp_matrix(m_maj_dists, "", nn_maj_dists_fname , "mlsvm_knn");
+        MatDestroy(&m_maj_indices);
+        MatDestroy(&m_maj_dists);
+
+        std::cout << "KNN results for 2 classes are saved successfully!" << std::endl;
+        kf.free_resources();
     }
     t_all.stop_timer("[Main] whole saving flann");
 
@@ -67,8 +102,13 @@ void run_flann(Mat& m_data, Mat& m_indices, Mat& m_dists){
     PetscInt i, j, ncols;
     const PetscInt    *cols;
     const PetscScalar *vals;
-
+    int num_nearest_neighbors = Config_params::getInstance()->get_nn_number_of_neighbors();
     MatGetSize(m_data, &num_row, &num_col);
+
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, num_nearest_neighbors,PETSC_NULL, &m_indices);
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, num_nearest_neighbors,PETSC_NULL, &m_dists);
+    std::cout << "[KNN][RF] num_nn:"<< num_nearest_neighbors << std::endl;
+
     std::vector<float>vecData;
 //    std::vector<std::string> labels;
 
@@ -99,20 +139,29 @@ void run_flann(Mat& m_data, Mat& m_indices, Mat& m_dists){
     std::vector<std::vector<float> > dists;
 
     flann::SearchParams params(128);
-    params.cores = 0; //automatic core selection
-    index_.knnSearch(data, indicies, dists, Config_params::getInstance()->get_nn_number_of_neighbors(),  params);
-    std::cout << "Number of nodes in the created graph:" << indicies.size() << std::endl;
+//    flann::seed_random(0);          //set the random seed to 1 for debug
 
+
+    params.cores = 0; //automatic core selection
+    index_.knnSearch(data, indicies, dists, num_nearest_neighbors,  params);
+    std::cout << "Number of nodes in the created graph:" << indicies.size() << std::endl;
+//    exit(1);
     //store the indices, dists to 2 separate matrices
-//    for(unsigned row_idx =0; row_idx < num_row; row_idx++){
-    for(unsigned int row_idx =0; row_idx < 10; row_idx++){
-        for(unsigned int nn_idx = 0; nn_idx < indicies[row_idx].size(); nn_idx++){
-            unsigned int node_idx = indicies[row_idx][nn_idx];
-            double dist = dists[row_idx][nn_idx];
-            std::cout << "row_idx:" << row_idx << ", nn_idx:" << nn_idx << ", node_idx:"<< node_idx<< ", dist:"<< dist << std::endl;
-//            MatSetValue(m_indices,row_idx,j,,INSERT_VALUES);
+    for(unsigned int row_idx =0; row_idx < num_row; row_idx++){
+//        std::cout << "\nrow " << row_idx <<": ";
+        for(j = 0; j < indicies[row_idx].size(); j++){
+            unsigned int node_idx = indicies[row_idx][j];
+            double dist = dists[row_idx][j];
+//            std::cout << "(" << j << ", "<< node_idx << ")  ";
+            MatSetValue(m_indices,row_idx,node_idx,1,INSERT_VALUES);
+            MatSetValue(m_dists,row_idx,node_idx,dist,INSERT_VALUES);
         }
     }
+    MatAssemblyBegin(m_indices,MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_indices,MAT_FINAL_ASSEMBLY);
+    MatAssemblyBegin(m_dists,MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_dists,MAT_FINAL_ASSEMBLY);
+
 
     //end!
 }

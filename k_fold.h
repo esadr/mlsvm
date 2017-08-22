@@ -141,6 +141,10 @@ public:
                                     Mat& m_maj_full_data,Mat& m_maj_train_data,Mat& m_maj_full_NN_indices,Mat& m_maj_full_NN_dists,Mat& m_maj_WA,Vec& v_maj_vol,
                                     bool debug_status=false);
 
+    Mat get_m_min_data(){ return m_min_data_ ;}
+    Mat get_m_maj_data(){ return m_maj_data_ ;}
+    void free_resources();
+
 };
 
 #endif // K_FOLD_H
