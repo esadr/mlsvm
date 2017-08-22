@@ -11,22 +11,27 @@ It will download both PETSc and FLANN libraries which are needed.
 
 Installation
 -------------
-First, we need to install the libraries which have been downloaded in the petsc and flann folders. 
+1- We need to install the libraries which have been downloaded in the petsc and flann folders. 
 The installation guides for them are provided by their developers and you can easily use them to install the libraries.
 For PETSc please refer to [here](https://www.mcs.anl.gov/petsc/documentation/installation.html) and for Flann [here](http://www.cs.ubc.ca/research/flann).
-
 In case of using python for calculating the k-nearest neighbors you need to install the Anaconda [here](https://www.continuum.io/downloads), and pyflann [here](https://github.com/primetang/pyflann).
-
 
 2- Configure the coresponding environment variables based on your installation. 
 Examples are as follow:
 
-`PY_PATH=/anaconda3/bin/`,  `PYTHONPATH=/lib/flann/usr/local/share/flann/python/:/lib/petsc/bin/`, `PETSC_ARCH=linux-cxx`, `PETSC_DIR=/lib/petsc`
+`PETSC_ARCH=linux-cxx`, `PETSC_DIR=/lib/petsc`
 
-3- Go to mlsvm folder
+Below paths are required for python version of k-nearest neighbors.
+`PY_PATH=/anaconda3/bin/`,  `PYTHONPATH=/lib/flann/usr/local/share/flann/python/:/lib/petsc/bin/`.
 
-4- Run "make"
-If the program compiled correctly, it is ready to use.
+3- Please go to mlsvm directory (top level) and run `make` command.
+If the program compiled correctly, it is ready to use. However, you need to prepare the data in the right format for mlsvm library.
+The tools are provided for converting the CSV and libSVM file format, normalization, and calculating k-nearest neighbors.
+They are explained in the tools sections.
+
+4- The overall steps are presented in the following figure.
+![alt text](http://github.com/esadr/mlsvm/docs/overall_steps.png)
+
 
 To use the MLSVM program, you can run it using below command and parameters. 
 `./main -f twonorm -x 1 -k 5 -q 0.4 -r 4`
