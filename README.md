@@ -1,10 +1,22 @@
 # MLSVM
 Multi level Support Vector Machines
 
+Download
+-------------
+You can use the recursive parameter to download the required libraries as part of this reposetory.
+
+`git clone --recursive https://github.com/esadr/mlsvm.git`
+
+It will download both PETSc and FLANN libraries which are needed.
+
 Installation
 -------------
-1- Install PETSc [here](https://www.mcs.anl.gov/petsc/documentation/installation.html) ,
-Flann [here](http://www.cs.ubc.ca/research/flann), Anaconda [here](https://www.continuum.io/downloads), and pyflann [here](https://github.com/primetang/pyflann).
+First, we need to install the libraries which have been downloaded in the petsc and flann folders. 
+The installation guides for them are provided by their developers and you can easily use them to install the libraries.
+For PETSc please refer to [here](https://www.mcs.anl.gov/petsc/documentation/installation.html) and for Flann [here](http://www.cs.ubc.ca/research/flann).
+
+In case of using python for calculating the k-nearest neighbors you need to install the Anaconda [here](https://www.continuum.io/downloads), and pyflann [here](https://github.com/primetang/pyflann).
+
 
 2- Configure the coresponding environment variables based on your installation. 
 Examples are as follow:
