@@ -55,6 +55,10 @@ The name format for dataset files after convert are as follows.
 X_data.dat is the data file for dataset X which includes both test and training data. It is a matrix in PETSc binary format which rows are data points.
 X_label.dat is the label file for all the data. It is a vector in PETSc binary format which has +1 for minority class and -1 for majority class.
 
+There is a sample data set in the datasets folder. You can download the rest of the data sets from UCI.
+Another data set in prepared format is accessible using this [link](https://clemson.box.com/v/MLSVM-Datasets)
+Please cite the original data provider in case of using these data sets which are listed in the license.txt file.
+
 Preprocess Data
 -------------
 The converted the data needs to be normalized. For normalization, mlsvm_zscore uses z-score normalization on the whole data including training and test parts.
@@ -64,7 +68,7 @@ The k nearest neighbors are calculated using the normalized data using mlsvm_knn
 The indices of neighbor nodes in the minority class are stored in X_min_norm_data_indices.dat inside the dataset folder.
 The distances to neighbor nodes are saved in X_min_norm_data_dists.dat for the minority class.
 
-For the majority class, the _min_ is changed to _maj_.
+For the majority class, the \_min_ is changed to \_maj_.
 
 Classification
 -------------
