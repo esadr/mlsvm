@@ -34,25 +34,52 @@ They are explained in the tools sections.
   <img src="https://user-images.githubusercontent.com/9002689/29581890-cbd7cc9a-8748-11e7-8d6f-df8b7d3096d0.png" width="600"/>
 </p>
 
+In the below sections, we conver all the tasks from the top to the bottom.
 
-To use the MLSVM program, you can run it using below command and parameters. 
-`./main -f twonorm -x 1 -k 5 -q 0.4 -r 4`
 
-The parameters could be set inside the `param.xml` file. You can find the details for parameters in the user guide document.
-
-Input files (Training data set)
+Read Input
 -------------
-The dataset files should be in datasets folder inside the mlsvm. You can change the path and name in the param.xml file.
+The input data might be in variety of formats such CSV, Text, and images. The mlsvm needs a PETSc binary format as input. We developed tools to convert the CSV file format or LibSVM file format to PETSc Binary format.
+The tools are listed in the tools folder and more details on how to use them are provided in the User Guide in the docs folder.
 
-The name format for dataset files are as follows.
+The parameters to use the tools and the main library can be configured through XML config file or command line.
+The XML config file is params.xml. Each parameter has a description and you can change the default values.
+Using command line parameters you can override the parameter's values over the XML values temporarily for a specific run.
+The list of command line parameters are in the User Guide.
 
-X_zsc_data.dat is the data file for dataset X which includes both test and training data in normalized form. It is a matrix in PETSc binary format which rows are data points.
+The default path for input or data set files is the datasets folder. You can change that by setting the ds_path.
+The name of the data set file is defined as ds_name in the XML config file. 
 
+The name format for dataset files after convert are as follows.
+
+X_data.dat is the data file for dataset X which includes both test and training data. It is a matrix in PETSc binary format which rows are data points.
 X_label.dat is the label file for all the data. It is a vector in PETSc binary format which has +1 for minority class and -1 for majority class.
+
+Preprocess Data
+-------------
+The converted the data needs to be normalized. For normalization, mlsvm_zscore uses z-score normalization on the whole data including training and test parts.
+The results of normalization is stored in X_zsc_data.dat file and the lable are not changed.
+
+The k nearest neighbors are calculated using the normalized data using mlsvm_knn. The results are saved in two files for both minority and majority classes.
+The indices of neighbor nodes in the minority class are stored in X_min_norm_data_indices.dat inside the dataset folder.
+The distances to neighbor nodes are saved in X_min_norm_data_dists.dat for the minority class.
+
+For the majority class, the _min_ is changed to _maj_.
+
+Classification
+-------------
+
 
 To run the mlsvm on dataset X, you create the files in datasets folder regards to name format explained above and call `./main -f X ` or you can configure the name inside the param.xml file and just call `./main`
 
 The rest of parameters are explained in the param.xml file, however the shortcuts for overriding them through the command prompt will explain later.
+
+
+
+
+
+Another directory is needed for temporary test data later You can change the path and name in the param.xml file.
+
 
 
 List of Tools:
@@ -74,3 +101,9 @@ For questions or suggestions please email me at esadrfa@g.clemson.edu
 
 
 
+
+
+To use the MLSVM program, you can run it using below command and parameters. 
+`./main -f twonorm -x 1 -k 5 -q 0.4 -r 4`
+
+The parameters could be set inside the `param.xml` file. You can find the details for parameters in the user guide document.
