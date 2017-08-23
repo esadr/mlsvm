@@ -538,7 +538,9 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
 
     ETimer t_stage1;
     int stage = 1;
+#if dbl_MS_UDSepVal >= 1
     printf("[MS][UDSepVal] ------ stage:%d, level:%d------ \n", stage, level);
+#endif
     std::vector<ud_point> ud_params_st_1;
     ud_params_st_1 = ud_param_generator(stage, inh_params, param_C, param_G);
     add_debug_parameters(ud_params_st_1);
@@ -566,9 +568,12 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
 
     ETimer t_stage2;
     stage = 2 ;
+#if dbl_MS_UDSepVal >= 1
     printf("[MS][UDSepVal] ------ stage:%d, level:%d------ \n", stage, level);
-    std::vector<ud_point> ud_params_st_2;
     printf("[MS][UDSepVal] 2nd stage model selection center C:%g, G:%g\n",ud_params_st_1[best_1st_stage].C , ud_params_st_1[best_1st_stage].G);
+#endif
+    std::vector<ud_point> ud_params_st_2;
+
     ud_params_st_2 = ud_param_generator(stage,true, ud_params_st_1[best_1st_stage].C , ud_params_st_1[best_1st_stage].G);
     for(unsigned int i = 0; i < num_iter_st2 ;i++){
         //skip the center of second stage(duplicate)
@@ -588,8 +593,9 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
         ++solver_id;
     }
     int best_of_all =  select_best_model(v_summary,level,2);
-    printf("[MS][UDSepVal] best of both stage of UD is: (iter :%d)\n", best_of_all);
+
 #if dbl_MS_UDSepVal >= 1
+    printf("[MS][UDSepVal] best of both stage of UD is: (iter :%d)\n", best_of_all);
     Config_params::getInstance()->print_summary(v_summary[best_of_all],"[MS][UDSepVal] Validation Data", level, -1, stage);
 #endif
     t_stage2.stop_timer("[MS][UDSepVal] stage 2 at level", std::to_string(level) );
@@ -895,7 +901,7 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
             "_level_" + std::to_string(Config_params::getInstance()->get_main_current_level_id()) +
             "_gid_" + std::to_string(classifier_id) + ".svmmodel";
     svm_save_model(output_file.c_str(), best_model);
-    printf("model %s is saved\n", output_file.c_str());
+    printf("[MS][UDIBSepVal] model %s is saved\n", output_file.c_str());
 
 #endif
 

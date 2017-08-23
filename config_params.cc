@@ -6,70 +6,6 @@
 #include <chrono>
 #include "petscvec.h"
 
-//Initialize all parameters with default values
-//void Config_params::init_to_default(){
-//    debug_exp_CS = 0;
-//    debug_exp_CS_level = 0;
-//    debug_exp_MS = 0;
-//    debug_exp_MS_level = 0;
-//    debug_exp_MR = 0;
-//    debug_exp_MR_level = 0;
-
-//    nn_number           =0;
-//    nn_distance_type    =0;
-//    ds_path             ="";
-//    ds_name             ="";
-//    exp_info            ="";
-//    tmp_path            ="";
-//    cpp_srand_seed      ="";
-//    main_num_repeat_exp =0;
-//    main_num_kf_iter    =0;
-//    VD_sample_size_fraction=0;
-////    multi_level_status=0;
-//    pre_init_loader_matrix =0;
-//    inverse_weight      =0;
-//    ld_weight_type      =0;
-//    ld_weight_param     =0;
-//    coarse_Eta          =0;
-//    coarse_threshold = 0;
-//    coarse_q = 0 ;
-//    coarse_r = 0;
-//    cs_max_coarse_level = 0;
-//    cs_use_real_points = 0;
-//    cs_weak_edges_ft = 0 ;
-//    ms_status = 0;
-//    ms_limit = 0;
-//    ms_svm_id = 0;
-//    ms_first_stage  = 0;
-//    ms_second_stage = 0;
-//    ms_print_untouch_reuslts = false;
-//    ms_bs_gm_threshold  = 0;
-//    ms_best_selection   = 0;
-//    ms_save_final_model = 0;
-//    svm_type    = 0;
-//    kernel_type = 0;
-//    degree  = 0;
-//    gamma   = 0;
-//    coef0   = 0;
-//    nu      = 0;
-//    cache_size = 0;
-//    C       = 0;
-//    eps     = 0;
-//    p       = 0;
-//    shrinking   = 0;
-//    probability = 0;
-//    nr_weight   = 0;
-//    rf_add_fraction = 0;
-//    rf_add_distant_point_status = 0;
-//    pr_start_partitioning = 0;
-//    pr_partition_max_size = 0;
-
-//    pr_maj_voting_id =0;
-
-//    best_C = 0;
-//    best_gamma = 0;
-//    best_params_are_set = 0;
-//}
 
 
 Config_params* Config_params::getInstance() {
@@ -78,13 +14,14 @@ Config_params* Config_params::getInstance() {
 }
 
 void Config_params::print_classification_training_params(){
+
     std::cout << "mlsvm_version:" << mlsvm_version << std::endl;
-    std::cout << "============= dataset=============" <<
+    std::cout << "============= dataset info =============" <<
                  "\nds_path: "              << get_ds_path()          <<
                  "\nds_name: "              << get_ds_name()          <<
                  "\ntmp_path: "             << get_tmp_path()          <<
                  std::endl;
-
+    /*
     std::cout << "\ncpp_srand_seed: " <<get_cpp_srand_seed()<< std::endl;
 
     std::cout << "--- Main file Paramters ---"      <<
@@ -158,6 +95,7 @@ void Config_params::print_classification_training_params(){
                  "\npr_partition_max_size: "      << get_pr_partition_max_size()        <<
                  "\npr_maj_voting_id: "           << get_pr_maj_voting_id()             <<
                  std::endl;
+    */
 }
 
 void Config_params::print_classification_prediction_params(){
@@ -216,20 +154,20 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
         if (!flg){
 //            PetscPrintf(PETSC_COMM_WORLD,"[CP] Must indicate the functionality type you need using -d . \nExit!\n");
 //            exit(1);
-            PetscPrintf(PETSC_COMM_WORLD,"[WARNING] You can choose the functionality using -d parameter. Multilevel SVM is the default functionality \n");
+//            PetscPrintf(PETSC_COMM_WORLD,"[WARNING] You can choose the functionality using -d parameter. Multilevel SVM is the default functionality \n");
             main_function=0;
         }
     }
 
     /// load the file
-    std::cout << "[Config_Params][read_params] param.xml path : "<< XML_FILE_PATH << "\n";
+    std::cout << "[CP][read_params] param.xml path : "<< XML_FILE_PATH << "\n";
     // Create empty XML document within memory
     pugi::xml_document doc;
     // Load XML file into memory
     pugi::xml_parse_result result = doc.load_file(XML_FILE_PATH.c_str(),
         pugi::parse_default|pugi::parse_declaration);
     if (!result)   {
-        std::cout << "[Config_Params][read_params] Parse error: " << result.description()
+        std::cout << "[CP][read_params] Parse error: " << result.description()
             << ", character pos= " << result.offset << std::endl;
         exit(1);
     }
@@ -414,7 +352,7 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     std::vector<std::string> args = parser_.args();
 //    set_inputs_file_names();           // set all the dataset files        //because of exp_info, file name's should set after parsing the argv
     check_input_distance_parameters();
-    std::cout << "[Config_params] input parameters are read" << std::endl;
+//    std::cout << "[CP] input parameters are read" << std::endl;
 }
 
 
@@ -446,10 +384,10 @@ void Config_params::read_classification_prediction_parameters(pugi::xml_node& ro
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
     if(experiment_id < 0 || kfold_id < 0) {
-        std::cout << "[Config_params] The experiment id or k-fold_id is invalid or not specified!"<<
+        std::cout << "[CP] The experiment id or k-fold_id is invalid or not specified!"<<
                      "\nPlease check the user guide for more information." << std::endl;
     }
-    std::cout << "[Config_params] input prediction parameters are read" << std::endl;
+    std::cout << "[CP] input prediction parameters are read" << std::endl;
 }
 
 
@@ -470,7 +408,7 @@ void Config_params::read_convert_files_parameters(pugi::xml_node& root,int argc,
 
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
-    std::cout << "[Config_params] input convert_files parameters are read" << std::endl;
+    std::cout << "[CP] input convert_files parameters are read" << std::endl;
 }
 
 
@@ -539,7 +477,7 @@ void Config_params::read_clustering_parameters(pugi::xml_node& root,int argc, ch
 //    set_inputs_file_names();           // set all the dataset files        //because of exp_info, file name's should set after parsing the argv
 
     check_input_distance_parameters();
-    std::cout << "[Config_params] input parameters for clustering are read" << std::endl;
+    std::cout << "[CP] input parameters for clustering are read" << std::endl;
 
 }
 
@@ -572,7 +510,7 @@ void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * 
 
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
-    std::cout << "[Config_params] flann parameters are read" << std::endl;
+    std::cout << "[CP] flann parameters are read" << std::endl;
 }
 
 
@@ -587,7 +525,7 @@ void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * 
 
 void Config_params::check_input_distance_parameters(){
     if(get_nn_distance_type() > 8 || get_nn_distance_type() <1){
-        std::cout << "[Config_params] supported distance types are from 1 to 8!" << std::endl;
+        std::cout << "[CP] supported distance types are from 1 to 8!" << std::endl;
         exit(1);
     }
 }
@@ -646,7 +584,7 @@ void Config_params::update_srand_seed(){
 //    cpp_srand_seed =  std::to_string(std::chrono::system_clock::now().time_since_epoch() /std::chrono::milliseconds(1));
     std::string last_srand_seed = get_cpp_srand_seed();
     options_["cpp_srand_seed"] = std::to_string(atoll(last_srand_seed.c_str()) + 1)  ;
-    std::cout << "[CP][USS] new srand seed is: " << get_cpp_srand_seed() << std::endl;
+//    std::cout << "[CP][USS] new srand seed is: " << get_cpp_srand_seed() << std::endl;
 }
 
 void Config_params::debug_only_set_srand_seed(std::string new_seed){
@@ -657,7 +595,7 @@ void Config_params::debug_only_set_srand_seed(std::string new_seed){
 void Config_params::add_final_summary(summary current_summary, int selected_level){
     current_summary.selected_level = selected_level;
     this->all_summary.push_back(current_summary);
-    std::cout << "[Config_params] summary added to all_summary" << std::endl;
+    std::cout << "[CP] summary added to all_summary" << std::endl;
 }
 
 int  Config_params::get_best_level() const{
@@ -778,7 +716,7 @@ void Config_params::set_master_models_info(){
     int master_size = get_main_num_repeat_exp() * get_main_num_kf_iter();
     std::cout << "master size:" << std::to_string(master_size) << std::endl;
     master_models_info.resize(master_size);
-    std::cout << "master models info's size:" << std::to_string(master_models_info.size()) << std::endl;
+//    std::cout << "master models info's size:" << std::to_string(master_models_info.size()) << std::endl;  //$$debug
 }
 
 //void Config_params::check_models_info(){
@@ -799,8 +737,8 @@ void Config_params::set_levels_models_info(){
 void Config_params::update_levels_models_info(int level_id, int num_models){
 
     levels_models_info[level_id] = num_models;
-    std::cout << "update levels models info, size of vector:" << levels_models_info.size()
-              << ",level:" << level_id << ", number of models: "<< levels_models_info[level_id]  << std::endl;
+//    std::cout << "[CP][UMLI] update levels models info, size of vector:" << levels_models_info.size()
+//              << ",level:" << level_id << ", number of models: "<< levels_models_info[level_id]  << std::endl;
 }
 
 
@@ -818,7 +756,7 @@ void Config_params::export_models_metadata(){
     std::ofstream outfile;
     outfile.open (fname_metadata);
     if(outfile.fail()){
-        std::cerr << "[CP][export_models_metadata] failed to open the " << fname_metadata << " file" << std::endl;
+        std::cerr << "[CP][EMM] failed to open the " << fname_metadata << " file" << std::endl;
         return ;
     }
 
@@ -830,7 +768,7 @@ void Config_params::export_models_metadata(){
     }
     outfile.close();
 
-    std::cout << "The models' summary are exported successfully" <<std::endl;
+    std::cout << "[CP][EMM] The models' summary are exported successfully" <<std::endl;
 }
 
 
@@ -845,5 +783,5 @@ void Config_params::read_zscore_parameters(pugi::xml_node& root,int argc, char *
 
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
-    std::cout << "[Config_params] z-score parameters are read" << std::endl;
+    std::cout << "[CP] z-score parameters are read" << std::endl;
 }

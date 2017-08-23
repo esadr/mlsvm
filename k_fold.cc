@@ -48,12 +48,13 @@ void k_fold::read_in_divided_data(Mat& m_min_data, Mat& m_maj_data){
     ETimer t_all;
 
     std::string prefix = Config_params::getInstance()->get_ds_path() + Config_params::getInstance()->get_ds_name();
-    std::cout << "[k_fold] prefix: " << prefix << std::endl;
+//    std::cout << "[k_fold] prefix: " << prefix << std::endl;
     std::string min_full_data {prefix + "_min_norm_data.dat"}; // add the dataset name
     std::string maj_full_data {prefix + "_maj_norm_data.dat"};
+#if dbl_KF_rdd >= 1
     std::cout << "[k_fold] min_full_data:<<"<< min_full_data << std::endl;
     std::cout << "[k_fold] maj_full_data:<<"<< maj_full_data << std::endl;
-
+#endif
     Loader ld;
     m_min_data = ld.read_input_matrix(min_full_data);
     m_maj_data = ld.read_input_matrix(maj_full_data);
@@ -67,16 +68,17 @@ void k_fold::read_in_full_NN(Mat& m_min_NN_indices,Mat& m_min_NN_dists,Mat& m_ma
     ETimer t_all;
 
     std::string prefix = Config_params::getInstance()->get_ds_path() + Config_params::getInstance()->get_ds_name();
-    std::cout << "[k_fold][Read_Full_NN] prefix: " << prefix << std::endl;
+//    std::cout << "[k_fold][Read_Full_NN] prefix: " << prefix << std::endl;
     std::string min_NN_indices {prefix + "_min_norm_data_indices.dat"};
     std::string min_NN_dists {prefix + "_min_norm_data_dists.dat"};
     std::string maj_NN_indices {prefix + "_maj_norm_data_indices.dat"};
     std::string maj_NN_dists {prefix + "_maj_norm_data_dists.dat"};
+#if dbl_KF_rfn >= 1
     std::cout << "[k_fold] min_NN_indices:<<"<< min_NN_indices << std::endl;
     std::cout << "[k_fold] min_NN_dists:<<"<< min_NN_dists << std::endl;
     std::cout << "[k_fold] maj_NN_indices:<<"<< maj_NN_indices << std::endl;
     std::cout << "[k_fold] maj_NN_dists:<<"<< maj_NN_dists << std::endl;
-
+#endif
     Loader ld;
     m_min_NN_indices = ld.read_input_matrix(min_NN_indices);
     m_min_NN_dists = ld.read_input_matrix(min_NN_dists);
@@ -691,8 +693,9 @@ void k_fold::cross_validation_class(int curr_iter,int total_iter, Mat& m_full_da
         idx_test_end    = subset_size ;
 #if dbl_KF_CVC >= 3
     PetscPrintf(PETSC_COMM_WORLD, "[KF][CV-C] condition: A (TEST - Train)\n");
+    std::cout << "[KF][CV-C] A idx_test_end: " << idx_test_end << std::endl;
 #endif
-        std::cout << "[KF][CV-C] A idx_test_end: " << idx_test_end << std::endl;
+
         // - - - - - Test - - - - -
         for(idx_iter= 0; idx_iter< idx_test_end; idx_iter++){  //idx_test_start should be 0
             //at each iteration copy the index from shuffled vector to array
@@ -1137,9 +1140,10 @@ void k_fold::combine_two_classes_in_one(Mat& m_output, Mat& m_positive_class, Ma
     MatGetSize(m_negative_class, &num_row_maj, NULL);
 
     num_row = num_row_min + num_row_maj;
-
-    PetscPrintf(PETSC_COMM_WORLD, "[KF][combine_two_classes_in_one] num_row_min: %d, num_row_maj:%d\n",num_row_min,num_row_maj);     //$$debug
-    PetscPrintf(PETSC_COMM_WORLD, "[KF][combine_two_classes_in_one] num_row: %d, num_col:%d, nz:%d\n",num_row,max_num_col_ + 1 , max_num_col_ + 1);     //$$debug
+#if dbl_KF_CTC >= 1
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][CTC] num_row_min: %d, num_row_maj:%d\n",num_row_min,num_row_maj);     //$$debug
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][CTC] num_row: %d, num_col:%d, nz:%d\n",num_row,max_num_col_ + 1 , max_num_col_ + 1);     //$$debug
+#endif
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row ,max_num_col_ + 1 ,(max_num_col_ + 1 ),PETSC_NULL, &m_output); //+1 is for label
     for(i =0; i < num_row_min ; i++){
         MatSetValue(m_output, i, 0, +1,INSERT_VALUES);        //Insert positive lable
@@ -1171,26 +1175,26 @@ void k_fold::combine_two_classes_in_one(Mat& m_output, Mat& m_positive_class, Ma
     MatView(m_output,viewer_testdata);
     PetscViewerDestroy(&viewer_testdata);
 
-    printf("[KF][combine_two_classes_in_one] total output Matrix:\n");                                               //$$debug
+    printf("[KF][CTC] total output Matrix:\n");                                               //$$debug
     MatView(m_output ,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
 #endif
-    t_all.stop_timer("[KF][combine_two_classes_in_one]");
+    t_all.stop_timer("[KF][CTC]");
 }
 
 
 
 
 
-void k_fold::write_output(std::string f_name, Mat m_Out){    //write the output to file
+void k_fold::write_output(std::string f_name, Mat m_Out, std::string desc){    //write the output to file
     PetscViewer     viewer_data_;
-
-
 //    PetscViewerBinaryOpen(PETSC_COMM_WORLD,f_name.c_str(),FILE_MODE_WRITE,&viewer_data_);
     PetscViewerBinaryOpen(PETSC_COMM_WORLD,f_name.c_str(), FILE_MODE_WRITE,&viewer_data_);
     MatView(m_Out,viewer_data_);
 //    PetscPrintf(PETSC_COMM_WORLD,"\nOutput matrix is written to file %s\n\n",f_name);
     PetscViewerDestroy(&viewer_data_);        //destroy the viewer
-    std::cout << "[KF][WOUT] output is successfully written to " << f_name << std::endl;
+#if dbl_KF_WOUT >= 1
+    std::cout << "[KF][WOUT] "<< desc <<" matrix is successfully written to " << f_name << std::endl;
+#endif
 }
 
 
@@ -1225,9 +1229,10 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
     cross_validation_class(current_iteration, total_iterations, m_min_full_data, m_min_train_data, m_min_test_data, arr_min_idx_train, min_train_size,
                            uset_min_test_idx,v_min_full_idx_train_dix, "minority", this->min_shuffled_indices_,debug_flg_CVC_min);
 
+#if dbl_KF_PDFI >= 1
     std::cout << "[KF][PDFI] min, train_size: " << min_train_size << std::endl;
     std::cout << "[KF][PDFI] min, arr_min_idx_train[40]: " << arr_min_idx_train[40] << std::endl;
-
+#endif
     Mat m_maj_test_data;
     std::unordered_set<PetscInt> uset_maj_test_idx;
     PetscInt    size_maj_full_data;
@@ -1238,13 +1243,13 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
     std::vector<PetscInt> v_maj_full_idx_train_dix;
     cross_validation_class(current_iteration, total_iterations, m_maj_full_data, m_maj_train_data, m_maj_test_data, arr_maj_idx_train, maj_train_size,
                            uset_maj_test_idx,v_maj_full_idx_train_dix, "majority", this->maj_shuffled_indices_);
-
+#if dbl_KF_PDFI >= 1
     std::cout << "[KF][PDFI] maj, train_size: " << maj_train_size << std::endl;
-
+#endif
     // - - - - -  Combine Test Data - - - - -
     Mat m_test_data;
     combine_two_classes_in_one(m_test_data, m_min_test_data, m_maj_test_data );
-    write_output(Config_params::getInstance()->get_test_ds_f_name(), m_test_data);
+    write_output(Config_params::getInstance()->get_test_ds_f_name(), m_test_data, "test data");
     MatDestroy(&m_test_data);
 
 

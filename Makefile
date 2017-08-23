@@ -1,4 +1,4 @@
-ALL: main
+ALL: mlsvm_classifier
 CC 	 = g++ -L. 
 CFLAGS 	 = -I.	
 CPPFLAGS = -std=c++11 -g -O3     #-W -Wall -Weffc++ -Wextra -pedantic -O3
@@ -77,7 +77,7 @@ main_libs_inst:  etimer.o common_funcs.o OptionParser.o k_fold.o svm.o config_pa
 
 mlsvm_classifier: $(MLSVM_OBJS) chkopts
 	-${CLINKER} $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_classifier
-	${RM} main.o 
+	${RM} mlsvm_classifier.o 
 	
 main_sl: $(SLSVM_OBJS) chkopts			# single level (no multi level which means no v-cycle)
 	-${CLINKER} $(SLSVM_OBJS)  ${PETSC_MAT_LIB} -o slsvm 

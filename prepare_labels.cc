@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     Vec v_labels;
     v_labels = read_input_vector_from_text(in_filename,num_lines);
     make_binary_labels(v_labels, minority_label,inverse);
-    write_output(out_filename,v_labels);
+    write_output(out_filename, v_labels);
     PetscFinalize();
     return 0;
 }

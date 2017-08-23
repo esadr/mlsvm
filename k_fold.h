@@ -126,7 +126,7 @@ public:
      * again and read them
      */
 //    void write_output(char f_name[PETSC_MAX_PATH_LEN], Mat m_Out);    //write the output to file
-    void write_output(std::string f_name, Mat m_Out);    //write the output to file
+    void write_output(std::string f_name, Mat m_Out, std::string desc="");    //write the output to file
 //    /*
 //     * release the local matrix and vector for input data
 //     */

@@ -64,8 +64,10 @@ Preprocess Data
 The converted data needs to be normalized. For normalization, mlsvm_zscore uses z-score normalization on the whole data including training and test parts.
 The results of normalization is stored in X_zsc_data.dat file and the lable are not changed.
 
-The k nearest neighbors are calculated using the normalized data using mlsvm_knn. The results are saved in two files for both minority and majority classes.
-The indices of neighbor nodes in the minority class are stored in X_min_norm_data_indices.dat inside the dataset folder.
+The k nearest neighbors are calculated by calling the mlsvm_save_flann over the normalized data. The mlsvm_save_flann calls the python scripts in the back to call flann.
+It needs the right parameters for PY_PATH and PYTHONPATH to work.
+
+The results are saved in two files for both minority and majority classes. The indices of neighbor nodes in the minority class are stored in X_min_norm_data_indices.dat inside the dataset folder.
 The distances to neighbor nodes are saved in X_min_norm_data_dists.dat for the minority class.
 
 For the majority class, the \_min_ is changed to \_maj_.
@@ -82,8 +84,6 @@ The rest of parameters are explained in the param.xml file, however the shortcut
 
 The MLSVM program can run by calling below command and parameters. 
 `./mlsvm_classifier -f twonorm -x 1 -k 5 -q 0.4 -r 4`
-
-
 
 
 Another directory is needed for temporary test data later You can change the path and name in the param.xml file.

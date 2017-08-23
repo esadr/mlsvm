@@ -42,12 +42,12 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         Config_params::getInstance()->set_levels_models_info();
         solution sol_coarsest;
         Refinement rf;
-        std::cout << "[MR][main] DEBUG level id before calling rf.process_coarsest_level:" +
-                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
+//        std::cout << "[MR][main] DEBUG level id before calling rf.process_coarsest_level:" +
+//                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
         rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n, level ,sol_coarsest, v_ref_results);
 
-        std::cout << "[MR][main] DEBUG level id after calling rf.process_coarsest_level:" +
-                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
+//        std::cout << "[MR][main] DEBUG level id after calling rf.process_coarsest_level:" +
+//                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
 
         // free resources
         MatDestroy(&p_data);
@@ -55,7 +55,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         MatDestroy(&p_WA);
         MatDestroy(&n_WA);
 
-        std::cout << "[MR][main]{coarsest} before returning the sol_coarsest C:"<< sol_coarsest.C << std::endl;
+//        std::cout << "[MR][main]{coarsest} before returning the sol_coarsest C:"<< sol_coarsest.C << std::endl;
 //        std::cout << "[MR][main]{coarsest} before returning the sol_coarsest nSV+:"<< sol_coarsest.p_index.size() << std::endl;
         return sol_coarsest;                                // return the coarsest solution
 
@@ -155,13 +155,14 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         ///------------------------- Refinement ----------------------------
         ETimer t_refine;
 //        printf("[MR][main] coarse solution from level:%d \n",level+1); //because it comes from coarser level
-        printf("\n         ==================== Refinement at level:%d =====================", level);
-        printf("\n                    Minority                        Majority              ");
+        printf("\n         ==================== Refinement at level:%d =====================\n", level);
+#if dbl_RF_INFO >= 1
+        printf("                    Minority                        Majority              ");
         printf("\n         #points:%d, #edges:%d ",ref_info_p.num_point,ref_info_p.num_edge);
         printf("\t  #points:%d, #edges:%d",ref_info_n.num_point,ref_info_n.num_edge);
         printf("\n         ================================================================\n");
         printf("[MR] coarse solution C:%g, G:%g, nSV+:%lu \n\n", sol_coarser.C, sol_coarser.gamma, sol_coarser.p_index.size());
-
+#endif
         solution sol_refine;
         Refinement rf;
 

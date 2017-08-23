@@ -26,6 +26,11 @@
 #define dbl_KF_CVS                  0           // Default 0
 #define dbl_KF_FN                   0           // Default 0
 #define dbl_KF_CTD                  0           // Default 0
+#define dbl_KF_CTC                  0           // Default 1 [combine_two_classes_in_one]   //release 0
+#define dbl_KF_PDFI                 0           // Default 1 [prepare_data_for_iteration]   //release 0
+#define dbl_KF_WOUT                 0           // Default 1 [write_output]                 //release 0
+#define dbl_KF_rdd                  0           // Default 0 [read divided data]
+#define dbl_KF_rfn                  0           // Default 0 [read full NN]
 //---- Loader ----
 #define dbl_LD_LWAB                 0
 #define dbl_LD_LFB                  0           // 0 Default, load flann binary
@@ -50,6 +55,7 @@
 #define dbl_MR_calc_performance     0           // 0 Default
 //---- Refinement ----
 #define dbl_RF_main                 1           // 1 Default
+#define dbl_RF_INFO                 0           // 1 Default    //release 0
 #define dbl_RF_main_with_partition  1           // 1 Default, 3 report steps
 #define dbl_RF_main_no_partition    1           // 1 Default
 #define dbl_RF_fSN                  1           // 1 Default find_SV_neighbors
@@ -69,7 +75,7 @@
 #define dbl_PR_CPM                  0           // 0 Default    //calc_performance_measure  5 prints final predicted label
 //---- Model Selection ----
 #define dbl_MS_UD                   1           // 1 Default
-#define dbl_MS_UDSepVal             1           // 1 Default
+#define dbl_MS_UDSepVal             0           // 1 Default    //release 0
 #define dbl_MS_UDIB                 1           // 1 Default
 #define dbl_MS_combine_test_data    0
 #define dbl_MS_ud_param_generator   0           // 0 Default, 3 shows new parameters
