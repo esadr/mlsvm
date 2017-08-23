@@ -3,13 +3,13 @@ CC 	 = g++ -L.
 CFLAGS 	 = -I.	
 CPPFLAGS = -std=c++11 -g -O3     #-W -Wall -Weffc++ -Wextra -pedantic -O3
 LOCDIR   = .
-MAIN 	 = main.cc
+MAIN 	 = mlsvm_classifier.cc
 MANSEC   = Mat
 
 LIBS= -lpugixml -lm -fopenmp 
 LIBFLANN= /usr/local/lib/libflann_cpp_s.a
 
-MLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc main.cc
+MLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlsvm_classifier.cc
 MLSVM_OBJS = $(MLSVM_SRCS:.cc=.o)
 
 SLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm.cc config_params.cc model_selection.cc solver.cc loader.cc ds_node.cc ds_graph.cc main_sl.cc
@@ -56,8 +56,8 @@ ConvertTools_OBJS = $(ConvertTools_SRCS:.cc=.o)
 Convert_libsvm_PETSc_SRCS= etimer.cc common_funcs.cc ut_common.cc convertor.cc ./tools/libsvm_PETSc.cc
 Convert_libsvm_PETSc_OBJS = $(Convert_libsvm_PETSc_SRCS:.cc=.o)
 
-Save_Flann_SRCS= etimer.cc common_funcs.cc loader.cc pugixml.cc OptionParser.cc config_params.cc k_fold.cc ./tools/save_flann.cc
-Save_Flann_OBJS = $(Save_Flann_SRCS:.cc=.o)
+mlsvm_Save_knn_SRCS= etimer.cc common_funcs.cc loader.cc pugixml.cc OptionParser.cc config_params.cc k_fold.cc ./tools/mlsvm_save_knn.cc
+mlsvm_Save_knn_OBJS = $(mlsvm_Save_knn_SRCS:.cc=.o)
 
 
 include ${PETSC_DIR}/lib/petsc/conf/variables
@@ -75,8 +75,8 @@ main_libs_inst:  etimer.o common_funcs.o OptionParser.o k_fold.o svm.o config_pa
 	-${CLINKER}  etimer.o common_funcs.o OptionParser.o k_fold.o svm.o config_params.o model_selection.o solver.o partitioning.o refinement.o main_recursion.o coarsening.o loader.o ds_node.o ds_graph.o main.o  ${PETSC_MAT_LIB} -o main $(LIBS)
 	${RM} main.o 
 
-main: $(MLSVM_OBJS) chkopts
-	-${CLINKER} $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o main
+mlsvm_classifier: $(MLSVM_OBJS) chkopts
+	-${CLINKER} $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_classifier
 	${RM} main.o 
 	
 main_sl: $(SLSVM_OBJS) chkopts			# single level (no multi level which means no v-cycle)
@@ -149,11 +149,11 @@ convert_libsvm_PETSc: $(Convert_libsvm_PETSc_OBJS) chkopts
 	${RM} convert_libsvm_PETSc.o 
 	
 	
-save_flann: $(Save_Flann_OBJS) chkopts
-	-${CLINKER} $(Save_Flann_OBJS)  ${PETSC_MAT_LIB} -o save_flann
-	${RM} save_flann.o 
+mlsvm_save_knn: $(mlsvm_Save_knn_OBJS) chkopts
+	-${CLINKER} $(mlsvm_Save_knn_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_save_knn
+	${RM} mlsvm_save_knn.o 
 
 clean_main:	#PETSc Makefile has clean method which conflict with clean method here, therefore this one is created
 	make clean
-	rm main
+	rm mlsvm_classifier
 	echo "clean is done"

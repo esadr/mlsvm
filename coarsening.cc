@@ -83,8 +83,8 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 #if dbl_CO_calcP >= 1         //calculate the stat for number of edges
     ref_info.num_point = num_row;
     ref_info.num_edge = sum_nnz / 2;
-    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} number of rows:"<< num_row <<
-                "\t\tedges:"<< ref_info.num_edge << std::endl;
+//    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} number of rows:"<< num_row <<
+//                "\t\tedges:"<< ref_info.num_edge << std::endl;
     std::sort(stat_degree_.begin(), stat_degree_.end(), std::greater<tmp_degree>());     //Sort all edges in descending order
 
     ref_info.min_num_edge = stat_degree_[num_row-1].degree_;
@@ -100,8 +100,9 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 #endif
 
     vertexs.setAvgFutureVolume( sum_future_volume / vertexs.getSize());
-    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} Average Future Volume:"<< sum_future_volume / vertexs.getSize() << std::endl;
+
 #if dbl_CO_calcP >= 3
+    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} Average Future Volume:"<< sum_future_volume / vertexs.getSize() << std::endl;
     t_WD.stop_timer("[CO][calc_p]Calc future volume");
 #endif
 
@@ -228,14 +229,14 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 //    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, Config_params::getInstance()->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
     float threshold=Config_params::getInstance()->get_cs_boundary_points_threshold();    //Experiment boundary points (Jan 9, 2017);
     size_t ultimate_estimated_fractions=Config_params::getInstance()->get_cs_boundary_points_max_num();    //Experiment boundary points (Jan 9, 2017)
-    std::cout << "[CO][calc_p] DEBUG boundary points t:" << threshold << ", max fractions:" << ultimate_estimated_fractions << std::endl;
+//    std::cout << "[CO][calc_p] DEBUG boundary points t:" << threshold << ", max fractions:" << ultimate_estimated_fractions << std::endl;
     
 //#if boundary_points == 0    //Experiment boundary points (Jan 9, 2017)
     bool is_boundary_points_active = Config_params::getInstance()->get_cs_boundary_points_status();
-    std::cout << "[CO][calc_p] DEBUG boundary points status:" << is_boundary_points_active << std::endl;
+//    std::cout << "[CO][calc_p] DEBUG boundary points status:" << is_boundary_points_active << std::endl;
     if(! is_boundary_points_active){
         MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, Config_params::getInstance()->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
-        std::cout << "[CO][calc_p] DEBUG P matrix is created with fixed number of fractions (no boundary) nnz:" << Config_params::getInstance()->get_coarse_r() << std::endl;
+//        std::cout << "[CO][calc_p] DEBUG P matrix is created with fixed number of fractions (no boundary) nnz:" << Config_params::getInstance()->get_coarse_r() << std::endl;
 //#else       //boundary_points == 1 , 20 is constant as the maximum number of estimated fractions for a fine point
     }else{
         MatCreateSeqAIJ(PETSC_COMM_SELF,num_row, this->num_coarse_points, ultimate_estimated_fractions, PETSC_NULL, &P);

@@ -14,7 +14,7 @@
  * 15:
  */
 
-#define timer_print                 1      // 1: Active , 0: Disable
+#define timer_print                 0      // 1: Active , 0: Disable
 //Export the matrices or not
 #define debug_export                1      // 1: Export , 0: Not Export
 
@@ -33,14 +33,15 @@
 #define dbl_LD_CD                   0           // 0 Default, 3 print raw and calculated distance
 #define dbl_LD_LNDS                 0           // 0 Default, 5 print size of data
 //---- Coarsening ----
-#define dbl_CO_calcP                1           // 1 normal with #edges
+#define dbl_CO_calcP                0           // 1 normal with #edges                 //release 0
 #define dbl_CO_vNorm                0           // calculate the normalized vector
 #define dbl_CO_cInv                 0           // calculate the inverse vector
 #define dbl_CO_CAD                  0           // 0 Default [Calculate Aggregate data]
 #define dbl_CO_calc_WA_c            0
 #define dbl_CO_calc_coarse_vol      0
-#define dbl_CO_FWE                  3           // filter weak edges (3 prints # filtered edges)
+#define dbl_CO_FWE                  0           // filter weak edges (3 prints # filtered edges) //release 0
 //---- MainRecursion (Refinement) ----
+#define dbl_MR_main                 0           // 1 Default //release 0
 #define debug_level_main_rec        0           // 0 Default
 #define dbl_MR_refinement           1           // 1 Default
 

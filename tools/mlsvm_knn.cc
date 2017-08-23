@@ -11,7 +11,8 @@ Config_params* Config_params::instance = NULL;
 void run_flann(Mat& m_data, Mat& m_indices, Mat& m_dists);
 
 int main(int argc, char **argv){
-    PetscInitialize(&argc, &argv, NULL, NULL);
+//    PetscInitialize(&argc, &argv, NULL, NULL);
+    PetscInitialize(NULL, NULL, NULL, NULL);
     ETimer t_all;
     //read XML parameters
     Config_params::getInstance()->read_params("./params.xml", argc, argv, Config_params::flann); //@ 040317-1842
@@ -49,7 +50,7 @@ int main(int argc, char **argv){
         ETimer t_kf;
         k_fold kf;
         kf.read_in_data();
-        kf.divide_data(false);   //false: don't export into files
+        kf.divide_data(true);   //I need the data files, so I export them to files
         Mat m_min_data = kf.get_m_min_data();
         Mat m_maj_data = kf.get_m_maj_data();
         t_kf.stop_timer("[Main] reading and deviding data in k-fold class");

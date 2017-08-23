@@ -281,8 +281,9 @@ void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::s
     const PetscScalar *vals_ind, *vals_dis;
     PetscScalar weight_ = 0;    //for differnet distance
     MatGetSize(m_NN_idx,&num_row,0);    //m returns the number of rows globally = number of nodes
+#if dbl_LD_CWAM >=1
     printf("[LD][CWAM] number of rows(nodes) in NN matrix: %d \n",num_row);  //$$debug
-
+#endif
     if(debug_status){
         printf("m_NN_idx Matrix :\n");                   //$$debug
         MatView(m_NN_idx,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug

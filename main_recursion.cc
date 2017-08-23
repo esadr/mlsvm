@@ -71,9 +71,13 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         Coarsening p_coarser("Minority") ;
         Coarsening n_coarser("Majority");
         cs_info ref_info_p, ref_info_n;
+#if dbl_MR_main >= 1
         printf("\n[MR][main] ================= Coarsening at level:%d =================\n",level);
+#endif
         if(p_num_row >= c_limit){
+#if dbl_MR_main >= 1
             printf("[MR][main]+ + + + + + + + Positive class + + + + + + + + \n");
+#endif
             m_P_p = p_coarser.calc_P(p_WA, p_vol, v_p_seeds_indices, ref_info_p); //m_P_p measn P matrix for positive label (minority class)
 //            t_coarse.stop_timer("[MR][Main]{1} from start of both class calc_p minority, level:",std::to_string(level));
 
@@ -107,8 +111,9 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
             VecDuplicate(p_vol,&p_vol_c);
             VecCopy(p_vol,p_vol_c);
         }
-
+#if dbl_MR_main >= 1
         printf("\n[MR][main]- - - - - - - - Negative class - - - - - - - -\n");
+#endif
         m_P_n = n_coarser.calc_P(n_WA, n_vol, v_n_seeds_indices, ref_info_n); // same for majority class
 //        t_coarse.stop_timer("[MR][Main]{4} from start of both class calc_p majority",std::to_string(level));
 

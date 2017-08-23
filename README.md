@@ -14,7 +14,7 @@ Installation
 1- We need to install the libraries which have been downloaded in the petsc and flann folders. 
 The installation guides for them are provided by their developers and you can easily use them to install the libraries.
 For PETSc please refer to [here](https://www.mcs.anl.gov/petsc/documentation/installation.html) and for Flann [here](http://www.cs.ubc.ca/research/flann).
-In case of using python for calculating the k-nearest neighbors you need to install the Anaconda [here](https://www.continuum.io/downloads), and pyflann [here](https://github.com/primetang/pyflann).
+For calculating the k-nearest neighbors you need to install the Anaconda [here](https://www.continuum.io/downloads), and pyflann [here](https://github.com/primetang/pyflann).
 
 2- Configure the coresponding environment variables based on your installation. 
 Examples are as follow:
@@ -22,7 +22,7 @@ Examples are as follow:
 `PETSC_ARCH=linux-cxx`, `PETSC_DIR=/lib/petsc`
 
 Below paths are required for python version of k-nearest neighbors.
-`PY_PATH=/anaconda3/bin/`,  `PYTHONPATH=/lib/flann/usr/local/share/flann/python/:/lib/petsc/bin/`.
+`PY_PATH=~/anaconda3/bin/`,  `PYTHONPATH=/lib/flann/usr/local/share/flann/python/:/lib/petsc/bin/`.
 
 3- Please go to mlsvm directory (top level) and run `make` command.
 If the program compiled correctly, it is ready to use. However, you need to prepare the data in the right format for mlsvm library.
@@ -61,7 +61,7 @@ Please cite the original data provider in case of using these data sets which ar
 
 Preprocess Data
 -------------
-The converted the data needs to be normalized. For normalization, mlsvm_zscore uses z-score normalization on the whole data including training and test parts.
+The converted data needs to be normalized. For normalization, mlsvm_zscore uses z-score normalization on the whole data including training and test parts.
 The results of normalization is stored in X_zsc_data.dat file and the lable are not changed.
 
 The k nearest neighbors are calculated using the normalized data using mlsvm_knn. The results are saved in two files for both minority and majority classes.
@@ -72,12 +72,16 @@ For the majority class, the \_min_ is changed to \_maj_.
 
 Classification
 -------------
-
+The classification use cross validation to make separate parts for validation and test from the training data. You can set the number of k-fold using -k parameter.
+For running the same experiment multiple times, you can set the number of experiments using -x. Each experiments shuffles the data in the beginning.
+The rest of parameters are explained in params.xml file and User Guide.
 
 To run the mlsvm on dataset X, you create the files in datasets folder regards to name format explained above and call `./main -f X ` or you can configure the name inside the param.xml file and just call `./main`
 
 The rest of parameters are explained in the param.xml file, however the shortcuts for overriding them through the command prompt will explain later.
 
+The MLSVM program can run by calling below command and parameters. 
+`./mlsvm_classifier -f twonorm -x 1 -k 5 -q 0.4 -r 4`
 
 
 
@@ -107,7 +111,5 @@ For questions or suggestions please email me at esadrfa@g.clemson.edu
 
 
 
-To use the MLSVM program, you can run it using below command and parameters. 
-`./main -f twonorm -x 1 -k 5 -q 0.4 -r 4`
 
 The parameters could be set inside the `param.xml` file. You can find the details for parameters in the user guide document.
