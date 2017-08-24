@@ -85,6 +85,20 @@ The rest of parameters are explained in the param.xml file, however the shortcut
 For instance, the MLSVM program can run by calling below command and parameters. 
 `./mlsvm_classifier -f twonorm -x 1 -k 5 -q 0.4 -r 4`
 
+Results
+-------------
+* Summary Logs
+The resutls are presented in the standard output. You can redirect the output to a file using two below approaches.
+1- Send all the output to a file and not printing in the terminal.
+`./mlsvm_classifier > ./summary.log`
+2- The outputs print in the terminal as well.
+`./mlsvm_classifier | tee ./summary.log`
+
+In case of errors, please forward both error and standard output to a file using 
+`./mlsvm_classifier > ./summary.log 2>&1`
+
+* Train Models
+The trained models are stored in the `./svm_models`. Each model has information about the experiment id and k-fold id which are used to train it. The test data for each of them are saved in the ./temp folder. 
 
 
 List of Tools:
