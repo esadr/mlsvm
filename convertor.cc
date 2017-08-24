@@ -90,16 +90,16 @@ void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_dat
 
         VecSetValue(v_lbl, curr_row, stoi(tokens[0]), INSERT_VALUES);
         for(int i=0; i< tokens.size(); i++){
-            PetscInt idx;
+            unsigned int idx;
             PetscScalar val;
             auto pos = tokens[i].find(":");
-            if (pos != std::string::npos) {
-//                std::cout << "pos: " << pos << std::endl;
+            if (pos != std::string::npos && pos <= num_col) {
                 idx= stoi(tokens[i].substr(0, pos)) - 1;                        //real index from file and -1 is for PETSc index that is from zero not one
                 val = stof(tokens[i].substr(pos+1,tokens[i].size()-1));       //value corresponding to the idx index
-//                std::cout << "idx: " << idx << ", val: " << val << std::endl;
+//                std::cout << "pos: " << pos << std::endl;
+//                    std::cout << "curr_row:"<<curr_row << ",i:" <<i<< ",idx: " << idx << ", val: " << val << std::endl;
+                MatSetValue(m_data,curr_row,idx, val,INSERT_VALUES);
             }
-            MatSetValue(m_data,curr_row,idx, val,INSERT_VALUES);
         }
         curr_row++;
     }

@@ -53,7 +53,7 @@ TestMatrix_OBJS = $(TestMatrix_SRCS:.cc=.o)
 ConvertTools_SRCS= etimer.cc common_funcs.cc ut_common.cc convertor.cc ./tools/convert_tools.cc
 ConvertTools_OBJS = $(ConvertTools_SRCS:.cc=.o)
 
-Convert_libsvm_PETSc_SRCS= etimer.cc common_funcs.cc ut_common.cc convertor.cc ./tools/libsvm_PETSc.cc
+Convert_libsvm_PETSc_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc ut_common.cc loader.cc convertor.cc ./tools/mlsvm_libsvm_PETSc.cc
 Convert_libsvm_PETSc_OBJS = $(Convert_libsvm_PETSc_SRCS:.cc=.o)
 
 mlsvm_Save_knn_SRCS= etimer.cc common_funcs.cc loader.cc pugixml.cc OptionParser.cc config_params.cc k_fold.cc ./tools/mlsvm_save_knn.cc
@@ -144,9 +144,9 @@ cvt: $(ConvertTools_OBJS) chkopts
 	-${CLINKER} $(ConvertTools_OBJS)  ${PETSC_MAT_LIB} -o convert_tools
 	${RM} convert_tools.o 
 
-convert_libsvm_PETSc: $(Convert_libsvm_PETSc_OBJS) chkopts
-	-${CLINKER} $(Convert_libsvm_PETSc_OBJS)  ${PETSC_MAT_LIB} -o convert_libsvm_PETSc
-	${RM} convert_libsvm_PETSc.o 
+mlsvm_libsvm_PETSc: $(Convert_libsvm_PETSc_OBJS) chkopts
+	-${CLINKER} $(Convert_libsvm_PETSc_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_libsvm_PETSc
+	${RM} mlsvm_libsvm_PETSc.o 
 	
 	
 mlsvm_save_knn: $(mlsvm_Save_knn_OBJS) chkopts
