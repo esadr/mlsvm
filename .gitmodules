@@ -4,3 +4,6 @@
 [submodule "flann"]
 	path = flann
 	url = https://github.com/mariusmuja/flann.git
+[submodule "pyflann"]
+	path = pyflann
+	url = git@github.com:esadr/pyflann.git

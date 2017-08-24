@@ -125,8 +125,7 @@ It converts the LibSVM file format to the suitable format for MLSVM.
 
 * mlsvm_zscore
 
-It normalizes the input data using z-scrore. For example, your data set should be stored in file X_data.dat and you call `./mlsvm_zscore -f X `. The output file is stored as X_zsc_data.dat in the same path.
-The path is set using --ds_p parameter.
+It normalizes the input data using z-scrore. For example, your data set should be stored in file X_data.dat and you run `./mlsvm_zscore -f X `. The output file is stored as X_zsc_data.dat in the same path. The path is set using --ds_p parameter.
 
 Parameters:
 -------------
