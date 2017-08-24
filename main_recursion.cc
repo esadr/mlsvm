@@ -34,7 +34,8 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
 
     /// ----------------- Both classes are small enough, Now call the ModelSelection (Recursive Condition) -----------------
     if ((p_num_row <  c_limit) && (n_num_row <  c_limit))  {          //both classes are small enough (coarsest level)
-        printf("\n[MR][main] ================= End of Coarsening at level:%d =================\n",level);
+//        printf("[MR][main] ================= End of Coarsening at level:%d =================\n",level);
+        printf("[MR][main] ----- End of Coarsening at level:%d ----- \n",level);
         printf("[MR][main] num points P:%d, N:%d\n",p_num_row, n_num_row);      //$$debug
 //        printf("[MR][main] start to solve SVM for level:%d\n",level);      //$$debug
 
@@ -72,10 +73,13 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         Coarsening n_coarser("Majority");
         cs_info ref_info_p, ref_info_n;
 #if dbl_MR_main >= 1
-        printf("\n[MR][main] ================= Coarsening at level:%d =================\n",level);
+        printf("[MR][main] Coarsening at level:%d\n",level);
+#endif
+#if dbl_MR_main >= 3
+        printf("[MR][main] ================= Coarsening at level:%d =================\n",level);
 #endif
         if(p_num_row >= c_limit){
-#if dbl_MR_main >= 1
+#if dbl_MR_main >= 3
             printf("[MR][main]+ + + + + + + + Positive class + + + + + + + + \n");
 #endif
             m_P_p = p_coarser.calc_P(p_WA, p_vol, v_p_seeds_indices, ref_info_p); //m_P_p measn P matrix for positive label (minority class)
@@ -111,7 +115,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
             VecDuplicate(p_vol,&p_vol_c);
             VecCopy(p_vol,p_vol_c);
         }
-#if dbl_MR_main >= 1
+#if dbl_MR_main >= 3
         printf("\n[MR][main]- - - - - - - - Negative class - - - - - - - -\n");
 #endif
         m_P_n = n_coarser.calc_P(n_WA, n_vol, v_n_seeds_indices, ref_info_n); // same for majority class
@@ -155,7 +159,8 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         ///------------------------- Refinement ----------------------------
         ETimer t_refine;
 //        printf("[MR][main] coarse solution from level:%d \n",level+1); //because it comes from coarser level
-        printf("\n         ==================== Refinement at level:%d =====================\n", level);
+//        printf("           ==================== Refinement at level:%d =====================\n", level);
+        printf("\n           - - - - - - - - - - Refinement at level:%d - - - - - - - - - - \n", level);
 #if dbl_RF_INFO >= 1
         printf("                    Minority                        Majority              ");
         printf("\n         #points:%d, #edges:%d ",ref_info_p.num_point,ref_info_p.num_edge);

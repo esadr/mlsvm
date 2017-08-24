@@ -54,7 +54,7 @@ int main(int argc, char **argv)
             for (int i=0; i < num_kf_iter_; i++){
                 Config_params::getInstance()->set_main_current_kf_id(i);
                 ETimer t_iteration;
-                printf("==== Exp:%d, Iteration %d ==== ",r,i);
+                printf("\n           ==================== Exp:%d, Iteration %d ==================== \n",r,i);
                 Mat m_min_train_data,m_min_WA;
                 Mat m_maj_train_data,m_maj_WA;
                 Vec v_p_vol, v_n_vol;
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 //                t_solver.stop_timer("[MC] Total Solver at iteration ",std::to_string(i));
 
                 t_iteration.stop_timer("[MC] Vcycle (including loading datasets) at iteration ",std::to_string(i));
-                Config_params::getInstance()->print_final_results();
+//                Config_params::getInstance()->print_final_results();          //commented for release
 
                 //save the final metadata for models of the current k-fold   @072617-1157
                 Config_params::getInstance()->update_master_models_info();
@@ -135,11 +135,11 @@ int main(int argc, char **argv)
         MatDestroy(&m_maj_full_NN_indices);
         MatDestroy(&m_maj_full_NN_dists);
 
-        std::cout << "EndofExperiment " ;
+        std::cout << "[MC] End of all experiments\n" ;
         Config_params::getInstance()->print_final_results();
 
-        t_all.stop_timer("[MC] whole test including all iterations");
-        printf("[MC] total number of iterations:%d \n",total_iter_);
+        t_all.stop_timer("[MC] Whole test including all iterations");
+        printf("[MC] Total number of iterations:%d \n",total_iter_);
 
         Config_params::getInstance()->export_models_metadata();
 

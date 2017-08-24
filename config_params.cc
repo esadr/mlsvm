@@ -6,7 +6,7 @@
 #include <chrono>
 #include "petscvec.h"
 
-
+#define verbose false
 
 Config_params* Config_params::getInstance() {
     if ( !instance ) instance = new Config_params;
@@ -595,7 +595,7 @@ void Config_params::debug_only_set_srand_seed(std::string new_seed){
 void Config_params::add_final_summary(summary current_summary, int selected_level){
     current_summary.selected_level = selected_level;
     this->all_summary.push_back(current_summary);
-    std::cout << "[CP] summary added to all_summary" << std::endl;
+//    std::cout << "[CP] summary added to all_summary" << std::endl;
 }
 
 int  Config_params::get_best_level() const{
@@ -621,7 +621,7 @@ void Config_params::print_summary(const summary& summary_in, std::string caller_
 
     if(stage != -1)
         printf("stage:%d, ",stage);
-
+#if verbose
     printf("AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.3f, TP:%.0f, TN:%.0f, FP:%.0f, FN:%.0f",
            summary_in.perf.at(Acc), summary_in.perf.at(Sens), summary_in.perf.at(Spec), summary_in.perf.at(PPV),
            summary_in.perf.at(NPV), summary_in.perf.at(F1), summary_in.perf.at(Gmean), summary_in.perf.at(TP),
@@ -634,6 +634,12 @@ void Config_params::print_summary(const summary& summary_in, std::string caller_
         printf(", nSV+:%d, nSV-:%d", summary_in.num_SV_p, summary_in.num_SV_n);
 
     printf("\n");
+#else               //release
+    printf("AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.3f\n",
+           summary_in.perf.at(Acc), summary_in.perf.at(Sens), summary_in.perf.at(Spec), summary_in.perf.at(PPV),
+           summary_in.perf.at(NPV), summary_in.perf.at(F1), summary_in.perf.at(Gmean));
+
+#endif
 
 }
 
@@ -675,10 +681,10 @@ void Config_params::print_final_results() const{
                this->all_summary[i].perf.at(Spec), this->all_summary[i].perf.at(PPV),
                this->all_summary[i].perf.at(NPV), this->all_summary[i].perf.at(F1),
                this->all_summary[i].perf.at(Gmean));
-
+    #if verbose
         if(this->all_summary[i].C && this->all_summary[i].gamma)
             printf(", C:%.2f, G:%.4f",this->all_summary[i].C, this->all_summary[i].gamma);
-
+    #endif
         printf("\n");
 
         sum_acc += this->all_summary[i].perf.at(Acc);
@@ -697,7 +703,8 @@ void Config_params::print_final_results() const{
     double avg_npv = sum_npv / this->all_summary.size();
     double avg_f1 = sum_f1 / this->all_summary.size();
     double avg_gmean = sum_gmean / this->all_summary.size();
-    printf("\n\n[CP][PFR], Avg_Acc:%.2f, Avg_SN:%.2f, Avg_SP:%.2f, Avg_PPV:%.2f, Avg_NPV:%.2f, Avg_F1:%.2f, Avg_GM:%.2f\n\n",
+    printf("           -------------------- Average results --------------------\n");
+    printf("[CP][PFR], Avg_Acc:%.2f, Avg_SN:%.2f, Avg_SP:%.2f, Avg_PPV:%.2f, Avg_NPV:%.2f, Avg_F1:%.2f, Avg_GM:%.2f\n\n",
            avg_acc, avg_sens, avg_spec, avg_ppv, avg_npv, avg_f1, avg_gmean);
 }
 
@@ -714,7 +721,7 @@ void Config_params::print_ref_result(const std::vector<ref_results>& v_ref_resul
 
 void Config_params::set_master_models_info(){
     int master_size = get_main_num_repeat_exp() * get_main_num_kf_iter();
-    std::cout << "master size:" << std::to_string(master_size) << std::endl;
+//    std::cout << "master size:" << std::to_string(master_size) << std::endl;
     master_models_info.resize(master_size);
 //    std::cout << "master models info's size:" << std::to_string(master_models_info.size()) << std::endl;  //$$debug
 }
@@ -746,8 +753,8 @@ void Config_params::update_master_models_info(){
     int curr_id = get_main_current_exp_id() * get_main_num_kf_iter() + get_main_current_kf_id();
     int best_level = get_best_level();
     master_models_info[curr_id] = std::make_pair(best_level, levels_models_info[best_level]);
-    std::cout << "update master models info, size of vector:" << master_models_info.size()
-              << ",level:" << best_level << ", number of models: " << levels_models_info[best_level] << std::endl;
+//    std::cout << "update master models info, size of vector:" << master_models_info.size()
+//              << ",level:" << best_level << ", number of models: " << levels_models_info[best_level] << std::endl;
 }
 
 void Config_params::export_models_metadata(){

@@ -320,7 +320,9 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
             ModelSelection ms_refine;
             ms_refine.uniform_design_separate_validation(m_new_neigh_p, v_vol_p, m_new_neigh_n, v_vol_n, true,
                                                          sol_coarser.C, sol_coarser.gamma, m_VD_p, m_VD_n, level, sol_refine, v_ref_results);
+#if dbl_RF_main_no_partition >=1
             std::cout << "[RF]{no partitioning} ms_active uniform design is finished!\n";
+#endif
 
         }else{  // No model selection either because it is disabled or the threshold is reached
             Solver sv_refine;
@@ -381,13 +383,15 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 
 
     MatGetSize(m_data,&num_row_fine_points,NULL);
-#if dbl_RF_fSN >=5
+#if dbl_RF_FSN >=5
     std::cout << "[RF][FSN]{" << cc_name << "} m_data num row as num_row_fine_points:"<< num_row_fine_points <<std::endl;
 #endif
     /// - - - - - - - - - Create P Transpose matrix - - - - - - - -
     // P' : find fine points in rows instead of columns due to performance issues with Aij matrix
     num_seeds = (int) seeds_ind.size();
+#if dbl_RF_FSN >=3
     std::cout  << "[RF][FSN]{" << cc_name << "} initialize num_seeds:" << num_seeds << "\n";
+#endif
     PetscMalloc1(num_row_fine_points,&ind_);
     Mat m_Pt_;
     MatTranspose(m_P,MAT_INITIAL_MATRIX,&m_Pt_);
@@ -395,10 +399,10 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 
     PetscInt num_row_m_Pt_, num_col_m_Pt_;
     MatGetSize(m_Pt_,&num_row_m_Pt_,&num_col_m_Pt_);
-#if dbl_RF_fSN >=5
+#if dbl_RF_FSN >=5
     std::cout << "[RF][FSN]{" << cc_name << "} P transpose dim ["<< num_row_m_Pt_ <<","<< num_col_m_Pt_ << "]" <<std::endl;
     std::cout << "[RF][FSN]{" << cc_name << "} m_data num rows:"<< num_row_fine_points << std::endl;
-    #if dbl_RF_fSN >=6            //should be above 7
+    #if dbl_RF_FSN >=7            //should be above 7
         std::cout << "[RF][FSN]{" << cc_name << "} list of all SVs are:\n";
 //        if(cc_name == "Majority"){
             std::cout << "[RF][FSN]{" << cc_name << "} [HINT]for no fake point, they should start from zero, not couple hundreds:\n";
@@ -418,20 +422,19 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 
     /// - - - - - reserve as the number of rows in finer data set (for each class) - - - - -
     std::vector<int> v_fine_neigh_id(num_row_fine_points);
-//if(cc_name == "Majority")
-//    exit(1);
+
     /// - - - - - - - - - Select fine points - - - - - - - -
     // Loop over indices of SV's in coarser level in P' matrix (Oct 2, #bug, fixed)
     for(unsigned int i=0; i < num_seeds ; i++){
         MatGetRow(m_Pt_,seeds_ind[i],&ncols, &cols, &vals);
 
-#if dbl_RF_fSN >=1
+#if dbl_RF_FSN >=1
         if(ncols == 0){
             std::cout  << "[RF][FSN]{" << cc_name << "} empty row in P' at row i:"<< i
                        << " seeds_ind[i]:" << seeds_ind[i] << " ncols:" << ncols << std::endl;
             exit(1);
         }
-        #if dbl_RF_fSN >=3
+        #if dbl_RF_FSN >=3
             std::cout  << "[RF][FSN]{" << cc_name << "} MatGetRow of P' matrix in loop seeds_ind[i]:"
                            << seeds_ind[i] << " ncols:" << ncols << std::endl;
         #endif
@@ -450,7 +453,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
             // - - - sort the vector of multiple participants in this aggregate - - -
             std::sort(v_agg_.begin(), v_agg_.end(), std::greater<selected_agg>());
 
-#if dbl_RF_fSN >=7
+#if dbl_RF_FSN >=7
     printf("==== [MR][inside selecting agg]{after sort each row of P'} i:%d ====\n",i);
     for (auto it = v_agg_.begin(); it != v_agg_.end(); it++){
         printf("index:%d, value:%g\n", it->index, it-> value);
@@ -471,7 +474,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
         MatRestoreRow(m_Pt_,seeds_ind[i],&ncols, &cols, &vals);
     }
     MatDestroy(&m_Pt_);
-#if dbl_RF_fSN >=9
+#if dbl_RF_FSN >=9
     std::cout<<"[RF][find_SV_neighbors] num_seeds:"<<num_seeds<<std::endl;
 #endif
     /// - - - - - - - - - Add distant points - - - - - - - - -
@@ -522,8 +525,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 
 
     // Using WA matrix, find the neighbors of points which are participated in SV's aggregate
-#if dbl_RF_fSN >=1      // this should be 3
-
+#if dbl_RF_FSN >=1      // this should be 1
     if(Config_params::getInstance()->get_rf_add_distant_point_status()){
         std::cout  << "[RF][FSN]{" << cc_name << "} num of points participated in SV aggregates are: "<< cnt_total - cnt_agg_part_distant_neighbor  << std::endl;
         std::cout  << "[RF][FSN]{" << cc_name << "} num of distant 1 neighbor of above points are::"<< cnt_agg_part_distant_neighbor << std::endl;
@@ -541,7 +543,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
     ISCreateGeneral(PETSC_COMM_SELF,cnt_total,ind_,PETSC_COPY_VALUES,&IS_neigh_id);
     PetscFree(ind_);      //free the indices as I have created the IS
 
-#if dbl_RF_fSN >=7          //default is 7
+#if dbl_RF_FSN >=7          //default is 7
     printf("[MR] IS is created \n");               //$$debug
     ISView(IS_neigh_id,PETSC_VIEWER_STDOUT_WORLD);
 //        MatGetSize(m_data,&num_row_fine_points,NULL);
@@ -552,7 +554,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
     MatGetSubMatrix(m_data,IS_neigh_id, NULL,MAT_INITIAL_MATRIX,&m_neighbors);
 
 
-#if dbl_RF_fSN >=3
+#if dbl_RF_FSN >=3
     PetscInt m_neighbors_num_row =0, m_neighbors_num_col;
     MatGetSize(m_neighbors ,&m_neighbors_num_row,&m_neighbors_num_col);
 
@@ -560,7 +562,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
                   << "} new sub matrix dimension #row:" << m_neighbors_num_row
                   << ",#col:" <<m_neighbors_num_col << std::endl;
 #endif
-#if dbl_RF_fSN >=7      //default is 7
+#if dbl_RF_FSN >=7      //default is 7
     std::cout  << "[RF][FSN]{" << cc_name << "} m_neighbors matrix:\n";                       //$$debug
     MatView(m_neighbors,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
 #endif

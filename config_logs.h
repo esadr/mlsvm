@@ -46,7 +46,7 @@
 #define dbl_CO_calc_coarse_vol      0
 #define dbl_CO_FWE                  0           // filter weak edges (3 prints # filtered edges) //release 0
 //---- MainRecursion (Refinement) ----
-#define dbl_MR_main                 0           // 1 Default //release 0
+#define dbl_MR_main                 1           // 1 Default //release 0
 #define debug_level_main_rec        0           // 0 Default
 #define dbl_MR_refinement           1           // 1 Default
 
@@ -56,9 +56,9 @@
 //---- Refinement ----
 #define dbl_RF_main                 1           // 1 Default
 #define dbl_RF_INFO                 0           // 1 Default    //release 0
-#define dbl_RF_main_with_partition  1           // 1 Default, 3 report steps
-#define dbl_RF_main_no_partition    1           // 1 Default
-#define dbl_RF_fSN                  1           // 1 Default find_SV_neighbors
+#define dbl_RF_main_with_partition  0           // 1 Default, 3 report steps        //release 0
+#define dbl_RF_main_no_partition    0           // 1 Default                        //release 0
+#define dbl_RF_FSN                  0           // 1 Default find_SV_neighbors      //release 0
 #define dbl_RF_ABM                  0           // 0 Default, 3 report different levels results after sort, 5 report before and after sort
 
 //---- Partitioning ----

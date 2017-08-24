@@ -2221,7 +2221,7 @@ void Solver::prepare_solution_single_model(svm_model * model_, int num_point_p, 
             "_level_" + std::to_string(Config_params::getInstance()->get_main_current_level_id()) + ".svmmodel";
     svm_save_model(output_file.c_str(), local_model);
     Config_params::getInstance()->update_levels_models_info(Config_params::getInstance()->get_main_current_level_id(), 1);
-    printf("model %s is saved\n", output_file.c_str());
+//    printf("[SV][PSSM] model %s is saved\n", output_file.c_str());
 #endif
 
 
