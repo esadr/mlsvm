@@ -78,27 +78,24 @@ The classification use cross validation to make separate parts for validation an
 For running the same experiment multiple times, you can set the number of experiments using -x. Each experiments shuffles the data in the beginning.
 The rest of parameters are explained in params.xml file and User Guide.
 
-To run the mlsvm on dataset X, you create the files in datasets folder regards to name format explained above and call `./main -f X ` or you can configure the name inside the param.xml file and just call `./main`
+To run the mlsvm on dataset X, you create the files in datasets folder regards to name format explained above and call `./mlsvm_classifier -f X ` or you can configure the name inside the param.xml file and just call `./mlsvm_classifier`
 
 The rest of parameters are explained in the param.xml file, however the shortcuts for overriding them through the command prompt will explain later.
 
-The MLSVM program can run by calling below command and parameters. 
+For instance, the MLSVM program can run by calling below command and parameters. 
 `./mlsvm_classifier -f twonorm -x 1 -k 5 -q 0.4 -r 4`
-
-
-Another directory is needed for temporary test data later You can change the path and name in the param.xml file.
 
 
 
 List of Tools:
 -------------
-Save_flann which divides the data to two classes and calculate the k-NN using FLANN library. It saves the output for each class in indices and dists files. The mlsvm use these files to create a adjacency matrix for the multi level framework.
-You can create it using 
-`make save_flann`
-The parameters are filename, number of nearest neighbors and type of distances which are passed by -f, --nn_n, --nn_d respectively.
+mlsvm_save_knn which divides the data to two classes and calculate the k-NN. It saves the output for each class in indices and dists files. 
+You can compile it by 
+`make mlsvm_save_knn`
+The parameters are filename, number of nearest neighbors and type of distances which are passed by -f, --nn_n, --nn_d respectively. 
 The default parameter for --nn_n is 10 and for --nn_n is 10 which are set in the param.xml file.
 The filename is the name of dataset without any extension like filename_zsc_data.dat.
-For example for twonorm dataset you can use `./save_flann -f twonorm --nn_n 10 --nn_d 1`
+For example for twonorm dataset you can use `./mlsvm_save_knn -f twonorm --nn_n 10 --nn_d 1`
 
 
 

@@ -1,0 +1,124 @@
+				  * * * * Real standard output of mlsvm_classfier * * * *                               | 	       * * * * Description for the log parts * * * *    
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+$ ./mlsvm_classifier																	                |       
+[CP][read_params] param.xml path : ./params.xml                                                         |
+mlsvm_version:0.0.44                                                                                    |
+============= dataset info =============                                                                |
+ds_path: ./datasets/                                                                                    |
+ds_name: twonorm                                                                                        |
+tmp_path: ./temp/                                                                                       |
+                                                                                                        |
+           ==================== Exp:0, Iteration 0 ====================                                 | Experiment id is zero, and the k-fold zero is running
+[MR][main] Coarsening at level:1                                                                        |
+[MR][main] Coarsening at level:2                                                                        | Coarsening phase
+[MR][main] Coarsening at level:3                                                                        |
+[MR][main] ----- End of Coarsening at level:4 -----                                                     |
+[MR][main] num points P:162, N:169                                                                      | Training, validation and test on the level 4 (smallest number of points)
+[SV][ETD], l:4, AC:0.98, SN:0.98, SP:0.98, PPV:0.98, NPV:0.98, F1:0.98, GM:0.980                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:3 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:3, n:22                                                                   | Training, validation and test on the level 3  
+[SV][ETD], l:3, AC:0.98, SN:0.98, SP:0.97, PPV:0.97, NPV:0.98, F1:0.98, GM:0.978                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:2 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:134, n:97                                                                 |
+[SV][ETD], l:2, AC:0.95, SN:0.99, SP:0.91, PPV:0.91, NPV:0.99, F1:0.95, GM:0.948                        | . . . 
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:1 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:493, n:486                                                                | Training, validation and test on the level 1 (finest level) 
+[SV][ETD], l:1, AC:0.95, SN:0.98, SP:0.92, PPV:0.93, NPV:0.98, F1:0.95, GM:0.951                        |
+                                                                                                        |
+           ==================== Exp:0, Iteration 1 ====================                                 | Experiment id is zero, and the k-fold one is running
+[MR][main] Coarsening at level:1                                                                        |
+[MR][main] Coarsening at level:2                                                                        |
+[MR][main] Coarsening at level:3                                                                        |
+[MR][main] ----- End of Coarsening at level:4 -----                                                     |
+[MR][main] num points P:172, N:162                                                                      |
+[SV][ETD], l:4, AC:0.97, SN:0.98, SP:0.96, PPV:0.96, NPV:0.98, F1:0.97, GM:0.967                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:3 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:6, n:8                                                                    |
+[SV][ETD], l:3, AC:0.97, SN:0.97, SP:0.96, PPV:0.96, NPV:0.97, F1:0.97, GM:0.967                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:2 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:91, n:145                                                                 |
+[SV][ETD], l:2, AC:0.97, SN:0.98, SP:0.95, PPV:0.95, NPV:0.98, F1:0.97, GM:0.965                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:1 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:85, n:88                                                                  |
+[SV][ETD], l:1, AC:0.96, SN:0.99, SP:0.94, PPV:0.94, NPV:0.99, F1:0.97, GM:0.965                        |
+                                                                                                        |
+           ==================== Exp:0, Iteration 2 ====================                                 |
+[MR][main] Coarsening at level:1                                                                        |
+[MR][main] Coarsening at level:2                                                                        |
+[MR][main] Coarsening at level:3                                                                        |
+[MR][main] ----- End of Coarsening at level:4 -----                                                     |
+[MR][main] num points P:171, N:159                                                                      |
+[SV][ETD], l:4, AC:0.98, SN:0.98, SP:0.98, PPV:0.98, NPV:0.98, F1:0.98, GM:0.978                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:3 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:282, n:280                                                                |
+[SV][ETD], l:3, AC:0.98, SN:0.97, SP:0.98, PPV:0.98, NPV:0.97, F1:0.98, GM:0.977                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:2 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:571, n:541                                                                |
+[SV][ETD], l:2, AC:0.98, SN:0.98, SP:0.97, PPV:0.97, NPV:0.98, F1:0.98, GM:0.976                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:1 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:1595, n:1638                                                              |
+[SV][ETD], l:1, AC:0.98, SN:0.98, SP:0.97, PPV:0.97, NPV:0.98, F1:0.98, GM:0.976                        |
+                                                                                                        |
+           ==================== Exp:0, Iteration 3 ====================                                 |
+[MR][main] Coarsening at level:1                                                                        |
+[MR][main] Coarsening at level:2                                                                        |
+[MR][main] Coarsening at level:3                                                                        |
+[MR][main] ----- End of Coarsening at level:4 -----                                                     |
+[MR][main] num points P:173, N:171                                                                      |
+[SV][ETD], l:4, AC:0.98, SN:0.99, SP:0.98, PPV:0.98, NPV:0.98, F1:0.98, GM:0.981                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:3 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:358, n:350                                                                |
+[SV][ETD], l:3, AC:0.98, SN:0.99, SP:0.98, PPV:0.98, NPV:0.99, F1:0.98, GM:0.982                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:2 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:703, n:708                                                                |
+[SV][ETD], l:2, AC:0.98, SN:0.98, SP:0.98, PPV:0.98, NPV:0.98, F1:0.98, GM:0.980                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:1 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:669, n:699                                                                |
+[SV][ETD], l:1, AC:0.97, SN:0.98, SP:0.96, PPV:0.97, NPV:0.98, F1:0.97, GM:0.974                        |
+                                                                                                        |
+           ==================== Exp:0, Iteration 4 ====================                                 |
+[MR][main] Coarsening at level:1                                                                        |
+[MR][main] Coarsening at level:2                                                                        |
+[MR][main] Coarsening at level:3                                                                        |
+[MR][main] ----- End of Coarsening at level:4 -----                                                     |
+[MR][main] num points P:164, N:170                                                                      |
+[SV][ETD], l:4, AC:0.98, SN:0.97, SP:0.98, PPV:0.98, NPV:0.97, F1:0.98, GM:0.977                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:3 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:337, n:337                                                                |
+[SV][ETD], l:3, AC:0.98, SN:0.97, SP:0.98, PPV:0.98, NPV:0.97, F1:0.98, GM:0.977                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:2 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:691, n:708                                                                |
+[SV][ETD], l:2, AC:0.97, SN:0.97, SP:0.98, PPV:0.98, NPV:0.97, F1:0.97, GM:0.972                        |
+                                                                                                        |
+           - - - - - - - - - - Refinement at level:1 - - - - - - - - - -                                |
+[RF][main] num new neighbor p:814, n:752                                                                |
+[SV][ETD], l:1, AC:0.97, SN:0.98, SP:0.95, PPV:0.96, NPV:0.98, F1:0.97, GM:0.967                        |
+[MC] End of all experiments                                                                             |
+[CP] final results are:                                                                                 | Report the results for the best level of each k-fold cross validation
+[CP][PFR],it:0, BestL:4, AC:0.98, SN:0.98, SP:0.98, PPV:0.98, NPV:0.98, F1:0.98, GM:0.98                | 
+[CP][PFR],it:1, BestL:3, AC:0.97, SN:0.97, SP:0.96, PPV:0.96, NPV:0.97, F1:0.97, GM:0.97                |
+[CP][PFR],it:2, BestL:1, AC:0.98, SN:0.98, SP:0.97, PPV:0.97, NPV:0.98, F1:0.98, GM:0.98                |
+[CP][PFR],it:3, BestL:1, AC:0.97, SN:0.98, SP:0.96, PPV:0.97, NPV:0.98, F1:0.97, GM:0.97                |
+[CP][PFR],it:4, BestL:4, AC:0.98, SN:0.97, SP:0.98, PPV:0.98, NPV:0.97, F1:0.98, GM:0.98                |
+           -------------------- Average results --------------------                                    |
+[CP][PFR], Avg_Acc:0.97, Avg_SN:0.98, Avg_SP:0.97, Avg_PPV:0.97, Avg_NPV:0.98, Avg_F1:0.97, Avg_GM:0.97 | Report the average of the results over all the expriments and k-folds
+                                                                                                        |
+[MC] Total number of iterations:5                                                                       |
+[CP][EMM] Start exporting the models' summary in ./svm_models/twonorm_models.summary file               |
+[CP][EMM] The models' summary are exported successfully                                                 |
+[MC] MLSVM Classifier finished successfully!                                                            |
+                                                                                                        
