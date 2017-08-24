@@ -88,6 +88,7 @@ For instance, the MLSVM program can run by calling below command and parameters.
 Results
 -------------
 * Summary Logs
+
 The resutls are presented in the standard output. You can redirect the output to a file using two below approaches.
 1- Send all the output to a file and not printing in the terminal.
 `./mlsvm_classifier > ./summary.log`
