@@ -11,10 +11,11 @@ It will download both PETSc and FLANN libraries which are needed.
 
 Installation
 -------------
-1- We need to install the libraries which have been downloaded in the petsc and flann folders. 
+1- We need to install the libraries which have been downloaded in the petsc, flann and pyflann folders. 
 The installation guides for them are provided by their developers and you can easily use them to install the libraries.
-For PETSc please refer to [here](https://www.mcs.anl.gov/petsc/documentation/installation.html) and for Flann [here](http://www.cs.ubc.ca/research/flann).
-For calculating the k-nearest neighbors you need to install the Anaconda [here](https://www.continuum.io/downloads), and pyflann [here](https://github.com/primetang/pyflann).
+For PETSc please refer to [link](https://www.mcs.anl.gov/petsc/documentation/installation.html) and for Flann [link](http://www.cs.ubc.ca/research/flann). 
+For calculating the k-nearest neighbors you need to install the Anaconda [link](https://www.continuum.io/downloads), and pyflann [link](https://github.com/primetang/pyflann).
+
 
 2- Configure the coresponding environment variables based on your installation. 
 Examples are as follow:
@@ -70,7 +71,7 @@ It needs the right parameters for PY_PATH and PYTHONPATH to work.
 The results are saved in two files for both minority and majority classes. The indices of neighbor nodes in the minority class are stored in X_min_norm_data_indices.dat inside the dataset folder.
 The distances to neighbor nodes are saved in X_min_norm_data_dists.dat for the minority class.
 
-For the majority class, the \_min_ is changed to \_maj_.
+For the majority class, the `_min_` is changed to `_maj_`.
 
 Classification
 -------------
@@ -110,8 +111,8 @@ List of Tools:
 It divides the data to two classes and calculate the k-NN. It saves the output for each class in indices and dists files. 
 You can compile it by 
 `make mlsvm_save_knn`
-The parameters are filename, number of nearest neighbors and type of distances which are passed by -f, --nn_n, --nn_d respectively. 
-The default parameter for --nn_n is 10 and for --nn_n is 10 which are set in the param.xml file.
+The parameters are filename, number of nearest neighbors and type of distances which are passed by -f, `--nn_n`, `--nn_d` respectively. 
+The default parameter for `--nn_n` is 10 and for `--nn_n` is 10 which are set in the param.xml file.
 The filename is the name of dataset without any extension like filename_zsc_data.dat.
 For example for twonorm dataset you can use `./mlsvm_save_knn -f twonorm --nn_n 10 --nn_d 1`
 
@@ -125,7 +126,7 @@ It converts the LibSVM file format to the suitable format for MLSVM.
 
 * mlsvm_zscore
 
-It normalizes the input data using z-scrore. For example, your data set should be stored in file X_data.dat and you run `./mlsvm_zscore -f X `. The output file is stored as X_zsc_data.dat in the same path. The path is set using --ds_p parameter.
+It normalizes the input data using z-scrore. For example, your data set should be stored in file X_data.dat and you run `./mlsvm_zscore -f X `. The output file is stored as `X_zsc_data.dat` in the same path. The path is set using `--ds_p` parameter.
 
 Parameters:
 -------------
