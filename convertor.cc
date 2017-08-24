@@ -162,6 +162,11 @@ void Convertor::CSV_file_to_PETSc_format(){
     MatCreateSeqDense(PETSC_COMM_SELF, num_col-1, num_row, NULL, &m_data);
 
     for(int i=0; i< num_row; i++ ){
+        if(abs(vv_data[i][0]) != 1){
+            std::cout << "[RCF] Wrong label is provided at row " << i <<" with value "<< vv_data[i][0] <<" \nExit";
+            exit(1);
+        }
+
         VecSetValue(v_lbl, i, vv_data[i][0], INSERT_VALUES);
         for(int j=0; j< num_col-1; j++){
             MatSetValue(m_data,j ,i , vv_data[i][j+1], INSERT_VALUES);

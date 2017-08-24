@@ -144,9 +144,9 @@ cvt: $(ConvertTools_OBJS) chkopts
 	-${CLINKER} $(ConvertTools_OBJS)  ${PETSC_MAT_LIB} -o convert_tools
 	${RM} convert_tools.o 
 
-mlsvm_libsvm_PETSc: $(Convert_libsvm_PETSc_OBJS) chkopts
-	-${CLINKER} $(Convert_libsvm_PETSc_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_libsvm_PETSc
-	${RM} mlsvm_libsvm_PETSc.o 
+mlsvm_libsvm_petsc: $(Convert_libsvm_PETSc_OBJS) chkopts
+	-${CLINKER} $(Convert_libsvm_PETSc_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_libsvm_petsc
+	${RM} mlsvm_libsvm_petsc.o 
 	
 	
 mlsvm_save_knn: $(mlsvm_Save_knn_OBJS) chkopts

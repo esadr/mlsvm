@@ -1,0 +1,27 @@
+$ ./mlsvm_knn -f twonorm --nn_n 10 
+[Config_Params][read_params] param.xml path : ./params.xml
+start reading clustering parameters
+[Config_params] flann parameters are read
+--- NN Paramters ---
+nn_number_of_classes: 2
+nn_number_of_neighbors: 10
+nn_distance_type: 1
+--- Input File names ---
+minority data: ./datasets/twonorm_min_norm_data.dat
+majority data: ./datasets/twonorm_maj_norm_data.dat
+[KF][WOUT] output is successfully written to ./datasets/twonorm_min_norm_data.dat
+[KF][WOUT] output is successfully written to ./datasets/twonorm_maj_norm_data.dat
+[CPU Time] [Main] reading and deviding data in k-fold class takes 0.028434 seconds 
+[KNN][RF] num_nn:10
+[KNN][RF] 3703 data points are loaded successfully!
+Number of nodes in the created graph:3703
+[CF][exp_matrix] {mlsvm_knn} Matrix exported to file: ./datasets/twonorm_min_norm_data_indices.dat
+[CF][exp_matrix] {mlsvm_knn} Matrix exported to file: ./datasets/twonorm_min_norm_data_dists.dat
+[KNN][RF] num_nn:10
+[KNN][RF] 3697 data points are loaded successfully!
+Number of nodes in the created graph:3697
+[CF][exp_matrix] {mlsvm_knn} Matrix exported to file: ./datasets/twonorm_maj_norm_data_indices.dat
+[CF][exp_matrix] {mlsvm_knn} Matrix exported to file: ./datasets/twonorm_maj_norm_data_dists.dat
+KNN results for 2 classes are saved successfully!
+[CPU Time] [Main] whole saving flann takes 0.2112 seconds 
+KNN is calculated and saved successfully!

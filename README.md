@@ -120,7 +120,7 @@ For example for twonorm dataset you can use `./mlsvm_save_knn -f twonorm --nn_n 
 
 It converts the csv file format to the suitable format for MLSVM which is PETSc Binary format.
 
-* convert_libsvm_PETSc
+* mlsvm_libsvm_petsc
 
 It converts the LibSVM file format to the suitable format for MLSVM.
 
