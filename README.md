@@ -99,12 +99,15 @@ In case of errors, please forward both error and standard output to a file using
 `./mlsvm_classifier > ./summary.log 2>&1`
 
 * Train Models
+
 The trained models are stored in the `./svm_models`. Each model has information about the experiment id and k-fold id which are used to train it. The test data for each of them are saved in the ./temp folder. 
 
 
 List of Tools:
 -------------
-mlsvm_save_knn which divides the data to two classes and calculate the k-NN. It saves the output for each class in indices and dists files. 
+* mlsvm_save_knn
+
+It divides the data to two classes and calculate the k-NN. It saves the output for each class in indices and dists files. 
 You can compile it by 
 `make mlsvm_save_knn`
 The parameters are filename, number of nearest neighbors and type of distances which are passed by -f, --nn_n, --nn_d respectively. 
@@ -112,16 +115,23 @@ The default parameter for --nn_n is 10 and for --nn_n is 10 which are set in the
 The filename is the name of dataset without any extension like filename_zsc_data.dat.
 For example for twonorm dataset you can use `./mlsvm_save_knn -f twonorm --nn_n 10 --nn_d 1`
 
+* mlsvm_csv_petsc
 
+It converts the csv file format to the suitable format for MLSVM which is PETSc Binary format.
+
+* convert_libsvm_PETSc
+
+It converts the LibSVM file format to the suitable format for MLSVM.
+
+* mlsvm_zscore
+
+It normalizes the input data using z-scrore. For example, your data set should be stored in file X_data.dat and you call `./mlsvm_zscore -f X `. The output file is stored as X_zsc_data.dat in the same path.
+The path is set using --ds_p parameter.
+
+Parameters:
+-------------
+Parameters are explained in briefly in the params.xml file. More information for the command lines arguments and parameters are covered in the User Guide.
 
 Contact
 -------------
 For questions or suggestions please email me at esadrfa@g.clemson.edu 
-
-
-
-
-
-
-
-The parameters could be set inside the `param.xml` file. You can find the details for parameters in the user guide document.
