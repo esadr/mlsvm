@@ -1,6 +1,15 @@
 # MLSVM
 Multi level Support Vector Machines
 
+
+The correspoding papers with experimental results are as follows:
+  * Sadrfaridpour, Ehsan, Talayeh Razzaghi, and Ilya Safro. "Engineering multilevel support vector machines." arXiv preprint arXiv:1707.07657 (2017).
+  [(PDF)](https://arxiv.org/pdf/1707.07657.pdf) [(BibTex)](https://goo.gl/XPHioV)
+  
+  * Sadrfaridpour, Ehsan, et al. "Algebraic multigrid support vector machines." arXiv preprint arXiv:1611.05487 (2016).
+  [(PDF)](https://arxiv.org/pdf/1611.05487.pdf) [(BibTex)](https://goo.gl/g7X8Kf)
+
+
 Download
 -------------
 You can use the recursive parameter to download the required libraries as part of this reposetory.
