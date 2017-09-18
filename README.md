@@ -6,8 +6,8 @@ The correspoding papers with experimental results are as follows:
   * Sadrfaridpour, Ehsan, Talayeh Razzaghi, and Ilya Safro. "Engineering multilevel support vector machines." arXiv preprint arXiv:1707.07657 (2017).
   [(PDF)](https://arxiv.org/pdf/1707.07657.pdf) [(BibTex)](https://goo.gl/XPHioV)
   
-  * Sadrfaridpour, Ehsan, et al. "Algebraic multigrid support vector machines." arXiv preprint arXiv:1611.05487 (2016).
-  [(PDF)](https://arxiv.org/pdf/1611.05487.pdf) [(BibTex)](https://goo.gl/g7X8Kf)
+  * Sadrfaridpour, Ehsan, Jeereddy Sandeep, Ken Kennedy, Andre Luckow, Talayeh Razzaghi, Ilya Safro. "Algebraic multigrid support vector machines." ESANN 2017 proceedings, European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning.
+  [(PDF)](https://www.elen.ucl.ac.be/Proceedings/esann/esannpdf/es2017-37.pdf) 
 
 
 Download
