@@ -1,0 +1,11 @@
+@inproceedings{sadrfaridpour_ehsan2017,
+  title={Algebraic multigrid support vector machines},
+  author={Sadrfaridpour, Ehsan and Jeereddy Sandeep and Ken Kennedy and Andre Luckow and Talayeh Razzaghi and Ilya Safro},
+  booktitle={ESANN 2017 proceedings, European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning},
+  year={2017},
+  address = {Bruges, Belgium},
+  publisher = {ESANN},
+  isbn      = {9782875870391},
+  url       = {https://www.elen.ucl.ac.be/Proceedings/esann/esannpdf/es2017-37.pdf}
+}
+
