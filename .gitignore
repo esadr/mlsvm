@@ -1,0 +1,10 @@
+*.o
+mlsvm_classifier
+mlsvm_csv_petsc
+mlsvm_knn
+mlsvm_libsvm_petsc
+mlsvm_zscore
+mlsvm_save_knn
+get_mat_info
+get_vec_info
+TAGS
