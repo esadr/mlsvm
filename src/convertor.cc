@@ -74,7 +74,7 @@ void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_dat
     std::cout << "row: " << num_row << ", col: " << num_col << std::endl;
 
     VecCreateSeq(PETSC_COMM_SELF,num_row,&v_lbl);
-    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row ,num_col + 1 ,(num_col + 1 ),PETSC_NULL, &m_data); //+1 is for label
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row ,num_col ,num_col ,PETSC_NULL, &m_data);
     //read the file withlibsvm format
     std::ifstream file(in_file_name);
     std::string str;
@@ -89,7 +89,7 @@ void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_dat
         }
 
         VecSetValue(v_lbl, curr_row, stoi(tokens[0]), INSERT_VALUES);
-        for(int i=0; i< tokens.size(); i++){
+        for(int i=1; i< tokens.size(); i++){
             unsigned int idx;
             PetscScalar val;
             auto pos = tokens[i].find(":");
