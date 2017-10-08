@@ -109,66 +109,65 @@ void run_flann(Mat& m_data, Mat& m_indices, Mat& m_dists){
     PetscInt i, j, ncols;
     const PetscInt    *cols;
     const PetscScalar *vals;
-    int num_nearest_neighbors = Config_params::getInstance()->get_nn_number_of_neighbors();
+    int num_nn = Config_params::getInstance()->get_nn_number_of_neighbors();
     MatGetSize(m_data, &num_row, &num_col);
 
-    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, num_nearest_neighbors,PETSC_NULL, &m_indices);
-    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, num_nearest_neighbors,PETSC_NULL, &m_dists);
-    std::cout << "[KNN][RF] num_nn:"<< num_nearest_neighbors << std::endl;
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row, num_nn, num_nn, PETSC_NULL, &m_indices);
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row, num_nn, num_nn, PETSC_NULL, &m_dists);
+    std::cout << "[KNN][RF] num_nn:"<< num_nn << std::endl;
 
     std::vector<float>vecData;
-//    std::vector<std::string> labels;
 
     for(i =0; i <num_row; i++){
         int tmp_nnz_indices=0;
+        // std::cout << "\nrow " << i <<": ";
         std::vector<float> v_nn_vals;
         MatGetRow(m_data,i,&ncols,&cols,&vals);
         for (j=0; j<ncols; j++) {
             if(j < ncols && j==cols[tmp_nnz_indices]){
                 v_nn_vals.push_back(vals[j]);
+                tmp_nnz_indices++;
             }else{
                 v_nn_vals.push_back(0);
             }
+            // std::cout << "(" << j << ", "<< vals[j]  << ")  ";
         }
         MatRestoreRow(m_data,i,&ncols,&cols,&vals);
         vecData.insert(vecData.end(), v_nn_vals.begin(), v_nn_vals.end());
     }
     flann::Matrix<float> data(vecData.data(),num_row,num_col);
     std::cout << "[KNN][RF] "<< num_row << " data points are loaded successfully!\n";
-    // - - - - call flann - - - -
-
 
     //call flann
-    flann::Index<flann::L2<float> > index_(data, flann::KDTreeIndexParams(16));
+
+    flann::Index<flann::L2<float> > index_(data, flann::KDTreeIndexParams(1));
     index_.buildIndex();
 
-    std::vector<std::vector<int> > indicies;
-    std::vector<std::vector<float> > dists;
+    // std::vector<std::vector<int> > indicies;
+    // std::vector<std::vector<float> > dists;
 
-    flann::SearchParams params(128);
+    flann::Matrix<int> indicies(new int[num_row * num_nn], num_row, num_nn);
+    flann::Matrix<float> dists(new float[num_row * num_nn], num_row, num_nn);
+
+    flann::SearchParams params(64);
 //    flann::seed_random(0);          //set the random seed to 1 for debug
 
-
     params.cores = 0; //automatic core selection
-    index_.knnSearch(data, indicies, dists, num_nearest_neighbors,  params);
-    std::cout << "Number of nodes in the created graph:" << indicies.size() << std::endl;
-//    exit(1);
+    index_.knnSearch(data, indicies, dists, num_nn, params);
+
     //store the indices, dists to 2 separate matrices
-    for(unsigned int row_idx =0; row_idx < num_row; row_idx++){
-//        std::cout << "\nrow " << row_idx <<": ";
-        for(j = 0; j < indicies[row_idx].size(); j++){
+    for(int row_idx = 0; row_idx < num_row; row_idx++){
+        // std::cout << "\nrow " << row_idx <<": ";
+        for(j = 0; j < num_nn; j++){
             unsigned int node_idx = indicies[row_idx][j];
             double dist = dists[row_idx][j];
-//            std::cout << "(" << j << ", "<< node_idx << ")  ";
-            MatSetValue(m_indices,row_idx,node_idx,1,INSERT_VALUES);
-            MatSetValue(m_dists,row_idx,node_idx,dist,INSERT_VALUES);
+            // std::cout << "(" << j << ", "<< node_idx << " - " << dist << ")  ";
+            MatSetValue(m_indices,row_idx,j,node_idx,INSERT_VALUES);
+            MatSetValue(m_dists,row_idx,j,dist,INSERT_VALUES);
         }
     }
     MatAssemblyBegin(m_indices,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_indices,MAT_FINAL_ASSEMBLY);
     MatAssemblyBegin(m_dists,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_dists,MAT_FINAL_ASSEMBLY);
-
-
-    //end!
 }
