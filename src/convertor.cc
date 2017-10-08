@@ -137,16 +137,30 @@ void Convertor::CSV_file_to_PETSc_format(){
     //    std::vector<std::pair<int,int>> v_lines;
     std::string line;
 
+
+    int line_num = 0;
     std::vector<std::vector<double>> vv_data;
     while(std::getline(in_file, line)){
         std::stringstream sep(line);
         std::string item;
         vv_data.push_back(std::vector<double>());
         while (std::getline(sep, item, ',')) {
-            vv_data.back().push_back(stod(item));
+            try{
+                vv_data.back().push_back(stod(item));
+            }
+            catch(const std::exception e){
+                std::cout << e.what() ;
+                std::cout << "A good guess:\n" << "data: " <<
+                             item << " at line " << line_num <<
+                             " is not convertable to double!" << std::endl;
+                std::cout << "Please check the file, \nExit!\n";
+                exit(1);
+            }
         }
+        line_num++;
     }
     in_file.close();
+
 
     Mat m_data;
     PetscInt num_row= vv_data.size();
