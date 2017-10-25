@@ -11,6 +11,8 @@ public:
                   Mat& n_data, Mat& m_P_n, Mat& n_WA, Vec& n_vol,
                   Mat& m_VD_p, Mat& m_VD_n, int level, std::vector<ref_results>& v_ref_results);
 
+    solution main_community_detection(Mat& m_data, Mat& m_WA, Vec& v_vol,
+                                      int num_clusters, int level);
 };
 
 #endif // MAIN_RECURSION_H

@@ -128,7 +128,7 @@ private:
     // Methods
     void check_input_distance_parameters();
 //    void check_input_prediction_parameters();
-
+    void read_functionality_parameter(int argc, char * argv[]);
     void read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_classification_prediction_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_convert_files_parameters(pugi::xml_node& root,int argc, char * argv[]);

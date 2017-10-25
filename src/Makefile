@@ -3,6 +3,7 @@ CC 	 = g++ -L.
 CFLAGS 	 = -Iinclude	
 CPPFLAGS = -std=c++11 -g -O3 -Iinclude    #-W -Wall -Weffc++ -Wextra -pedantic -O3
 OBJDIR  = obj
+OUTDIR  = bin
 LOCDIR   = .
 MAIN 	 = mlsvm_classifier.cc
 MANSEC   = Mat
