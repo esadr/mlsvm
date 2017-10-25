@@ -84,19 +84,19 @@ main_libs_inst:  etimer.o common_funcs.o OptionParser.o k_fold.o svm.o config_pa
 	${RM} main.o 
 
 mlsvm_classifier: $(MLSVM_OBJS) chkopts
-	-${CLINKER} $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_classifier
+	-${CLINKER} $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o $(OUTDIR)/mlsvm_classifier
 	${RM} mlsvm_classifier.o 
 	
 mlcdm: 	$(MLCDM_OBJS) chkopts
-	-${CLINKER} $(MLCDM_OBJS)  ${PETSC_MAT_LIB} -o mlcdm
+	-${CLINKER} $(MLCDM_OBJS)  ${PETSC_MAT_LIB} -o $(OUTDIR)/mlcdm
 	${RM} mlcdm.o 
 	
 main_sl: $(SLSVM_OBJS) chkopts			# single level (no multi level which means no v-cycle)
-	-${CLINKER} $(SLSVM_OBJS)  ${PETSC_MAT_LIB} -o slsvm 
+	-${CLINKER} $(SLSVM_OBJS)  ${PETSC_MAT_LIB} -o $(OUTDIR)/slsvm 
 	${RM} main_sl.o 
 
 prepare_labels:  prepare_labels.o chkopts
-	-${CLINKER}  prepare_labels.o  ${PETSC_VEC_LIB} -o prepare_labels 
+	-${CLINKER}  prepare_labels.o  ${PETSC_VEC_LIB} -o $(OUTDIR)/prepare_labels 
 	${RM} prepare_labels.o 
 	
 ut_main_libs_inst:  ut_mr.o main_recursion.o etimer.o model_selection.o svm.o loader.o ds_node.o ds_graph.o coarsening.o common_funcs.o config_params.o OptionParser.o ut_main.o chkopts
@@ -129,19 +129,19 @@ sap: $(SAP_OBJS) chkopts
 	${RM} sap.o 
 	
 mlsvm_predict: $(PREDICT_OBJS) chkopts
-	-${CLINKER} $(PREDICT_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_predict
+	-${CLINKER} $(PREDICT_OBJS)  ${PETSC_MAT_LIB} -o $(OUTDIR)/mlsvm_predict
 	${RM} mlsvm_predict.o
 
 mlsvm_zscore: $(ZSCORE_OBJS) chkopts
-	-${CLINKER} $(ZSCORE_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_zscore
+	-${CLINKER} $(ZSCORE_OBJS)  ${PETSC_MAT_LIB} -o $(OUTDIR)/mlsvm_zscore
 	${RM} mlsvm_zscore.o
 
 mlsvm_csv_petsc: $(CSV_PETSC_OBJS) chkopts
-	-${CLINKER} $(CSV_PETSC_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_csv_petsc
+	-${CLINKER} $(CSV_PETSC_OBJS)  ${PETSC_MAT_LIB} -o $(OUTDIR)/mlsvm_csv_petsc
 	${RM} mlsvm_csv_petsc.o
 
 mlsvm_knn: $(KNN_OBJS) chkopts
-	-${CLINKER}  $(KNN_OBJS) ${PETSC_MAT_LIB} -o mlsvm_knn
+	-${CLINKER}  $(KNN_OBJS) ${PETSC_MAT_LIB} -o $(OUTDIR)/mlsvm_knn
 	${RM} mlsvm_knn.o
 	
 pers: $(PERS_OBJS) chkopts
@@ -157,15 +157,19 @@ cvt: $(ConvertTools_OBJS) chkopts
 	${RM} convert_tools.o 
 
 mlsvm_libsvm_petsc: $(Convert_libsvm_PETSc_OBJS) chkopts
-	-${CLINKER} $(Convert_libsvm_PETSc_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_libsvm_petsc
+	-${CLINKER} $(Convert_libsvm_PETSc_OBJS)  ${PETSC_MAT_LIB} -o $(OUTDIR)/mlsvm_libsvm_petsc
 	${RM} mlsvm_libsvm_petsc.o 
 	
 	
 mlsvm_save_knn: $(mlsvm_Save_knn_OBJS) chkopts
-	-${CLINKER} $(mlsvm_Save_knn_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_save_knn
+	-${CLINKER} $(mlsvm_Save_knn_OBJS)  ${PETSC_MAT_LIB} -o $(OUTDIR)/mlsvm_save_knn
 	${RM} mlsvm_save_knn.o 
 
 clean_main:	#PETSc Makefile has clean method which conflict with clean method here, therefore this one is created
 	make clean
-	rm mlsvm_classifier
+	rm $(OUTDIR)/mlsvm_classifier
 	echo "clean is done"
+
+	
+	
+#TODO: compile the object files in the obj folder to make the main path clear	
