@@ -1,4 +1,3 @@
-
 #include <iostream>
 //#include <vector>
 #include <algorithm>            //for using std::sort

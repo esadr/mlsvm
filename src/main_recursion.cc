@@ -186,3 +186,114 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         return sol_refine;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+solution MainRecursion::main_community_detection(Mat& m_data, Mat& m_WA, Vec& v_vol, int num_clusters, int level){
+
+    level++;
+    int c_limit = Config_params::getInstance()->get_coarse_threshold();
+    Mat m_data_c,m_WA_c,m_P;  //m_data_c is aggregated data (coarse data point)
+    Vec v_vol_c;
+    PetscInt num_row;
+    std::vector<NodeId> v_seeds_indices;
+
+    MatGetSize(m_data, &num_row,0);
+
+    if ((num_row <  c_limit))  {          //data are small enough (coarsest level)
+        printf("\n[MR][main] ================= End of Coarsening at level:%d =================\n",level);
+        printf("[MR][main] num points :%d\n",num_row);      //$$debug
+//        printf("[MR][main] start to solve SVM for level:%d\n",level);      //$$debug
+
+
+        solution sol_coarsest;
+
+//        Clustering_Refinement rf;
+
+//        rf.maximize_modularity(m_data, m_WA, v_vol,5);
+
+
+//        rf.calc_new_center();
+
+//        rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n, level ,sol_coarsest, v_ref_results);
+
+
+        // free resources
+        MatDestroy(&m_data);
+        MatDestroy(&m_WA);
+
+        std::cout << "[MR][CL] at the coarsest level! Exit!" << std::endl;
+        exit(1);
+        return sol_coarsest;                                // return the coarsest solution
+
+    }else{      ///-------------- Coarsening -------------------
+        ETimer t_coarse;
+        if(level > Config_params::getInstance()->get_cs_max_coarse_level())     {       //future work
+            printf("!!! the coarsening is not converged after %d levels, skip this run !!!\n", level);
+            solution empty_solution;
+            empty_solution.C = -1;
+            return empty_solution;
+        }
+        double filter_threshold = Config_params::getInstance()->get_cs_weak_edges_ft();
+        Coarsening coarser("Clustering") ;
+        cs_info ref_info;
+        printf("\n[MR][main] ================= Coarsening at level:%d =================\n",level);
+        m_P = coarser.calc_P(m_WA, v_vol, v_seeds_indices, ref_info);
+//            t_coarse.stop_timer("[MR][Main]{1} from start of both class calc_p minority, level:",std::to_string(level));
+
+        m_data_c = coarser.calc_aggregate_data(m_P, m_data, v_vol, v_seeds_indices);
+//            t_coarse.stop_timer("[MR][Main]{2} from start of both class calc Agg Data minority, level:",std::to_string(level));
+
+        m_WA_c = coarser.calc_WA_c(m_P, m_WA);
+//            t_coarse.stop_timer("[MR][Main]{2} from start of both class calc Agg Data minority, level:",std::to_string(level));
+
+        coarser.calc_real_weight(m_WA_c, m_data_c);       //recalculate the weights in adjacency matrix from the data
+        coarser.filter_weak_edges(m_WA_c, filter_threshold, level);
+
+        v_vol_c = coarser.calc_coarse_volumes(m_P, v_vol);
+//            t_coarse.stop_timer("[MR][Main]{3} from start of both class calc Agg Vol minority, level:",std::to_string(level));
+
+
+        solution sol_coarser ;
+        sol_coarser = main_community_detection(m_data_c, m_WA_c, v_vol_c, num_clusters, level); // recursive call
+
+
+
+//        ///------------------------- Refinement ----------------------------
+//        ETimer t_refine;
+////        printf("[MR][main] coarse solution from level:%d \n",level+1); //because it comes from coarser level
+//        printf("\n         ==================== Refinement at level:%d =====================", level);
+//        printf("\n                    Minority                        Majority              ");
+//        printf("\n         #points:%d, #edges:%d ",ref_info_p.num_point,ref_info_p.num_edge);
+//        printf("\t  #points:%d, #edges:%d",ref_info_n.num_point,ref_info_n.num_edge);
+//        printf("\n         ================================================================\n");
+//        printf("[MR] coarse solution C:%g, G:%g, nSV+:%lu \n\n", sol_coarser.C, sol_coarser.gamma, sol_coarser.p_index.size());
+
+        solution sol_refine;
+//        Refinement rf;
+
+//        sol_refine = rf.main(p_data,m_P_p,p_vol, p_WA, n_data,m_P_n,n_vol, n_WA, m_VD_p, m_VD_n, sol_coarser,level,v_ref_results);
+
+//        MatDestroy(&p_data);
+//        MatDestroy(&n_data);
+//        MatDestroy(&p_data_c);
+//        MatDestroy(&n_data_c);
+//        MatDestroy(&p_WA_c);
+//        MatDestroy(&n_WA_c);
+//        VecDestroy(&p_vol);
+//        VecDestroy(&n_vol);
+
+//        t_refine.stop_timer("[MR] Refinement at level:",std::to_string(level));
+        return sol_refine;
+    }
+}
+
+

@@ -1,7 +1,8 @@
 ALL: mlsvm_classifier
 CC 	 = g++ -L. 
-CFLAGS 	 = -I.	
-CPPFLAGS = -std=c++11 -g -O3     #-W -Wall -Weffc++ -Wextra -pedantic -O3
+CFLAGS 	 = -Iinclude	
+CPPFLAGS = -std=c++11 -g -O3 -Iinclude    #-W -Wall -Weffc++ -Wextra -pedantic -O3
+OBJDIR  = obj
 LOCDIR   = .
 MAIN 	 = mlsvm_classifier.cc
 MANSEC   = Mat
@@ -11,6 +12,9 @@ LIBFLANN= /usr/local/lib/libflann_cpp_s.a
 
 MLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlsvm_classifier.cc
 MLSVM_OBJS = $(MLSVM_SRCS:.cc=.o)
+
+MLCDM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlcdm.cc
+MLCDM_OBJS = $(MLCDM_SRCS:.cc=.o)
 
 SLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm.cc config_params.cc model_selection.cc solver.cc loader.cc ds_node.cc ds_graph.cc main_sl.cc
 SLSVM_OBJS = $(SLSVM_SRCS:.cc=.o)
@@ -67,10 +71,13 @@ include ${PETSC_DIR}/lib/petsc/conf/rules
 info: 
 	-@echo $(LIBS)
 	-@echo $(MLSVM_OBJS)
-#pugixml: g++ -c pugixml.cpp pugixml.hpp
-pugixml: mpicxx -c pugixml.cpp pugixml.hpp
+#pugixml: g++ -c pugixml.cpp pugixml.hpp -o obj/pugixml.o
+# obj/pugixml.o: pugixml.cc pugixml.hpp 
+# 	mpicxx -c pugixml.cc  -o obj/pugixml.o
 
-
+pugixml: pugixml.cc pugixml.hpp 
+	mpicxx -c pugixml.cc  -o pugixml.o
+	
 main_libs_inst:  etimer.o common_funcs.o OptionParser.o k_fold.o svm.o config_params.o model_selection.o solver.o partitioning.o refinement.o main_recursion.o coarsening.o loader.o ds_node.o ds_graph.o main.o chkopts
 	-${CLINKER}  etimer.o common_funcs.o OptionParser.o k_fold.o svm.o config_params.o model_selection.o solver.o partitioning.o refinement.o main_recursion.o coarsening.o loader.o ds_node.o ds_graph.o main.o  ${PETSC_MAT_LIB} -o main $(LIBS)
 	${RM} main.o 
@@ -78,6 +85,10 @@ main_libs_inst:  etimer.o common_funcs.o OptionParser.o k_fold.o svm.o config_pa
 mlsvm_classifier: $(MLSVM_OBJS) chkopts
 	-${CLINKER} $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_classifier
 	${RM} mlsvm_classifier.o 
+	
+mlcdm: 	$(MLCDM_OBJS) chkopts
+	-${CLINKER} $(MLCDM_OBJS)  ${PETSC_MAT_LIB} -o mlcdm
+	${RM} mlcdm.o 
 	
 main_sl: $(SLSVM_OBJS) chkopts			# single level (no multi level which means no v-cycle)
 	-${CLINKER} $(SLSVM_OBJS)  ${PETSC_MAT_LIB} -o slsvm 

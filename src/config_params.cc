@@ -139,24 +139,8 @@ void Config_params::print_zscore_params(){
 }
 
 void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[], program_parts caller_func){
-
-    PetscBool       flg; //@ 040417-2130
-    PetscInt        temp;
-//    PetscOptionsGetInt(NULL,NULL,"-help",&temp,&flg);			//newer versions of  PETSc
-//    if (!flg){
-//        //print help function
-//        PetscPrintf(PETSC_COMM_WORLD,"[CP] Help parameters are not ready yet! Please refer to manual! \nExit!\n");
-//        exit(1);
-//    }
-
     if(caller_func == program_parts::main){
-        PetscOptionsGetInt(NULL,NULL,"-d",&main_function,&flg);			//newer versions of  PETSc
-        if (!flg){
-//            PetscPrintf(PETSC_COMM_WORLD,"[CP] Must indicate the functionality type you need using -d . \nExit!\n");
-//            exit(1);
-//            PetscPrintf(PETSC_COMM_WORLD,"[WARNING] You can choose the functionality using -d parameter. Multilevel SVM is the default functionality \n");
-            main_function=0;
-        }
+        read_functionality_parameter(argc, argv);
     }
 
     /// load the file
@@ -167,14 +151,12 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
     pugi::xml_parse_result result = doc.load_file(XML_FILE_PATH.c_str(),
         pugi::parse_default|pugi::parse_declaration);
     if (!result)   {
-        std::cout << "[CP][read_params] Parse error: " << result.description()
+        std::cerr << "[CP][read_params] Parse error: " << result.description()
             << ", character pos= " << result.offset << std::endl;
         exit(1);
     }
     // A valid XML document must have a single root node
     pugi::xml_node root = doc.document_element();
-
-
 
 
     switch(caller_func){
@@ -188,10 +170,12 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
             break;
 
         case 1:     // regression
-            break;
+            std::cerr << "[CP] Regression has not developed yet! \nExit!\n";
+            exit(1);
+//            break;
 
         case 2:
-            std::cout << "start reading clustering parameters\n";
+            std::cout << "[CP] start reading clustering parameters\n";
             read_clustering_parameters(root, argc, argv);
             break;
         }
@@ -225,6 +209,21 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
 }
 
 
+void Config_params::read_functionality_parameter(int argc, char * argv[]){
+    parser_.add_option("-d").dest("main_function");
+    this->options_ = parser_.parse_args(argc, argv);
+    try{
+        main_function =  stoi(options_["main_function"]);
+//        std::cout << "[CP] functionality parameter is: " << main_function << std::endl;
+    }catch(...){
+        std::cerr << "[CP] problem reading the functionality parameter!" << std::endl;
+        exit(1);
+    }
+    if(main_function > 2){
+        std::cerr << "[CP] functionality parameter is wrong!" << std::endl;
+        exit(1);
+    }
+}
 
 void Config_params::read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]){
 
