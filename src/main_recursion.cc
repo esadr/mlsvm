@@ -197,7 +197,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
 
 
 
-solution MainRecursion::main_community_detection(Mat& m_data, Mat& m_WA, Vec& v_vol, int num_clusters, int level){
+solution MainRecursion::main_community_detection(Mat& m_data, Mat& m_WA, Vec& v_vol, int level){
 
     level++;
     int c_limit = Config_params::getInstance()->get_coarse_threshold();
@@ -211,8 +211,6 @@ solution MainRecursion::main_community_detection(Mat& m_data, Mat& m_WA, Vec& v_
     if ((num_row <  c_limit))  {          //data are small enough (coarsest level)
         printf("\n[MR][main] ================= End of Coarsening at level:%d =================\n",level);
         printf("[MR][main] num points :%d\n",num_row);      //$$debug
-//        printf("[MR][main] start to solve SVM for level:%d\n",level);      //$$debug
-
 
         solution sol_coarsest;
 
