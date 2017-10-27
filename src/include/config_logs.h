@@ -34,6 +34,7 @@
 //---- Loader ----
 #define dbl_LD_LWAB                 0
 #define dbl_LD_LFB                  0           // 0 Default, load flann binary
+#define dbl_LD_LM                   0           // 0 Default, load metis
 #define dbl_LD_CWAM                 0           // 0 Default, create WA matrix using input NN matrices
 #define dbl_LD_CD                   0           // 0 Default, 3 print raw and calculated distance
 #define dbl_LD_LNDS                 0           // 0 Default, 5 print size of data

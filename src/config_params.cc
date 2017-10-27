@@ -115,6 +115,12 @@ void Config_params::print_convert_files_params(){
                  "\ntmp_path: "             << get_tmp_path()          << std::endl;
 }
 
+void Config_params::print_load_metis_params(){
+    std::cout << "mlsvm_version:"           << mlsvm_version           <<
+                 "\nds_path: "              << get_ds_path()           <<
+                 "\nds_name: "              << get_ds_name()           << std::endl;
+}
+
 void Config_params::print_flann_params(){
     std::cout << "--- NN Paramters ---"         <<
                  "\nnn_number_of_classes: "     << get_nn_number_of_classes()   <<
@@ -205,7 +211,12 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
         read_convert_files_parameters(root, argc, argv);//@080517-1120
         print_convert_files_params();
         break;
-    }
+    case ld_metis:
+        read_load_metis_parameters(root, argc, argv);//@102617
+        print_load_metis_params();
+        break;
+
+    }//this is the end of caller_func cases
 }
 
 
@@ -392,7 +403,6 @@ void Config_params::read_classification_prediction_parameters(pugi::xml_node& ro
 
 void Config_params::read_convert_files_parameters(pugi::xml_node& root,int argc, char * argv[]){
 
-
     mlsvm_version = root.child("mlsvm_version").attribute("stringVal").value();
 
     /// read the parameters from the XML file (params.xml)
@@ -408,6 +418,22 @@ void Config_params::read_convert_files_parameters(pugi::xml_node& root,int argc,
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
     std::cout << "[CP] input convert_files parameters are read" << std::endl;
+}
+
+void Config_params::read_load_metis_parameters(pugi::xml_node& root, int argc, char * argv[]){
+
+    mlsvm_version = root.child("mlsvm_version").attribute("stringVal").value();
+
+    /// read the parameters from the XML file (params.xml)
+    ds_path             = root.child("ds_path").attribute("stringVal").value();
+    ds_name             = root.child("ds_name").attribute("stringVal").value();
+    /// read the parameters from input arguments ()
+    parser_.add_option("--ds_p")                       .dest("ds_path")             .set_default(ds_path);
+    parser_.add_option("-f", "--ds_f", "--file")       .dest("ds_name")             .set_default(ds_name);
+
+    this->options_ = parser_.parse_args(argc, argv);
+    std::vector<std::string> args = parser_.args();
+    std::cout << "[CP] input load_metis parameters are read" << std::endl;
 }
 
 

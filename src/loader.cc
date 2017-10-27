@@ -1,6 +1,8 @@
 #include "loader.h"
 #include "common_funcs.h"
-//#include "//    ETimer.h"
+
+#include <fstream>      //read and write from/to files
+#include <sstream>      //read and write from/to files
 
 //Loader::Loader(const char * f_indices_file_name, const char * f_dists_file_name){
 Loader::Loader(const std::string &f_indices_file_name, const std::string &f_dists_file_name){
@@ -268,6 +270,126 @@ Mat Loader::load_flann_binary(){
 }
 
 
+
+
+/*
+ * input: Metis v4 file format weighted, the distance are probably distance?
+ *
+ * Note1: the values as the weight is the strenght which is calculated as the inverse of the distance
+ * Note2: the indices in the input starts at 1 instead of 0, so for counting we can ignore it
+ *          but for loading the values we need to reduce them by 1
+ * output: weighted Adjacency matrix
+ */
+
+// - - - - read the Metis file - - - -
+// Number of rows and columns is the first value in the first line of the input file
+// The nnz for each row is required which is not known in advance
+// Solution: 2 passes through the file,
+//          first: for counting number of edges for each node,
+//          second: initialize the values in the WA matrix
+
+Mat Loader::load_metis(){
+    printf("[LD] load metis (not tested) Exit!!!\n");
+    exit(1);
+    std::string in_file_name = Config_params::getInstance()->get_ds_name(); //@@
+    /// -------------- 1st pass (over the input file) --------------
+    ETimer t_readfile;
+    // - - - - read the Metis file - - - -
+    std::ifstream file(in_file_name);
+    std::string str, item;
+
+    //read the first line to get number of rows
+    std::getline(file, str);
+    std::stringstream ss(str);
+    std::vector<std::string> graph_info;
+    while (getline(ss, item, ' ')) {    //split by space, tokens[0] is label, and the rest of them are index:value
+        graph_info.push_back(item);
+    }
+    PetscInt num_vertices = stoi(graph_info[0]);
+    //PetscInt num_edges = stoi(graph_info[1]);
+
+    /* determine number of nonzeros per row in the new matrix */
+    PetscInt *cnt, curr_vertex=0;
+    PetscMalloc1(num_vertices, &cnt);
+
+    while (std::getline(file, str))// starts from the 2nd row in the file which is counted in index 0 of cnt
+    {
+        std::stringstream ss(str);
+        item = "";
+        std::vector<std::string> edge_info;
+        while (getline(ss, item, ' ')) {    //split by space, tokens[0] is label, and the rest of them are index:value
+            edge_info.push_back(item);
+        }
+        cnt[curr_vertex] = edge_info.size() / 2;
+        curr_vertex++;
+    }
+    file.close();
+
+    //Create Matrix WA : Weighted Adjancency
+    Mat WA;
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_vertices, num_vertices, 0, cnt, &WA);
+
+    /// -------------- 2nd pass (over the input file) --------------
+    CommonFuncs cf;
+    cf.set_weight_type(Config_params::getInstance()->get_ld_weight_type(), Config_params::getInstance()->get_ld_weight_param());
+    // - - - - read the Metis file - - - -
+    file.open(in_file_name);
+
+    //ignore the first line
+    std::getline(file, str);
+    curr_vertex = 0;
+    while (std::getline(file, str))// starts from the 2nd row in the file which is counted in index 0 of cnt
+    {
+        std::stringstream ss(str);
+        item = "";
+        std::vector<std::string> edge_info;
+        while (getline(ss, item, ' ')) {    //split by space, tokens[0] is label, and the rest of them are index:value
+            edge_info.push_back(item);
+        }
+
+        for(unsigned int i=0; i+1 < edge_info.size(); i+=2){ //check i+1 to make sure inside the loop there is no out of bound index
+            //neighbour vertex: edge_info[i] - 1
+            //edge distance: edge_info[i+1]
+            int neighbour_vertex = stoi(edge_info[i]) - 1;
+            double edge_weight = cf.convert_distance_to_weight(stod(edge_info[i+1]));
+
+            // the self loop and lower triangular elements are ignored
+            // the lower triangular will be build from the uppper triangular later
+            if (curr_vertex < neighbour_vertex )      //only upper triangular
+                MatSetValue(WA, curr_vertex, neighbour_vertex, edge_weight, INSERT_VALUES);
+        }
+        curr_vertex++;
+    }
+    file.close();
+    t_readfile.stop_timer("[LD][LM] reading input file twice");
+
+    ETimer t_WA_assembly;
+    MatAssemblyBegin(WA,MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(WA,MAT_FINAL_ASSEMBLY);
+#if dbl_LD_LM >=3
+    printf("[LD][LM] insert values to WA is finished\n");      //$$debug
+    #if dbl_LD_LM >= 9
+        printf("WA Matrix (only triangular part):\n");                                               //$$debug
+        MatView(WA,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+    #endif
+#endif
+    t_WA_assembly.stop_timer("[LD][LM] WA assembly");
+
+    ETimer t_WA_complete;
+    Mat WA_t;
+    MatTranspose(WA,MAT_INITIAL_MATRIX,&WA_t);
+    MatAYPX(WA,1,WA_t,DIFFERENT_NONZERO_PATTERN);
+    t_WA_complete.stop_timer("[LD][LM] WA add to its transpose");
+    MatDestroy(&WA_t);
+#if dbl_LD_LM >=3
+    #if dbl_LD_LM >= 7
+        printf("[LD][LM] WA Matrix After add to it's transpose:\n");                   //$$debug
+        MatView(WA,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+    #endif
+    printf("[LD][LM] WA is created completely \n");
+#endif
+    return WA;
+}
 
 
 

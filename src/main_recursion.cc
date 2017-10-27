@@ -261,7 +261,7 @@ solution MainRecursion::main_community_detection(Mat& m_data, Mat& m_WA, Vec& v_
 
 
         solution sol_coarser ;
-        sol_coarser = main_community_detection(m_data_c, m_WA_c, v_vol_c, num_clusters, level); // recursive call
+        sol_coarser = main_community_detection(m_data_c, m_WA_c, v_vol_c, level); // recursive call
 
 
 
