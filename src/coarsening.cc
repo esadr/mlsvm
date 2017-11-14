@@ -21,6 +21,8 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
     VecCreateSeq(PETSC_COMM_SELF,num_row,&D_vec);
 //    MatGetDiagonal(WA,D_vec);
     MatGetRowSum(WA,D_vec);                                 //Calculate sum of each row of W matrix
+
+
 #if dbl_CO_calcP >= 7
     printf("[Coarsening] D_vec Vector:\n");
     VecView(D_vec,PETSC_VIEWER_STDOUT_WORLD);
@@ -109,9 +111,10 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 //==================== Select strong Seeds ============================
 //        ETimer t_sseed;
 
-#if dbl_CO_calcP >=5
+
     int num_strong_seeds=0;
     num_strong_seeds = vertexs.selectSeeds();      //NOTE: Always notice that set avg-future-volume in advance
+#if dbl_CO_calcP >=5
     printf("number of strong seeds: %d\n",num_strong_seeds);    //$$debug
 #endif
 //        t_sseed.stop_timer("select strong seeds:");

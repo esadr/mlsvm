@@ -38,11 +38,11 @@
 #define dbl_LD_CD                   0           // 0 Default, 3 print raw and calculated distance
 #define dbl_LD_LNDS                 0           // 0 Default, 5 print size of data
 //---- Coarsening ----
-#define dbl_CO_calcP                3          // 1 normal with #edges
+#define dbl_CO_calcP                1          // 1 normal with #edges
 #define dbl_CO_vNorm                0           // calculate the normalized vector
 #define dbl_CO_cInv                 0           // calculate the inverse vector
 #define dbl_CO_CAD                  0           // 0 Default [Calculate Aggregate data]
-#define dbl_CO_calc_WA_c            0
+#define dbl_CO_calc_WA_c            3
 #define dbl_CO_calc_coarse_vol      0
 #define dbl_CO_FWE                  3           // filter weak edges (3 prints # filtered edges)
 //---- MainRecursion (Refinement) ----
