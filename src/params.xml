@@ -7,7 +7,7 @@
 
   <mlsvm_version stringVal="0.0.44"/> 
   <!-- ****************** Main ********************-->
-  <cpp_srand_seed stringVal= ""/>	 	    <!--for real runs should be empty string ""-->
+  <cpp_srand_seed stringVal= "13"/>	 	    <!--for real runs should be empty string ""-->
   
   <main_num_repeat_exp intVal = "1"/>; 		<!--set the number of repeats in the Main file over the whole cross-validation -->
   <main_num_kf_iter intVal = "5"/>; 		<!--set the number of cross-validation in the Main file-->
@@ -18,8 +18,8 @@
   <nn_number_of_neighbors intVal="10"/>
   <nn_distance_type intVal="1"/>		
   <!-- ****************** Loader ********************-->
-  <ds_path stringVal="./datasets/"/>
-  <ds_name stringVal="twonorm"/>		 
+  <ds_path stringVal="/home/esfp/dev/mlsvm_issues/mlsvm/Matthias Schmitt <male.schmitt@posteo.de>/"/>
+  <ds_name stringVal="letter-h"/>		 
   <tmp_path stringVal="./temp/"/>	<!--temp folder path for k_fold files-->
   <pre_init_loader_matrix intVal = "300"/>; 	<!--In Loader, for initaliation of the matrix (not less than the number of features)-->
   <inverse_weight boolVal= "1"/>		<!-- 0: means the distance is related to strenght of the connection.
@@ -33,7 +33,7 @@
   <coarse_r intVal= "4"/>    			<!-- Max number of aggregates each fine point could participate to them-->
   <cs_max_coarse_level intVal = "30"/>		<!-- Limit the number of levels in the coarsening (stop infinit loops)-->
   <cs_use_real_points intVal= "0"/>		<!-- Default 0: calculate the fake points, 1: use real point for coarser levels -->
-  <cs_weak_edges_ft doubleVal= "0.001"/>		<!-- Filter threshold for the weak edges-->
+  <cs_weak_edges_ft doubleVal= "0.00001"/>		<!-- Filter threshold for the weak edges-->
   <cs_boundary_points_status boolVal = "0"/>	<!--max number of fractions added to a row of P matrix for a fine point in case of considering the boundary points-->
   <cs_boundary_points_threshold doubleVal= "0.5"/> 	<!--the minimum entropy for a fine point to be considered as boundary point between 0 and 1-->
   <cs_boundary_points_max_num intVal = "30"/>	<!-- 0: no boundary point, 1: added max number of fraction for boundary poitns-->

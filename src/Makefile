@@ -1,7 +1,7 @@
 ALL: mlsvm_classifier
 CC 	 = g++ -L. 
 CFLAGS 	 = -I.	
-CPPFLAGS = -std=c++11 -g -O3     #-W -Wall -Weffc++ -Wextra -pedantic -O3
+CPPFLAGS = -std=c++11 -g #-O3     #-W -Wall -Weffc++ -Wextra -pedantic -O3
 LOCDIR   = .
 MAIN 	 = mlsvm_classifier.cc
 MANSEC   = Mat

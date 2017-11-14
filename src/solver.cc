@@ -54,7 +54,10 @@ svm_model * Solver::train_model(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec&
                 param.degree = 3;
             }
         }
-        if(error_cnt > 3) exit(1);
+        if(error_cnt > 3) {
+            fprintf(stderr,"[SV][TM] ERROR in reading the parametes is occured 3 times, Exit!\n");
+            exit(1);
+        }
     }while(error_msg);                                                       // now prob and param are loaded and checked
 //    std::cout << "[SV][TM] after read parameters:"<< "\n";
 
@@ -319,7 +322,7 @@ void Solver::partial_solver(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n
     error_msg = svm_check_parameter(&prob,&param);
     if(error_msg) {
         printf("[SV][PS]  ERROR: %s\n",error_msg);
-        fprintf(stderr,"ERROR: %s\n",error_msg);
+        fprintf(stderr,"[SV][PS] ERROR: %s\n",error_msg);
         print_parameters();
         exit(1);
     }
@@ -2167,11 +2170,11 @@ void Solver::prepare_solution_single_model(svm_model * model_, int num_point_p, 
     sol_single_model.C = model_->param.C;
     sol_single_model.gamma = model_->param.gamma;
 
-#if dbl_SV_PSSM >= 3
+#if dbl_SV_PSSM >= 5
     printf("\n\n[SV][PSSM] 1st SV in minority (model_->sv_indices[0]):%d\n", model_->sv_indices[0]);
     printf("[SV][PSSM] 1st SV in majority (model_->sv_indices[model_->nSV[0] ] - 1 - num_point_p) :%d, num_points_p:%d\n",
            model_->sv_indices[model_->nSV[0] ] - 1 - num_point_p, num_point_p);
-    #if dbl_SV_PSSM >= 5
+    #if dbl_SV_PSSM >= 7
         printf("indices of support vectors for minority class:\n");
         for (int k=0; k < model_->nSV[0];k++){
             printf("%d,", model_->sv_indices[k]);

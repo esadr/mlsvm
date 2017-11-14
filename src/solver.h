@@ -75,6 +75,9 @@ public:
         predict_probability = Config_params::getInstance()->get_svm_probability();
     }
 
+    ~Solver(){
+        std::cout << "[SV] solver goes out of scope\n";
+    }
     void set_local_model(svm_model * in_model){
         local_model = in_model;
     }
@@ -150,7 +153,7 @@ public:
     void get_separate_matrices(Mat& m_data, std::vector<int>& v_target_lbl,
                                        const PetscScalar * arr_train_index, PetscInt num_nnz,
                                              Mat& m_p_data, Mat& m_n_data);
-
+    
 };
 
 #endif // SOLVER_H

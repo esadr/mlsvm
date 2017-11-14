@@ -83,8 +83,8 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 #if dbl_CO_calcP >= 1         //calculate the stat for number of edges
     ref_info.num_point = num_row;
     ref_info.num_edge = sum_nnz / 2;
-//    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} number of rows:"<< num_row <<
-//                "\t\tedges:"<< ref_info.num_edge << std::endl;
+    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} number of rows:"<< num_row <<
+                "\t\tedges:"<< ref_info.num_edge << std::endl;
     std::sort(stat_degree_.begin(), stat_degree_.end(), std::greater<tmp_degree>());     //Sort all edges in descending order
 
     ref_info.min_num_edge = stat_degree_[num_row-1].degree_;

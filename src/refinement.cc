@@ -616,7 +616,7 @@ void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data
         prepare_single_solution(&coarsest_model, num_row_p, sol_coarsest);
         std::cout << "[RF][PCL] the process_coarsest_level without model selection is incomplete, EXIT!" << std::endl;
         exit(1);
-        sv_coarsest.free_solver("[RF][PCL]");        // Notice, the sv_coarsest is only availabel in this scope, and not accessible outside the else clause
+        //sv_coarsest.free_solver("[RF][PCL]");        // Notice, the sv_coarsest is only availabel in this scope, and not accessible outside the else clause
     }
 }
 

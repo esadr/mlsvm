@@ -21,9 +21,9 @@ void Config_params::print_classification_training_params(){
                  "\nds_name: "              << get_ds_name()          <<
                  "\ntmp_path: "             << get_tmp_path()          <<
                  std::endl;
-    /*
+    
     std::cout << "\ncpp_srand_seed: " <<get_cpp_srand_seed()<< std::endl;
-
+/*
     std::cout << "--- Main file Paramters ---"      <<
                  "\nmain_num_repeat_exp: "          << get_main_num_repeat_exp()        <<
                  "\nmain_num_kf_iter: "             << get_main_num_kf_iter()           <<
@@ -735,7 +735,10 @@ void Config_params::set_master_models_info(){
  */
 void Config_params::set_levels_models_info(){
 //    int curr_id = get_main_current_exp_id() * get_main_num_kf_iter() + get_main_current_kf_id();
+    std::cout << "[CP][set_levels_models_info] BEFORE size of levels_models_info vector is:" << levels_models_info.size() << std::endl;
+    std::cout << "[CP][set_levels_models_info] get_main_current_level_id() : " << get_main_current_level_id() << std::endl;
     levels_models_info.resize(get_main_current_level_id());
+    std::cout << "[CP][set_levels_models_info] AFTER  size of levels_models_info vector is:" << levels_models_info.size() << std::endl;
 //    master_models_info[curr_id].resize(get_main_current_level_id());
 //    master_models_info.push_back(curr_models);
 }
