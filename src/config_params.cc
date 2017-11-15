@@ -21,9 +21,9 @@ void Config_params::print_classification_training_params(){
                  "\nds_name: "              << get_ds_name()          <<
                  "\ntmp_path: "             << get_tmp_path()          <<
                  std::endl;
-    /*
-    std::cout << "\ncpp_srand_seed: " <<get_cpp_srand_seed()<< std::endl;
 
+    std::cout << "\ncpp_srand_seed: " <<get_cpp_srand_seed()<< std::endl;
+///*
     std::cout << "--- Main file Paramters ---"      <<
                  "\nmain_num_repeat_exp: "          << get_main_num_repeat_exp()        <<
                  "\nmain_num_kf_iter: "             << get_main_num_kf_iter()           <<
@@ -95,7 +95,7 @@ void Config_params::print_classification_training_params(){
                  "\npr_partition_max_size: "      << get_pr_partition_max_size()        <<
                  "\npr_maj_voting_id: "           << get_pr_maj_voting_id()             <<
                  std::endl;
-    */
+//    */
 }
 
 void Config_params::print_classification_prediction_params(){
@@ -151,6 +151,7 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
 
     if(caller_func == program_parts::main){
         PetscOptionsGetInt(NULL,NULL,"-d",&main_function,&flg);			//newer versions of  PETSc
+//        PetscOptionsGetInt(NULL,"-d",&main_function,&flg);			//older than 3.7 versions of  PETSc
         if (!flg){
 //            PetscPrintf(PETSC_COMM_WORLD,"[CP] Must indicate the functionality type you need using -d . \nExit!\n");
 //            exit(1);
@@ -735,7 +736,30 @@ void Config_params::set_master_models_info(){
  */
 void Config_params::set_levels_models_info(){
 //    int curr_id = get_main_current_exp_id() * get_main_num_kf_iter() + get_main_current_kf_id();
-    levels_models_info.resize(get_main_current_level_id());
+
+//    levels_models_info.resize(get_main_current_level_id());
+
+//    std::cout << "[CP][SLMI] model info vector from last iteration:" << std::endl;
+//    std::cout << "[CP][SLMI] \tsize:" << levels_models_info.size() <<
+//                 "\t capacity:" << levels_models_info.capacity() <<
+//                 "\t current_level_id:" << get_main_current_level_id() << std::endl;
+
+
+    levels_models_info.clear();                                 // Clear the vector from what is there from last iteration
+//    levels_models_info.reserve(get_main_current_level_id());    // reserve the memory for all levels
+    for(int i=0; i < get_main_current_level_id(); i++){
+        levels_models_info.push_back(1);
+    }
+
+
+//    std::cout << "[CP][SLMI] updated model info vector :" << std::endl;
+//    std::cout << "[CP][SLMI] \tsize:" << levels_models_info.size() <<
+//                 "\t capacity:" << levels_models_info.capacity() << std::endl;
+//    for(int i=0; i < get_main_current_level_id(); i++){
+//        std::cout << "[CP][SLMI] model info vector "<< i <<":"<< levels_models_info[i] << std::endl;
+//    }
+//    std::cout << "[CP][SLMI] model info vector is cleared successfully" << std::endl;
+
 //    master_models_info[curr_id].resize(get_main_current_level_id());
 //    master_models_info.push_back(curr_models);
 }

@@ -38,15 +38,15 @@
 #define dbl_LD_CD                   0           // 0 Default, 3 print raw and calculated distance
 #define dbl_LD_LNDS                 0           // 0 Default, 5 print size of data
 //---- Coarsening ----
-#define dbl_CO_calcP                0           // 1 normal with #edges                 //release 0
+#define dbl_CO_calcP                1           // 1 normal with #edges                 //release 0
 #define dbl_CO_vNorm                0           // calculate the normalized vector
 #define dbl_CO_cInv                 0           // calculate the inverse vector
 #define dbl_CO_CAD                  0           // 0 Default [Calculate Aggregate data]
 #define dbl_CO_calc_WA_c            0
 #define dbl_CO_calc_coarse_vol      0
-#define dbl_CO_FWE                  0           // filter weak edges (3 prints # filtered edges) //release 0
+#define dbl_CO_FWE                  3           // filter weak edges (3 prints # filtered edges) //release 0
 //---- MainRecursion (Refinement) ----
-#define dbl_MR_main                 1           // 1 Default //release 0
+#define dbl_MR_main                 3           // 1 Default 3 level info //release 0
 #define debug_level_main_rec        0           // 0 Default
 #define dbl_MR_refinement           1           // 1 Default
 
@@ -86,7 +86,7 @@
 #define dbl_MS_UDC                  1           // 1 Default
 
 //---- Solver ----
-#define dbl_SV_free_solver          0           // 0 Default, 1 prints which class called the free method
+#define dbl_SV_free_solver          1           // 0 Default, 1 prints which class called the free method
 #define dbl_SV_malloc_weights       0           // 0 Default, 1 prints the labels for classes
 #define dbl_SV_read_problem         0           // 0 Default, 1 prints the number of points in classes
 #define dbl_SV_RPIB                 0           // 0 Default    //read_problem_index_base

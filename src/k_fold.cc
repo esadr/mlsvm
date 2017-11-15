@@ -51,10 +51,11 @@ void k_fold::read_in_divided_data(Mat& m_min_data, Mat& m_maj_data){
 //    std::cout << "[k_fold] prefix: " << prefix << std::endl;
     std::string min_full_data {prefix + "_min_norm_data.dat"}; // add the dataset name
     std::string maj_full_data {prefix + "_maj_norm_data.dat"};
-#if dbl_KF_rdd >= 1
+#if dbl_KF_rdd >= 0
     std::cout << "[k_fold] min_full_data:<<"<< min_full_data << std::endl;
     std::cout << "[k_fold] maj_full_data:<<"<< maj_full_data << std::endl;
 #endif
+
     Loader ld;
     m_min_data = ld.read_input_matrix(min_full_data);
     m_maj_data = ld.read_input_matrix(maj_full_data);

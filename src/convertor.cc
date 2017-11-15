@@ -131,7 +131,7 @@ void Convertor::CSV_file_to_PETSc_format(){
     in_file.open(fname);
 
     if(!in_file.is_open()){
-        std::cout << "[RCF] failed to open" << fname <<" file! \nExit";
+        std::cout << "[RCF] failed to open " << fname <<" file! \nExit";
         exit(1);
     }
     //    std::vector<std::pair<int,int>> v_lines;

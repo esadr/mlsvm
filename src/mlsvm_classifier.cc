@@ -17,8 +17,8 @@ Config_params* Config_params::instance = NULL;
 
 int main(int argc, char **argv)
 {
-//    PetscInitialize(&argc, &argv, NULL, NULL);
-    PetscInitialize(NULL, NULL, NULL, NULL);
+    PetscInitialize(&argc, &argv, NULL, NULL);
+//    PetscInitialize(NULL, NULL, NULL, NULL);
     Config_params::getInstance()->read_params("./params.xml", argc, argv);  // read parameters
     switch(Config_params::getInstance()->get_main_function()){
     ///*********************************************************************
@@ -36,6 +36,7 @@ int main(int argc, char **argv)
         k_fold kf;                                          // read the input data again and shuffle it
         Mat m_min_full_data, m_maj_full_data;
         kf.read_in_divided_data(m_min_full_data, m_maj_full_data);      // read the data for both class
+
         kf.initialize_vectors();
         //#memory optimization (I can release the memory after I created the train and test data to save memory usage,
         //drawback is loading the data files in the beginning)

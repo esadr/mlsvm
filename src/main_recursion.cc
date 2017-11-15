@@ -4,6 +4,7 @@
 #include "config_params.h"
 #include "etimer.h"
 
+#include <thread>
 
 solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
                              Mat& n_data, Mat& m_P_n_f, Mat& n_WA, Vec& n_vol,
@@ -39,16 +40,18 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         printf("[MR][main] num points P:%d, N:%d\n",p_num_row, n_num_row);      //$$debug
 //        printf("[MR][main] start to solve SVM for level:%d\n",level);      //$$debug
 
-        //reserve the space in master_models_info for all levels in refinement
+        // Set the number of models at each level to zero as default
+        // The current level is used to set the vector size and initialize it
         Config_params::getInstance()->set_levels_models_info();
+
         solution sol_coarsest;
         Refinement rf;
-//        std::cout << "[MR][main] DEBUG level id before calling rf.process_coarsest_level:" +
-//                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
+        std::cout << "[MR][main] DEBUG level id before calling rf.process_coarsest_level:" +
+                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
         rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n, level ,sol_coarsest, v_ref_results);
 
-//        std::cout << "[MR][main] DEBUG level id after calling rf.process_coarsest_level:" +
-//                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
+        std::cout << "[MR][main] DEBUG level id after calling rf.process_coarsest_level:" +
+                     std::to_string(Config_params::getInstance()->get_main_current_level_id()) << std::endl;
 
         // free resources
         MatDestroy(&p_data);
@@ -56,8 +59,8 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         MatDestroy(&p_WA);
         MatDestroy(&n_WA);
 
-//        std::cout << "[MR][main]{coarsest} before returning the sol_coarsest C:"<< sol_coarsest.C << std::endl;
-//        std::cout << "[MR][main]{coarsest} before returning the sol_coarsest nSV+:"<< sol_coarsest.p_index.size() << std::endl;
+        std::cout << "[MR][main]{coarsest} before returning the sol_coarsest C:"<< sol_coarsest.C << std::endl;
+        std::cout << "[MR][main]{coarsest} before returning the sol_coarsest nSV+:"<< sol_coarsest.p_index.size() << std::endl;
         return sol_coarsest;                                // return the coarsest solution
 
     }else{      ///-------------- Coarsening -------------------

@@ -7,7 +7,7 @@
 
   <mlsvm_version stringVal="0.0.44"/> 
   <!-- ****************** Main ********************-->
-  <cpp_srand_seed stringVal= ""/>	 	    <!--for real runs should be empty string ""-->
+  <cpp_srand_seed stringVal= "13"/>	 	    <!--for real runs should be empty string ""-->
   
   <main_num_repeat_exp intVal = "1"/>; 		<!--set the number of repeats in the Main file over the whole cross-validation -->
   <main_num_kf_iter intVal = "5"/>; 		<!--set the number of cross-validation in the Main file-->
@@ -18,8 +18,8 @@
   <nn_number_of_neighbors intVal="10"/>
   <nn_distance_type intVal="1"/>		
   <!-- ****************** Loader ********************-->
-  <ds_path stringVal="./datasets/"/>
-  <ds_name stringVal="twonorm"/>		 
+  <ds_path stringVal="/home/esfp/dev/mlsvm_issues/11132017/double_free/"/>
+  <ds_name stringVal="letter-h"/>		 
   <tmp_path stringVal="./temp/"/>	<!--temp folder path for k_fold files-->
   <pre_init_loader_matrix intVal = "300"/>; 	<!--In Loader, for initaliation of the matrix (not less than the number of features)-->
   <inverse_weight boolVal= "1"/>		<!-- 0: means the distance is related to strenght of the connection.
