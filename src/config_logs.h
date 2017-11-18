@@ -86,7 +86,7 @@
 #define dbl_MS_UDC                  1           // 1 Default
 
 //---- Solver ----
-#define dbl_SV_free_solver          1           // 0 Default, 1 prints which class called the free method
+#define dbl_SV_free_solver          0           // 0 Default, 1 prints which class called the free method
 #define dbl_SV_malloc_weights       0           // 0 Default, 1 prints the labels for classes
 #define dbl_SV_read_problem         0           // 0 Default, 1 prints the number of points in classes
 #define dbl_SV_RPIB                 0           // 0 Default    //read_problem_index_base
@@ -115,7 +115,7 @@
 
 
 #define dbl_SV_PDTPIB               0           // 0 Default    1 prints the details
-#define export_SVM_models           1           // 0 Default    1 Save the SVM models in svm_models folder
+#define export_SVM_models           0           // 0 Default    1 Save the SVM models in svm_models folder
 
 #endif // CONFIG_LOGS_H
 
