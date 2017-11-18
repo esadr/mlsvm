@@ -890,7 +890,7 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
 
     best_sv.predict_test_data_in_matrix_output(m_testdata, classifier_id, m_all_predict_TD);
 
-#if export_SVM_models       //export the model (we save a model at a time)
+#if export_SVM_models == 1       //export the model (we save a model at a time)
     //save the models in a local folder
     //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
     //append the model to summary file after each export

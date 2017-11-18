@@ -51,9 +51,9 @@ void Config_params::print_classification_training_params(){
                  "\ncs_max_coarse_level: "  << get_cs_max_coarse_level()  <<
                  "\ncs_use_real_points: "   << get_cs_use_real_points()   <<
                  "\ncs_weak_edges_ft: "     << get_cs_weak_edges_ft()     <<
-                 "\ncs_boundary_points_status: "     << get_cs_boundary_points_status()     <<
-                 "\ncs_boundary_points_threshold: "  << get_cs_boundary_points_threshold()  <<
-                 "\ncs_boundary_points_max_num: "    << get_cs_boundary_points_max_num()    <<
+//                 "\ncs_boundary_points_status: "     << get_cs_boundary_points_status()     <<
+//                 "\ncs_boundary_points_threshold: "  << get_cs_boundary_points_threshold()  <<
+//                 "\ncs_boundary_points_max_num: "    << get_cs_boundary_points_max_num()    <<
                  std::endl;
 
     std::cout << "--- ModelSelection Paramters ---" <<
@@ -666,7 +666,7 @@ void Config_params::set_best_parameters(measures preferred_measure){    //defaul
 }
 
 void Config_params::print_final_results() const{
-    printf("[CP] final results are: \n");
+    printf("           >   >   >   >   >   >         Final Results         <   <   <   <   <   < \n");
     double sum_acc=0;
     double sum_gmean=0;
     double sum_sens=0;
@@ -704,9 +704,13 @@ void Config_params::print_final_results() const{
     double avg_npv = sum_npv / this->all_summary.size();
     double avg_f1 = sum_f1 / this->all_summary.size();
     double avg_gmean = sum_gmean / this->all_summary.size();
-    printf("           -------------------- Average results --------------------\n");
-    printf("[CP][PFR], Avg_Acc:%.2f, Avg_SN:%.2f, Avg_SP:%.2f, Avg_PPV:%.2f, Avg_NPV:%.2f, Avg_F1:%.2f, Avg_GM:%.2f\n\n",
-           avg_acc, avg_sens, avg_spec, avg_ppv, avg_npv, avg_f1, avg_gmean);
+//    printf("           -------------------- Average Results --------------------\n");
+    printf("\n           *  *  *  *  *  * *  *  *  *  * *  *  *  *  * *  *  *  *  *  *  *  *  *  *\n");
+    printf("           *                            Average Results                            *\n");
+    printf("           *                                                                       *\n");
+    printf("           *   Acc:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f    *\n",
+                           avg_acc, avg_sens, avg_spec, avg_ppv, avg_npv, avg_f1, avg_gmean);
+    printf("           *  *  *  *  *  * *  *  *  *  * *  *  *  *  * *  *  *  *  *  *  *  *  *  *\n");
 }
 
 

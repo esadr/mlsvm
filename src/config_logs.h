@@ -46,7 +46,7 @@
 #define dbl_CO_calc_coarse_vol      0
 #define dbl_CO_FWE                  3           // filter weak edges (3 prints # filtered edges) //release 0
 //---- MainRecursion (Refinement) ----
-#define dbl_MR_main                 3           // 1 Default 3 level info //release 0
+#define dbl_MR_main                 1           // 1 Default 3 level info //release 0
 #define debug_level_main_rec        0           // 0 Default
 #define dbl_MR_refinement           1           // 1 Default
 

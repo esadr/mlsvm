@@ -290,11 +290,6 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
             std::cout << "[RF][main] nSV+:"<< uset_SV_index_p.size() << " nSV-:"<< uset_SV_index_n.size() << std::endl;
         #endif
 
-        #if export_SVM_models       //export the models
-
-
-        #endif
-
 
         }// end of "if(level > 1 )" for preparing the solution for levels except the finest
 
@@ -604,27 +599,15 @@ void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data
                                             // - - - - - load the validation data - - - - -
     if(Config_params::getInstance()->get_ms_status()){      // - - - - model selection - - - -
 
-//        if(Config_params::getInstance()->get_main_current_kf_id() == 4){
-
-        std::cout << "\n\n refinement ----  Iteration "<<
-                     Config_params::getInstance()->get_main_current_kf_id() <<
-                     ", level: " << Config_params::getInstance()->get_main_current_level_id() << std::endl;
-
-//        }
+//        std::cout << "\n\n refinement ----  Iteration "<<
+//                     Config_params::getInstance()->get_main_current_kf_id() <<
+//                     ", level: " << Config_params::getInstance()->get_main_current_level_id() << std::endl;
 
         // call model selection method
         ModelSelection ms_coarsest;
         ms_coarsest.uniform_design_separate_validation(m_data_p, v_vol_p, m_data_n, v_vol_n, l_inh_param, local_param_c, local_param_gamma,
                                                        m_VD_p, m_VD_n, level, sol_coarsest,v_ref_results);
-        std::cout << "[RF][PCL] nSV+:" << sol_coarsest.p_index.size() << std::endl;     //$$debug
-
-
-
-        if(Config_params::getInstance()->get_main_current_kf_id() == 4){
-            std::cout << "\n\n at refinement ----  After UD , Exit!" << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        }
-
+//        std::cout << "[RF][PCL] nSV+:" << sol_coarsest.p_index.size() << std::endl;     //$$debug
 
     }else{                                          // - - - - No model selection (call solver directly) - - - -
 

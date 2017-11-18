@@ -2210,7 +2210,7 @@ void Solver::prepare_solution_single_model(svm_model * model_, int num_point_p, 
     printf("\n\n[SV][PSSM] solution has nSV+:%d, nSV-:%d, l:%d\n", model_->nSV[0], model_->nSV[1], model_->l);
 #endif
 
-#if export_SVM_models       //export the models
+#if export_SVM_models == 1      //export the models
     //save the models in a local folder
     //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
     //append the model to summary file after each export

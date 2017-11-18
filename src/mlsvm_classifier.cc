@@ -141,9 +141,9 @@ int main(int argc, char **argv)
 
         t_all.stop_timer("[MC] Whole test including all iterations");
         printf("[MC] Total number of iterations:%d \n",total_iter_);
-
+#if export_SVM_models == 1
         Config_params::getInstance()->export_models_metadata();
-
+#endif
 
     //    Config_params::getInstance()->print_params();
         printf("[MC] MLSVM Classifier finished successfully!\n");
