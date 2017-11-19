@@ -17,8 +17,8 @@ Config_params* Config_params::instance = NULL;
 
 int main(int argc, char **argv)
 {
-    PetscInitialize(&argc, &argv, NULL, NULL);
-//    PetscInitialize(NULL, NULL, NULL, NULL);
+//    PetscInitialize(&argc, &argv, NULL, NULL);
+    PetscInitialize(NULL, NULL, NULL, NULL);
     Config_params::getInstance()->read_params("./params.xml", argc, argv);  // read parameters
     switch(Config_params::getInstance()->get_main_function()){
     ///*********************************************************************
@@ -120,10 +120,13 @@ int main(int argc, char **argv)
 
                 //save the final metadata for models of the current k-fold   @072617-1157
                 Config_params::getInstance()->update_master_models_info();
-
+#if save_test_files == 0
                 std::string test_file = Config_params::getInstance()->get_test_ds_f_name();
-//                if( remove(test_file.c_str())==0)
-//                    std::cout << "[MC] test data file is removed successfully from " << test_file << std::endl;
+		std::string info_file = test_file + ".info";
+		remove(info_file.c_str());
+                if( remove(test_file.c_str())==0)
+                    std::cout << "[MC] test data file is removed successfully from " << test_file << std::endl;
+#endif
 
             }   // end of for loop for "Whole cross fold"
         }   // end of for loop for "Repeat the experiment"

@@ -116,7 +116,7 @@
 
 #define dbl_SV_PDTPIB               0           // 0 Default    1 prints the details
 #define export_SVM_models           0           // 0 Default    1 Save the SVM models in svm_models folder
-
+#define save_test_files             0           // 0 Default removes the test file, 	1 keeps them 
 #endif // CONFIG_LOGS_H
 
 
