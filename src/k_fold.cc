@@ -19,11 +19,11 @@ void k_fold::read_in_data(std::string input_train_data, std::string input_train_
     PetscInt data_size=0, label_size=0;
 
     if(input_train_data.empty())
-        input_train_data = Config_params::getInstance()->get_ds_path()+
+        input_train_data = Config_params::getInstance()->get_ds_path()+ "/" +
                         Config_params::getInstance()->get_ds_name()+ "_zsc_data.dat";
 
     if(input_train_label.empty())
-        input_train_label = Config_params::getInstance()->get_ds_path()+
+        input_train_label = Config_params::getInstance()->get_ds_path()+ "/" +
                         Config_params::getInstance()->get_ds_name()+ "_label.dat";
 
 

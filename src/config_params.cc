@@ -542,10 +542,10 @@ void Config_params::set_ds_name(std::string const new_ds_name){
 
 void Config_params::set_file_names_for_save_flann(){
     if(get_nn_number_of_classes() == 2){
-        p_norm_data_f_name  = get_ds_path() + get_ds_name() + "_min_norm_data.dat";
-        n_norm_data_f_name  = get_ds_path() + get_ds_name() + "_maj_norm_data.dat";
+        p_norm_data_f_name  = get_ds_path() + "/" + get_ds_name() + "_min_norm_data.dat";
+        n_norm_data_f_name  = get_ds_path() + "/" + get_ds_name() + "_maj_norm_data.dat";
     }else{
-        single_norm_data_f_name  = get_ds_path() + get_ds_name() + "_zsc_data.dat";
+        single_norm_data_f_name  = get_ds_path() + "/" + get_ds_name() + "_zsc_data.dat";
     }
 }
 

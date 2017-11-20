@@ -1,3 +1,9 @@
+/*
+ * This is the C++ version of calling FLANN which is not working properly.
+ * Please use the mlsvm_save_knn which directly calls the flann.py script to calculate the Knn.
+ *
+ */
+
 #include "../config_params.h"
 #include <flann/flann.hpp>
 //#include <flann/util/random.h>
