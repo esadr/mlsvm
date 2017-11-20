@@ -47,11 +47,11 @@ void k_fold::read_in_data(std::string input_train_data, std::string input_train_
 void k_fold::read_in_divided_data(Mat& m_min_data, Mat& m_maj_data){
     ETimer t_all;
 
-    std::string prefix = Config_params::getInstance()->get_ds_path() + Config_params::getInstance()->get_ds_name();
+    std::string prefix = Config_params::getInstance()->get_ds_path() + "/" + Config_params::getInstance()->get_ds_name();
 //    std::cout << "[k_fold] prefix: " << prefix << std::endl;
     std::string min_full_data {prefix + "_min_norm_data.dat"}; // add the dataset name
     std::string maj_full_data {prefix + "_maj_norm_data.dat"};
-#if dbl_KF_rdd >= 0
+#if dbl_KF_rdd >= 1
     std::cout << "[k_fold] min_full_data:<<"<< min_full_data << std::endl;
     std::cout << "[k_fold] maj_full_data:<<"<< maj_full_data << std::endl;
 #endif
@@ -68,7 +68,7 @@ void k_fold::read_in_divided_data(Mat& m_min_data, Mat& m_maj_data){
 void k_fold::read_in_full_NN(Mat& m_min_NN_indices,Mat& m_min_NN_dists,Mat& m_maj_NN_indices,Mat& m_maj_NN_dists){
     ETimer t_all;
 
-    std::string prefix = Config_params::getInstance()->get_ds_path() + Config_params::getInstance()->get_ds_name();
+    std::string prefix = Config_params::getInstance()->get_ds_path() + "/" + Config_params::getInstance()->get_ds_name();
 //    std::cout << "[k_fold][Read_Full_NN] prefix: " << prefix << std::endl;
     std::string min_NN_indices {prefix + "_min_norm_data_indices.dat"};
     std::string min_NN_dists {prefix + "_min_norm_data_dists.dat"};

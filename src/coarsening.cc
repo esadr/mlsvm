@@ -427,7 +427,7 @@ Mat Coarsening::calc_P_without_shrinking(Mat& WA, Vec& vol,std::vector<NodeId>& 
     }
     MatAssemblyBegin(m_P,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_P,MAT_FINAL_ASSEMBLY);
-#if dbl_CO_calcP >=0
+#if dbl_CO_calcP >=7
     printf("[CO][calc_p] P Matrix:\n");                                               //$$debug
     MatView(m_P,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
 #endif
