@@ -648,7 +648,8 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
 
 /*
  * I need to create a hash table (set) for test indices and then query the neighbor of points in each row of the training data
- * inside the filter_NN to find out which nodes are not in the training data. The test data is used to track them because it is at most 20% of whole data
+ * inside the filter_NN to find out which nodes are not in the training data.
+ * The test data is used to track them because it is at most 20% of whole data
  *
  * flann's indices are sorted ascending by their distance (first one is closer than second one)- Checked Feb 1, 2017 using dists results
  *
@@ -1215,7 +1216,7 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
                         Mat& m_min_full_data,Mat& m_min_train_data,Mat& m_min_full_NN_indices,Mat& m_min_full_NN_dists,Mat& m_min_WA,Vec& v_min_vol,
                         Mat& m_maj_full_data,Mat& m_maj_train_data,Mat& m_maj_full_NN_indices,Mat& m_maj_full_NN_dists,Mat& m_maj_WA,Vec& v_maj_vol,
                         bool debug_status){
-    // - - - - - cross fold the data for each class - - - - -
+    // - - - - - cross fold the data for positive class - - - - -
     Mat m_min_test_data;
     std::unordered_set<PetscInt> uset_min_test_idx;
     PetscInt    size_min_full_data;
@@ -1229,11 +1230,15 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
 
     cross_validation_class(current_iteration, total_iterations, m_min_full_data, m_min_train_data, m_min_test_data, arr_min_idx_train, min_train_size,
                            uset_min_test_idx,v_min_full_idx_train_dix, "minority", this->min_shuffled_indices_,debug_flg_CVC_min);
-
+#if dbl_exp_train_data ==1      //only for comparison with other solvers, not part of normal process
+    write_output(Config_params::getInstance()->get_p_e_k_train_data_f_name() , m_min_train_data, "minority data");
+#endif
 #if dbl_KF_PDFI >= 1
     std::cout << "[KF][PDFI] min, train_size: " << min_train_size << std::endl;
     std::cout << "[KF][PDFI] min, arr_min_idx_train[40]: " << arr_min_idx_train[40] << std::endl;
 #endif
+
+    // - - - - - cross fold the data for negative class - - - - -
     Mat m_maj_test_data;
     std::unordered_set<PetscInt> uset_maj_test_idx;
     PetscInt    size_maj_full_data;
@@ -1244,9 +1249,13 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
     std::vector<PetscInt> v_maj_full_idx_train_dix;
     cross_validation_class(current_iteration, total_iterations, m_maj_full_data, m_maj_train_data, m_maj_test_data, arr_maj_idx_train, maj_train_size,
                            uset_maj_test_idx,v_maj_full_idx_train_dix, "majority", this->maj_shuffled_indices_);
+#if dbl_exp_train_data ==1      //only for comparison with other solvers, not part of normal process
+    write_output(Config_params::getInstance()->get_n_e_k_train_data_f_name(), m_maj_train_data, "majority data");
+#endif
 #if dbl_KF_PDFI >= 1
     std::cout << "[KF][PDFI] maj, train_size: " << maj_train_size << std::endl;
 #endif
+
     // - - - - -  Combine Test Data - - - - -
     Mat m_test_data;
     combine_two_classes_in_one(m_test_data, m_min_test_data, m_maj_test_data );
@@ -1351,7 +1360,7 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
     MatView(m_filtered_NN_dists,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
 #endif
 
-    t_all.stop_timer("[KF][FN] filtering the class of ",info);
+    t_all.stop_timer("[KF][FN] filtering NN for the class of",info);
 }
 
 

@@ -11,10 +11,6 @@
 
 Config_params* Config_params::instance = NULL;
 
-#define Multiple_Runs   1       //1 means, it is in debug mode and only run once
-#define flann_is_needed 1       //1 means, Flann is required, 0 means, No flann and use the old files(only works for single run)
-#define sep_test_data   0       //1 means, test data is passed as a seperate file, only works for single run
-
 int main(int argc, char **argv)
 {
 //    PetscInitialize(&argc, &argv, NULL, NULL);
@@ -44,7 +40,6 @@ int main(int argc, char **argv)
         Mat m_min_full_NN_indices,m_min_full_NN_dists,m_maj_full_NN_indices,m_maj_full_NN_dists;
         kf.read_in_full_NN(m_min_full_NN_indices,m_min_full_NN_dists,m_maj_full_NN_indices,m_maj_full_NN_dists);
 
-    #if Multiple_Runs == 1          /// - - - - - - - - - - - - Multiple runs - - - - - - - - - - - -
         // - - - - - - Repeat the expriment for multiple times - - - - - -
         for(int r=0; r< num_repeat_exp_; r++){
             Config_params::getInstance()->set_main_current_exp_id(r);
@@ -59,30 +54,14 @@ int main(int argc, char **argv)
                 Mat m_min_train_data,m_min_WA;
                 Mat m_maj_train_data,m_maj_WA;
                 Vec v_p_vol, v_n_vol;
-                // set the name of testdata file
-                std::string f_name_test_data = Config_params::getInstance()->get_tmp_path() +"kfold_test_data_exp_"+
-                        std::to_string(r)+"_fold_"+std::to_string(i)+ "_exp_" + Config_params::getInstance()->get_exp_info();
-                Config_params::getInstance()->set_test_ds_f_name(f_name_test_data);
-
-                std::string f_name_p_train_data = Config_params::getInstance()->get_tmp_path() +"kfold_p_train_data_exp_"+
-                        std::to_string(r)+"_fold_"+std::to_string(i)+ "_exp_" + Config_params::getInstance()->get_exp_info();
-                Config_params::getInstance()->set_p_e_k_train_data_f_name(f_name_p_train_data);
-
-                std::string f_name_n_train_data = Config_params::getInstance()->get_tmp_path() +"kfold_n_train_data_exp_"+
-                        std::to_string(r)+"_fold_"+std::to_string(i)+ "_exp_" + Config_params::getInstance()->get_exp_info();
-                Config_params::getInstance()->set_n_e_k_train_data_f_name(f_name_n_train_data);
-
-//                std::cout << "testdata file name is "   << Config_params::getInstance()->get_test_ds_f_name()
-//                                                        << Config_params::getInstance()->get_p_e_k_train_data_f_name()
-//                                                        << Config_params::getInstance()->get_n_e_k_train_data_f_name() << std::endl; //#TODO needs to check @@082317-1445
+                Config_params::getInstance()->set_current_iter_file_names(r, i); // r is the current experiment, i is the current iteration (k-fold id)
 
                 kf.prepare_data_for_iteration(i,num_kf_iter_,m_min_full_data,m_min_train_data,m_min_full_NN_indices,m_min_full_NN_dists,m_min_WA,v_p_vol
                                               ,m_maj_full_data,m_maj_train_data,m_maj_full_NN_indices,m_maj_full_NN_dists,m_maj_WA,v_n_vol);
-//                exit(1);
-    #endif  // end of Multiple_Runs == 1
 
-                // bypass the classification to export the cross-validation for comparison to other solvers
-//                /*
+
+            // bypass the classification to export the cross-validation training data (comparison with other solvers)
+            #if dbl_exp_train_data == 0
             //====================== create validation data ===============================
                 ETimer t_sample;
                 Mat m_VD_p, m_VD_n;
@@ -110,28 +89,25 @@ int main(int argc, char **argv)
 
                 MatDestroy(&m_VD_p);    // release the validation data
                 MatDestroy(&m_VD_n);
-//                */
-
-        #if Multiple_Runs == 1
-//                t_solver.stop_timer("[MC] Total Solver at iteration ",std::to_string(i));
 
                 t_iteration.stop_timer("[MC] Vcycle (including loading datasets) at iteration ",std::to_string(i));
-//                Config_params::getInstance()->print_final_results();          //commented for release
-
                 //save the final metadata for models of the current k-fold   @072617-1157
                 Config_params::getInstance()->update_master_models_info();
-#if save_test_files == 0
+            #endif //dbl_exp_train_data
+
+//            std::cout << "[MC] EXIT\n" ;            exit(1);
+            // 1 saves the test files for comparison or run standalone prediction
+            #if save_test_files == 0
                 std::string test_file = Config_params::getInstance()->get_test_ds_f_name();
-		std::string info_file = test_file + ".info";
-		remove(info_file.c_str());
+                std::string info_file = test_file + ".info";
+                remove(info_file.c_str());
                 if( remove(test_file.c_str())==0)
                     std::cout << "[MC] test data file is removed successfully from " << test_file << std::endl;
-#endif
+            #endif
 
-            }   // end of for loop for "Whole cross fold"
+            }   // end of for loop for "Whole cross validation"
         }   // end of for loop for "Repeat the experiment"
-        #endif
-        //destory the remaining objects to free the memory
+        //destory the remaining objects (free the memory)
         MatDestroy(&m_min_full_data);
         MatDestroy(&m_maj_full_data);
         MatDestroy(&m_min_full_NN_indices);
@@ -139,14 +115,17 @@ int main(int argc, char **argv)
         MatDestroy(&m_maj_full_NN_indices);
         MatDestroy(&m_maj_full_NN_dists);
 
+    #if dbl_exp_train_data == 0
         std::cout << "[MC] End of all experiments\n" ;
         Config_params::getInstance()->print_final_results();
 
         t_all.stop_timer("[MC] Whole test including all iterations");
         printf("[MC] Total number of iterations:%d \n",total_iter_);
-#if export_SVM_models == 1
+
+    #if export_SVM_models == 1
         Config_params::getInstance()->export_models_metadata();
-#endif
+    #endif //export_SVM_models      //in case of exporting the data, the models are not trained and the output is useless
+    #endif //dbl_exp_train_data
 
     //    Config_params::getInstance()->print_params();
         printf("[MC] MLSVM Classifier finished successfully!\n");

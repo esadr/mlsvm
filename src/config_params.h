@@ -223,7 +223,7 @@ public:
     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
-
+    void   set_current_iter_file_names(int curr_exp, int curr_iter);
     // Loader
     bool   get_inverse_weight()     const { return inverse_weight; }
     int    get_ld_weight_type()     const { return ld_weight_type; }

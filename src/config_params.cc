@@ -820,3 +820,14 @@ void Config_params::read_zscore_parameters(pugi::xml_node& root,int argc, char *
     std::vector<std::string> args = parser_.args();
     std::cout << "[CP] z-score parameters are read" << std::endl;
 }
+
+void Config_params::set_current_iter_file_names(int curr_exp, int curr_iter){
+    set_test_ds_f_name(get_tmp_path() +"kfold_test_data_exp_"+ std::to_string(curr_exp)+"_fold_"+
+                        std::to_string((curr_iter))+ "_exp_" + get_exp_info());
+
+    set_p_e_k_train_data_f_name(get_tmp_path() +"kfold_p_train_data_exp_"+ std::to_string(curr_exp)+
+                                "_fold_"+ std::to_string((curr_iter))+ "_exp_" + get_exp_info());
+
+    set_n_e_k_train_data_f_name(get_tmp_path() +"kfold_n_train_data_exp_"+std::to_string(curr_exp)+
+                                "_fold_"+ std::to_string((curr_iter))+ "_exp_" + get_exp_info());
+}
