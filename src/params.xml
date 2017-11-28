@@ -87,7 +87,7 @@
 						1: Sum of volumes of points in each class -->
   <pr_start_partitioning intVal= "5000"/> 		<!--start to partition data to smaller parts-->
   <!-- ****************** Partitioning ********************-->
-  <pr_partition_max_size intVal= "1500"/> 		<!--Maximum number of points in each partition(partition) for partitioning classes-->
+  <pr_partition_max_size intVal= "1000"/> 		<!--Maximum number of points in each partition(partition) for partitioning classes-->
   <pr_maj_voting_id intVal= "2"/> 		<!-- Majority Voting technique
 						1: all votes are the same 
 						2: weighted by inverse Euclidean distance 
