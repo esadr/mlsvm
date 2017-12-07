@@ -118,6 +118,7 @@
 #define export_SVM_models           1           // 0 Default    1 Save the SVM models in svm_models folder
 #define save_test_files             0           // 0 Default removes the test file, 	1 keeps them
 #define dbl_exp_train_data          0           // 0 Default, 1 only export the data for comparison with other solvers
+#define timer_complexity_analysis   1           // 0 Default, 1 only for reporting the detail of time for coarsening and refinement
 #endif // CONFIG_LOGS_H
 
 

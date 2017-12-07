@@ -42,6 +42,7 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         printf("[MR][main] num points P:%d, N:%d\n",p_num_row, n_num_row);      //$$debug
 //        printf("[MR][main] start to solve SVM for level:%d\n",level);      //$$debug
 
+        Config_params::getInstance()->set_timer_end_coarsening();
         // Set the number of models at each level to zero as default
         // The current level is used to set the vector size and initialize it
         Config_params::getInstance()->set_levels_models_info();

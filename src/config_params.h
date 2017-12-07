@@ -6,6 +6,7 @@
 #include "pugixml.hpp"
 #include "OptionParser.h"
 #include "ds_global.h"
+#include <ctime>
 
 class Config_params{
 private:
@@ -134,7 +135,10 @@ private:
     void read_convert_files_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_clustering_parameters(pugi::xml_node& root,int argc, char * argv[]);
 
-
+    //======= Timers ========
+    std::clock_t t_start_coarsening;
+    std::clock_t t_end_coarsening;
+    std::clock_t t_end_refinement;
 
 
 public:
@@ -289,6 +293,11 @@ public:
     // - - - - - Classification prediction  - - - - -
     int    get_experiment_id()      const { return stoi(options_["experiment_id"]);}
     int    get_kfold_id()           const { return stoi(options_["kfold_id"]);}
+
+    void   set_timer_start_coarsening() {t_start_coarsening = std::clock();}
+    void   set_timer_end_coarsening() {t_end_coarsening = std::clock();}
+    void   set_timer_end_refinement() {t_end_refinement = std::clock();}
+    void   print_coarsening_refinement_times() const;
 };
 
 #endif // CONFIG_PARAMS_H

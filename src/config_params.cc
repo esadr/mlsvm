@@ -2,7 +2,8 @@
 #include <iostream>
 #include <fstream>          // export models information to file
 #include "pugixml.hpp"
-#include <time.h>
+//#include <time.h>
+//#include <ctime>
 #include <chrono>
 #include "petscvec.h"
 
@@ -831,3 +832,12 @@ void Config_params::set_current_iter_file_names(int curr_exp, int curr_iter){
     set_n_e_k_train_data_f_name(get_tmp_path() +"kfold_n_train_data_exp_"+std::to_string(curr_exp)+
                                 "_fold_"+ std::to_string((curr_iter))+ "_exp_" + get_exp_info());
 }
+
+
+void Config_params::print_coarsening_refinement_times() const{
+    double cpu_duration_coarsening = (t_end_coarsening - t_start_coarsening) / (double)CLOCKS_PER_SEC;
+    double cpu_duration_refinement = (t_end_refinement - t_end_coarsening) / (double)CLOCKS_PER_SEC;
+    std::cout <<"[CPU Time] (complexity analysis) coarsening takes " << cpu_duration_coarsening
+             << ", refinement takes "<< cpu_duration_refinement <<" seconds " << std::endl;
+}
+
