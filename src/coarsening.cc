@@ -942,7 +942,7 @@ Mat Coarsening::calc_real_weight(Mat& m_WA_c, Mat& m_data_c) {
 
 
 
-double Coarsening::calc_stat_nnz(Mat& m_A, bool approximate) {
+double Coarsening::calc_stat_nnz(Mat& m_A, bool approximate, int level, const std::string& name) {
     PetscInt num_row, num_col, i,j, ncols_A;
     const PetscInt    *cols_A;
     const PetscScalar *vals_A;
@@ -950,7 +950,7 @@ double Coarsening::calc_stat_nnz(Mat& m_A, bool approximate) {
 
     if(approximate){
         // - - - - - PETSc function to extract information for matrix - - - - - -
-        ETimer t_petsc;
+//        ETimer t_petsc;
         MatInfo info;
         double  mal, nz_a, nz_u;
         MatGetInfo(m_A,MAT_LOCAL,&info);
@@ -958,15 +958,15 @@ double Coarsening::calc_stat_nnz(Mat& m_A, bool approximate) {
         nz_a = info.nz_allocated;
         nz_u = info.nz_used;
 
-        printf("[CO][CSN] num_row:%d, num_col:%d, approximate nz_used:%g\n",
-               num_row, num_col, nz_u);
-        t_petsc.stop_timer("[CO][CSN] calc statistics of number of non-zeros using approximate method");
+        printf("[CO][CSN] level:%d, class:%s, num_row:%d, num_col:%d, approximate nz_used:%g\n",
+               level, name.c_str(), num_row, num_col, nz_u);
+//        t_petsc.stop_timer("[CO][CSN] calc statistics of number of non-zeros using approximate method");
         return nz_u;
     }
     else
     {
         // - - - - - Manual approach to extract information for matrix - - - - - -
-        ETimer t_manual;
+//        ETimer t_manual;
 
         double cnt_nnz=0;
 
@@ -978,8 +978,9 @@ double Coarsening::calc_stat_nnz(Mat& m_A, bool approximate) {
             }
             MatRestoreRow(m_A,i,&ncols_A,&cols_A,&vals_A);
         }
-        printf("[CO][CSN] num_row:%d, num_col:%d, exact nz_used=%g\n",num_row, num_col, cnt_nnz);
-        t_manual.stop_timer("[CO][CSN] calc statistics of number of non-zeros using exact method");
+        printf("[CO][CSN] level:%d, class:%s, num_row:%d, num_col:%d, exact nz_used=%g\n",
+               level, name.c_str(), num_row, num_col, cnt_nnz);
+//        t_manual.stop_timer("[CO][CSN] calc statistics of number of non-zeros using exact method");
         return cnt_nnz;
     }
 }
