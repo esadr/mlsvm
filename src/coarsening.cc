@@ -942,3 +942,47 @@ Mat Coarsening::calc_real_weight(Mat& m_WA_c, Mat& m_data_c) {
 
 
 
+double Coarsening::calc_stat_nnz(Mat& m_A, bool approximate) {
+    PetscInt num_row, num_col, i,j, ncols_A;
+    const PetscInt    *cols_A;
+    const PetscScalar *vals_A;
+    MatGetSize(m_A,&num_row, &num_col);
+
+    if(approximate){
+        // - - - - - PETSc function to extract information for matrix - - - - - -
+        ETimer t_petsc;
+        MatInfo info;
+        double  mal, nz_a, nz_u;
+        MatGetInfo(m_A,MAT_LOCAL,&info);
+        mal  = info.mallocs;
+        nz_a = info.nz_allocated;
+        nz_u = info.nz_used;
+
+        printf("[CO][CSN] num_row:%d, num_col:%d, approximate nz_used:%g\n",
+               num_row, num_col, nz_u);
+        t_petsc.stop_timer("[CO][CSN] calc statistics of number of non-zeros using approximate method");
+        return nz_u;
+    }
+    else
+    {
+        // - - - - - Manual approach to extract information for matrix - - - - - -
+        ETimer t_manual;
+
+        double cnt_nnz=0;
+
+        for(i =0; i <num_row; i++){
+            MatGetRow(m_A,i,&ncols_A,&cols_A,&vals_A);
+            for (j=0; j<ncols_A; j++) {
+                if(vals_A[j])               //if the value is not zero
+                    cnt_nnz +=1;
+            }
+            MatRestoreRow(m_A,i,&ncols_A,&cols_A,&vals_A);
+        }
+        printf("[CO][CSN] num_row:%d, num_col:%d, exact nz_used=%g\n",num_row, num_col, cnt_nnz);
+        t_manual.stop_timer("[CO][CSN] calc statistics of number of non-zeros using exact method");
+        return cnt_nnz;
+    }
+}
+
+
+

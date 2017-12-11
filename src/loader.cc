@@ -218,6 +218,8 @@ Mat Loader::load_flann_binary(){
     //Create Matrix WA : Weighted Adjancency
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, Config_params::getInstance()->get_pre_init_loader_matrix(),PETSC_NULL, &WA);
 
+    std::map<double, double> node_stat;
+
     ETimer t_init_WA;
     CommonFuncs cf;
     cf.set_weight_type(Config_params::getInstance()->get_ld_weight_type(), Config_params::getInstance()->get_ld_weight_param());
@@ -231,6 +233,7 @@ Mat Loader::load_flann_binary(){
             if(i != (vals_ind[j] - 1)  ){   //if it's not a loop to itself
                 if (vals_ind[j] - 1 > i ){      //if it's in upper triangular
                     MatSetValue(WA,i,vals_ind[j] - 1 ,weight_,INSERT_VALUES);
+
                 }else{
                     MatSetValue(WA,vals_ind[j] - 1, i ,weight_,INSERT_VALUES);  // switched item (needed when I fill only a triangular)
                 }

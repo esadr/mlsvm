@@ -40,7 +40,6 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
           printf("            \\_/    \\_/    \\_/            level:%d          \\_/    \\_/    \\_/ \n",level);
 
         printf("[MR][main] num points P:%d, N:%d\n",p_num_row, n_num_row);      //$$debug
-//        printf("[MR][main] start to solve SVM for level:%d\n",level);      //$$debug
 
         Config_params::getInstance()->set_timer_end_coarsening();
         // Set the number of models at each level to zero as default
@@ -101,6 +100,9 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
             p_WA_c = p_coarser.calc_WA_c(m_P_p, p_WA);
 //            t_coarse.stop_timer("[MR][Main]{2} from start of both class calc Agg Data minority, level:",std::to_string(level));
 
+            p_coarser.calc_stat_nnz(p_WA);
+            p_coarser.calc_stat_nnz(p_WA_c);
+
             p_coarser.calc_real_weight(p_WA_c, p_data_c);       //recalculate the weights in adjacency matrix from the data
             p_coarser.filter_weak_edges(p_WA_c, filter_threshold, level);
 
@@ -136,6 +138,9 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
 
         n_WA_c = n_coarser.calc_WA_c(m_P_n, n_WA);
 //        t_coarse.stop_timer("[MR][Main]{6} from start of both class calc Agg Vol majority",std::to_string(level));
+
+        p_coarser.calc_stat_nnz(n_WA);
+        p_coarser.calc_stat_nnz(n_WA_c);
 
         n_coarser.calc_real_weight(n_WA_c, n_data_c);       //recalculate the weights in adjacency matrix from the data
         n_coarser.filter_weak_edges(n_WA_c, filter_threshold,level);

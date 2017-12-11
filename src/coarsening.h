@@ -82,6 +82,8 @@ public:
     void filter_weak_edges(Mat & A, double alfa, int level);
 
     Mat calc_real_weight(Mat& m_WA_c, Mat& m_data_c);
+
+    double calc_stat_nnz(Mat& m_A, bool approximate=1);
 };
 
 
