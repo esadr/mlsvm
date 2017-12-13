@@ -1339,7 +1339,7 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
     MatCreateSeqAIJ(PETSC_COMM_SELF,train_size , required_num_NN , required_num_NN, PETSC_NULL, &m_filtered_NN_indices);
     MatCreateSeqAIJ(PETSC_COMM_SELF,train_size , required_num_NN , required_num_NN, PETSC_NULL, &m_filtered_NN_dists);
 
-    std::cout << "[KF][FilterNN] filtering"<< std::endl;
+//    std::cout << "[KF][FilterNN] filtering"<< std::endl;
     for(i=0; i< train_size; i++){
         MatGetRow(m_full_NN_indices,arr_train_indices[i], &idx_ncols,&idx_cols,&idx_vals);
         MatGetRow(m_full_NN_dists,arr_train_indices[i], &dis_ncols,&dis_cols,&dis_vals);
@@ -1348,9 +1348,9 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
 
 
 //        full row --> filtered row
-        int full_row_index= arr_train_indices[i];
-#if dbl_KF_FN >= 0
-        std::cout << "full_row_index:"<<full_row_index << " ------>  filtered_row_index:" << i <<std::endl;
+//        int full_row_index= arr_train_indices[i];
+#if dbl_KF_FN >= 7
+        std::cout << "full_row_index:"<< arr_train_indices[i] << " ------>  filtered_row_index:" << i <<std::endl;
 #endif
         for(int index_col=0; index_col < idx_ncols ; index_col++){
             if(uset_test_indices.find(idx_vals[index_col]) == uset_test_indices.end()){
@@ -1375,7 +1375,7 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
         //idx:(i,j)        (i,j)
         //dis:(i,d)        (i,d)
 
-    #if dbl_KF_FN >= 0
+#if dbl_KF_FN >= 7
                     std::cout << "index:(" << idx_cols[index_col] << "," <<full_NN_idx <<") \t             "<<
                                  index_col<< "(" << count_index << "," << filtered_NN_idx <<")\n";
 
@@ -1383,7 +1383,7 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
                         std::cout << "dis_idx:"<< dis_idx <<", dist:(" << dis_cols[index_col] << ","
                                   << dis_vals[dis_idx] <<") \t "<<
                                  "(" << count_index << "," << dis_vals[dis_idx] <<")\n";
-    #endif
+#endif
 
                     MatSetValue(m_filtered_NN_indices, i, count_index, v_full_idx_to_train_idx[idx_vals[index_col]], INSERT_VALUES);
                     // -row, col are same as above, the value is corresponding distance at same location which is dis_vals[index_col]
@@ -1410,7 +1410,7 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
 //    MatDestroy(&m_full_NN_indices);                             //do not release them since they will release in the end of main.cc
 //    MatDestroy(&m_full_NN_dists);
     PetscFree(arr_train_indices);     //memory allocated in cross_validation_class
-#if dbl_KF_FN >= 0
+#if dbl_KF_FN >= 7
     printf("[KF][FN] Matrix of filtered NN indices:\n");                                               //$$debug
     MatView(m_filtered_NN_indices,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
     printf("[KF][FN] Matrix of filtered NN dists:\n");                                               //$$debug
