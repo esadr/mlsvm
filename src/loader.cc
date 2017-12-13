@@ -210,12 +210,10 @@ void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::s
     }
 
     /// -------- Calc upper bound of number of non-zeros in each row ---------------
-    //approximate method, since there might be only i->j or both (i,j) and (j,i)
-    //for simplicity, we don't detect the both condition as one which might increase the number as large as twice
-    // while it is not the exact number, it is larger number (not more than twice as large) which lead the number of non-zeros
+    //exact method using vector of set
     ETimer t_calc_nnz;
     std::vector<std::set<int>> node_stat_approximate(num_row,std::set<int>());       //make a vector of zero's for all data points
-    std::cout << "[LD][CWAM] number of columns: " << num_row << std::endl;
+//    std::cout << "[LD][CWAM] number of columns: " << num_row << std::endl;
 
     for(i =0; i <num_row; i++){                         //i would be the row number
         MatGetRow(m_NN_idx,i,&ncols_ind,&cols_ind,&vals_ind);             //ncols : number if non-zeros in the row
@@ -224,45 +222,42 @@ void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::s
         for (j=0; j<ncols_ind; j++) {//Notice: as I use indices for j, for dists I should reduce it by one
 //            std::cout << "col " << j << std::endl;
 
-            //if it's not a loop to itself    (the [KF][filterNN] filters the loops) and distance zero
-//            if(i != (vals_ind[j]) && (vals_dis[j]) ){
+            //it's not a loop to itself    (the [KF][filterNN] filters the loops) and distance zero
             if (vals_ind[j] > i ){      //if it's in upper triangular
-                    std::cout << "if " << i << ","<< vals_ind[j] << std::endl;
+//                std::cout << "if " << i << ","<< vals_ind[j] << std::endl;
                 node_stat_approximate[i].insert(vals_ind[j]);
             }
             else{
-                    std::cout << "else " << vals_ind[j] <<","<< i << std::endl;
+//                std::cout << "else " << vals_ind[j] <<","<< i << std::endl;
                 node_stat_approximate[vals_ind[j]].insert(i);
             }
-//            }
         }
         MatRestoreRow(m_NN_idx,i,&ncols_ind,&cols_ind,&vals_ind);
         MatRestoreRow(m_NN_dis,i,&ncols_dis,&cols_dis,&vals_dis);
     }
-    t_calc_nnz.stop_timer("[LD][CWAM] calc upper bound of number of non-zeros in each row for WA ");
+    t_calc_nnz.stop_timer("[LD][CWAM] calc number of non-zeros in each row for WA ");
 
-    std::cout << "[LD][CWAM] number of columns: " << num_row <<", non_zero's array:" << std::endl;
+//    std::cout << "[LD][CWAM] number of columns: " << num_row <<", non_zero's array:" << std::endl;
     std::vector<PetscInt> v_nnz(num_row,0);
     int cnt=0;
     for(std::set<int> s:node_stat_approximate){
 //        std::cout << cnt <<","<< s.size() << std::endl;
-        v_nnz[cnt] = s.size() * 2 ;
+        v_nnz[cnt] = s.size() ;
         cnt+=1;
     }
 
     PetscInt* nnz = &v_nnz[0];
+#if dbl_LD_CWAM >=7
     for(int i =0; i < v_nnz.size(); i++){
         std::cout <<"malloc nnz " << i <<","<< nnz[i] << std::endl;
     }
+#endif
 
-//    std::cout << "[LD][CWAM] debug is on and exit!: " << std::endl;
-//    exit(1);
     /// ------------- Create the WA matrix ----------------------
     //Create Matrix WA : Weighted Adjancency
 //    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, Config_params::getInstance()->get_pre_init_loader_matrix(),PETSC_NULL, &WA); //depreacted v0.0.45 121117_1200
       //https://stackoverflow.com/a/2923290/2674061
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, PETSC_NULL,nnz, &m_WA);
-
 
     ETimer t_init_WA;
     CommonFuncs cf;
@@ -271,46 +266,42 @@ void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::s
         MatGetRow(m_NN_idx,i,&ncols_ind,&cols_ind,&vals_ind);             //ncols : number if non-zeros in the row
         MatGetRow(m_NN_dis,i,&ncols_dis,&cols_dis,&vals_dis);
 
-        std::cout << "\n[LD][CWAM] i:"<< i << std::endl;
-//        double distance = 0;
-//        int dis_id=0;
+//        std::cout << "\n[LD][CWAM] i:"<< i << std::endl;
         for (j=0; j<ncols_ind; j++) {//Notice: as I use indices for j, for dists I should reduce it by one
-
+#if dbl_LD_CWAM >=7
             std::cout << "\nj:"<< j <<", cols_ind[j]:" << cols_ind[j] << ", cols_dis[j]:" << cols_dis[j]
                       << ", other node:"<< vals_ind[j] << ", distance:"<< vals_dis[j];
-
+#endif
             weight_ = cf.convert_distance_to_weight(vals_dis[j]);
-//            //if it's not a loop to itself    && the distance is not exact zero between i,j
-//            if((i != col_idx)  && distance){
+            //it's not a loop to itself    (the [KF][filterNN] filters the loops) and distance zero
             if (i < vals_ind[j]){      //if it's in upper triangular
-
                 MatSetValue(m_WA,i, vals_ind[j],weight_,INSERT_VALUES);
-                printf("if setvalue: (%d,%d)=%g\n",i, vals_ind[j], vals_dis[j]);
+//                printf("if setvalue: (%d,%d)=%g\n",i, vals_ind[j], vals_dis[j]);
             }else{
                 MatSetValue(m_WA, vals_ind[j], i ,weight_,INSERT_VALUES);  // switched item (needed when I fill only a triangular)
-                printf("else setvalue: (%d,%d)=%g\n", vals_ind[j], i, vals_dis[j]);
+//                printf("else setvalue: (%d,%d)=%g\n", vals_ind[j], i, vals_dis[j]);
             }
         }
 
         MatRestoreRow(m_NN_idx,i,&ncols_ind,&cols_ind,&vals_ind);
         MatRestoreRow(m_NN_dis,i,&ncols_dis,&cols_dis,&vals_dis);
     }
-    exit(1);
-if(debug_status)
-    exit(1);
+//    exit(1);
+//if(debug_status)
+//    exit(1);
 
     MatAssemblyBegin(m_WA,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_WA,MAT_FINAL_ASSEMBLY);
-//#if dbl_LD_CWAM >=3
+#if dbl_LD_CWAM >=3
     printf("[LD][CWAM] insert values to m_WA is finished\n");      //$$debug
-//    #if dbl_LD_CWAM >= 7
+    #if dbl_LD_CWAM >= 7
         printf("[LD][CWAM] WA Matrix (only triangular part):\n");                                               //$$debug
         MatView(m_WA,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
-//    #endif
-//#endif
+    #endif
+#endif
     t_init_WA.stop_timer("[LD][CWAM] insert triangular part of WA");
 
-    exit(1);
+//    exit(1);
 
     ETimer t_WA_complete;
     Mat m_WA_t;

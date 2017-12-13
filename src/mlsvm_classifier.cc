@@ -13,8 +13,8 @@ Config_params* Config_params::instance = NULL;
 
 int main(int argc, char **argv)
 {
-    PetscInitialize(&argc, &argv, NULL, NULL);
-//    PetscInitialize(NULL, NULL, NULL, NULL);
+//    PetscInitialize(&argc, &argv, NULL, NULL);
+    PetscInitialize(NULL, NULL, NULL, NULL);
     Config_params::getInstance()->read_params("./params.xml", argc, argv);  // read parameters
     switch(Config_params::getInstance()->get_main_function()){
     ///*********************************************************************
