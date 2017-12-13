@@ -223,14 +223,14 @@ void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::s
 //            std::cout << "col " << j << std::endl;
 
             //it's not a loop to itself    (the [KF][filterNN] filters the loops) and distance zero
-            if (vals_ind[j] > i ){      //if it's in upper triangular
+//            if (vals_ind[j] > i ){      //if it's in upper triangular
 //                std::cout << "if " << i << ","<< vals_ind[j] << std::endl;
                 node_stat_approximate[i].insert(vals_ind[j]);
-            }
-            else{
+//            }
+//            else{
 //                std::cout << "else " << vals_ind[j] <<","<< i << std::endl;
                 node_stat_approximate[vals_ind[j]].insert(i);
-            }
+//            }
         }
         MatRestoreRow(m_NN_idx,i,&ncols_ind,&cols_ind,&vals_ind);
         MatRestoreRow(m_NN_dis,i,&ncols_dis,&cols_dis,&vals_dis);
@@ -274,13 +274,13 @@ void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::s
 #endif
             weight_ = cf.convert_distance_to_weight(vals_dis[j]);
             //it's not a loop to itself    (the [KF][filterNN] filters the loops) and distance zero
-            if (i < vals_ind[j]){      //if it's in upper triangular
+//            if (i < vals_ind[j]){      //if it's in upper triangular
                 MatSetValue(m_WA,i, vals_ind[j],weight_,INSERT_VALUES);
 //                printf("if setvalue: (%d,%d)=%g\n",i, vals_ind[j], vals_dis[j]);
-            }else{
+//            }else{
                 MatSetValue(m_WA, vals_ind[j], i ,weight_,INSERT_VALUES);  // switched item (needed when I fill only a triangular)
 //                printf("else setvalue: (%d,%d)=%g\n", vals_ind[j], i, vals_dis[j]);
-            }
+//            }
         }
 
         MatRestoreRow(m_NN_idx,i,&ncols_ind,&cols_ind,&vals_ind);
@@ -292,23 +292,23 @@ void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::s
 
     MatAssemblyBegin(m_WA,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_WA,MAT_FINAL_ASSEMBLY);
-#if dbl_LD_CWAM >=3
-    printf("[LD][CWAM] insert values to m_WA is finished\n");      //$$debug
-    #if dbl_LD_CWAM >= 7
-        printf("[LD][CWAM] WA Matrix (only triangular part):\n");                                               //$$debug
-        MatView(m_WA,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
-    #endif
-#endif
+//#if dbl_LD_CWAM >=3
+//    printf("[LD][CWAM] insert values to m_WA is finished\n");      //$$debug
+//    #if dbl_LD_CWAM >= 7
+//        printf("[LD][CWAM] WA Matrix (only triangular part):\n");                                               //$$debug
+//        MatView(m_WA,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+//    #endif
+//#endif
     t_init_WA.stop_timer("[LD][CWAM] insert triangular part of WA");
 
 //    exit(1);
 
-    ETimer t_WA_complete;
-    Mat m_WA_t;
-    MatTranspose(m_WA,MAT_INITIAL_MATRIX,&m_WA_t);
-    MatAYPX(m_WA,1,m_WA_t,DIFFERENT_NONZERO_PATTERN);
-    t_WA_complete.stop_timer("[LD][CWAM] t_m_WA_complete");
-    MatDestroy(&m_WA_t);
+//    ETimer t_WA_complete;
+//    Mat m_WA_t;
+//    MatTranspose(m_WA,MAT_INITIAL_MATRIX,&m_WA_t);
+//    MatAYPX(m_WA,1,m_WA_t,DIFFERENT_NONZERO_PATTERN);
+//    t_WA_complete.stop_timer("[LD][CWAM] t_m_WA_complete");
+//    MatDestroy(&m_WA_t);
 #if dbl_LD_CWAM >=3
     #if dbl_LD_CWAM >= 7
         printf("[LD][CWAM] WA Matrix After add to it's transpose:\n");                   //$$debug
