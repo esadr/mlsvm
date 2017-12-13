@@ -201,14 +201,14 @@ void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::s
 #if dbl_LD_CWAM >=1
     printf("[LD][CWAM] number of rows(nodes) in NN matrix: %d \n",num_row);  //$$debug
 #endif
-    if(debug_status){
+//    if(debug_status){
         printf("[LD][CWAM] m_NN_idx Matrix :\n");                   //$$debug
         MatView(m_NN_idx,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
 
         printf("[LD][CWAM] m_NN_dis Matrix :\n");                   //$$debug
         MatView(m_NN_dis,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
-    }
-
+//    }
+    exit(1);
 
     /// -------- Calc upper bound of number of non-zeros in each row ---------------
     //approximate method, since there might be only i->j or both (i,j) and (j,i)

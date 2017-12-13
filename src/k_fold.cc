@@ -1354,8 +1354,18 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
 #endif
         for(int index_col=0; index_col < idx_ncols ; index_col++){
             if(uset_test_indices.find(idx_vals[index_col]) == uset_test_indices.end()){
-                if(dis_cols[0] != 0 && count_col_id == 0)            //check if the first dist is zero, then jump to the right index
-                    count_col_id = dis_cols[0];
+
+                double full_NN_idx = idx_vals[index_col];                                     //debug
+                double filtered_NN_idx = v_full_idx_to_train_idx[idx_vals[index_col]];
+
+                if(i != filtered_NN_idx) {   //not a loop to itself
+                    int dis_idx = 0;
+                    while(dis_idx < dis_ncols){
+                        if(dis_cols[dis_idx] == idx_cols[index_col])
+                            break;
+                        dis_idx++;
+                    }
+
         //it is not in test data(equal to end of unordered_set means not found)
         //therefore, it is in training data
         //filtered row index:i, col:count, value: index of full data converted to index in train data using
@@ -1365,30 +1375,27 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
         //idx:(i,j)        (i,j)
         //dis:(i,d)        (i,d)
 
-#if dbl_KF_FN >= 0
-                double full_NN_idx = idx_vals[index_col];                                     //debug
-                double filtered_NN_idx = v_full_idx_to_train_idx[idx_vals[index_col]];
+    #if dbl_KF_FN >= 0
+                    std::cout << "index:(" << idx_cols[index_col] << "," <<full_NN_idx <<") \t             "<<
+                                 index_col<< "(" << count_index << "," << filtered_NN_idx <<")\n";
 
-                std::cout << "index:(" << idx_cols[index_col] << "," <<full_NN_idx <<") \t "<<
-                             index_col<< "(" << count_index << "," << filtered_NN_idx <<")\n";
+                    if(count_col_id < dis_ncols) //the distance zero reduces the size of distance row
+                        std::cout << "dis_idx:"<< dis_idx <<", dist:(" << dis_cols[index_col] << ","
+                                  << dis_vals[dis_idx] <<") \t "<<
+                                 "(" << count_index << "," << dis_vals[dis_idx] <<")\n";
+    #endif
 
-                if(count_col_id < dis_ncols) //the distance zero reduces the size of distance row
-                    std::cout << "dist:(" << dis_cols[index_col] << "," << dis_vals[index_col] <<") \t "<<
-                             "(" << count_col_id << "," << dis_vals[index_col] <<")\n";
-#endif
+                    MatSetValue(m_filtered_NN_indices, i, count_index, v_full_idx_to_train_idx[idx_vals[index_col]], INSERT_VALUES);
+                    // -row, col are same as above, the value is corresponding distance at same location which is dis_vals[index_col]
 
-                MatSetValue(m_filtered_NN_indices, i, count_index, v_full_idx_to_train_idx[idx_vals[index_col]], INSERT_VALUES);
-                // -row, col are same as above, the value is corresponding distance at same location which is dis_vals[index_col]
-
-                // -The distance between a point to itself is zero
-                //      the sparse format in the filter_NN ignores it and the first distance is not for count 0
-                //      we use the col index of indices for the distances and stop before reaching the end of distances
-                if(count_col_id < dis_ncols) //the distance zero reduces the size of distance row
-                    MatSetValue(m_filtered_NN_dists, i, count_col_id, dis_vals[index_col], INSERT_VALUES);
-                ++count_index;
-                ++count_col_id;
-
-                if(count_index == (required_num_NN )) break;     //stop adding more NN for this row(data point)
+                    // -The distance between a point to itself is zero
+                    //      the sparse format in the filter_NN ignores it and the first distance is not for count 0
+                    //      we use the col index of indices for the distances and stop before reaching the end of distances
+//                    MatSetValue(m_filtered_NN_dists, i, dis_idx, dis_vals[index_col], INSERT_VALUES);
+                    MatSetValue(m_filtered_NN_dists, i, count_index, dis_vals[dis_idx], INSERT_VALUES);
+                    ++count_index;
+                    if(count_index == (required_num_NN )) break;     //stop adding more NN for this row(data point)
+                }
             }
         }
 
