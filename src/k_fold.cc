@@ -649,9 +649,10 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
 /*
  * I need to create a hash table (set) for test indices and then query the neighbor of points in each row of the training data
  * inside the filter_NN to find out which nodes are not in the training data.
- * The test data is used to track them because it is at most 20% of whole data
+ * The test data is used to track them because it is at most 1/k of whole data where k is the number of folds in Cross validation
  *
- * flann's indices are sorted ascending by their distance (first one is closer than second one)- Checked Feb 1, 2017 using dists results
+ * flann's indices are sorted ascending by their distance (first one is closer than second one)
+ * Checked Feb 1, 2017 using dists results
  *
  * Structure:       **** for each class separately **** (different from earlier approach which is longer coding)
  * First:   A function to give me the indices for training and test data
@@ -671,7 +672,10 @@ void k_fold::cross_validation_class(int curr_iter,int total_iter, Mat& m_full_da
 //    Mat m_min_train_data, m_maj_train_data, m_test_data; //Temporary for file output
     // - - - - - - minority - - - - - -
     PetscInt    idx_test_start, idx_test_end, subset_size;
-    PetscInt    * arr_idx_test; //the arr_idx_train is used for filter_NN function, so I need it later and I need to keep it, don't forget to destroy it in that function
+
+    //the arr_idx_train is used for filter_NN function, so I need it later and I need to keep it,
+    //don't forget to destroy it in that function
+    PetscInt    * arr_idx_test;
     PetscInt    idx_iter=0, idx_test_curr=0, idx_train_curr=0;
 
     PetscInt    size_full_data;
@@ -800,17 +804,23 @@ void k_fold::cross_validation_class(int curr_iter,int total_iter, Mat& m_full_da
     uset_test_indices.reserve(subset_size * 2);
     for(int i=0; i< subset_size; i++){              //this should be the test size
         uset_test_indices.insert(arr_idx_test[i]);
+
     }
 
-    //store a indices on train data as values in right indices from full data,
-    //so there are about 10- 20% garbage info in the vector which I don't care, since I only use the train_indices later in filter_NN
+    //store the indices of train data as values in right indices from full data,
+    //so there are about 10- 20% garbage info in the vector which I don't care,
+    //since I only use the train_indices later in filter_NN
+    // the test part has not used at all or in the future
     v_full_idx_to_train_idx.reserve(size_full_data);
     std::fill(v_full_idx_to_train_idx.begin(), v_full_idx_to_train_idx.end(), -1);
     for(int i=0; i< train_size; i++){              //this should be the test size
-        v_full_idx_to_train_idx[arr_idx_train[i]]=i;    // i.e. value of index 31 is equal to 19 (since some of 30 first points might be selected for test data)
-        if(info == "minority" && i < 150 && debug_status)
-            std::cout << "[KF][CV-C] arr_idx_train[i]: " << arr_idx_train[i] <<
-                     ", v_full_idx_to_train_idx[" << arr_idx_train[i]<< "]: " << v_full_idx_to_train_idx[arr_idx_train[i]]<< std::endl;
+        // i.e. value of index 31 is equal to 19 (since some of 30 first points might be selected for test data)
+        v_full_idx_to_train_idx[arr_idx_train[i]]=i;
+//        if(info == "minority" && i < 150 && debug_status)
+
+//        std::cout << "[KF][CV-C] i:" <<i << ", arr_idx_train[i]: " << arr_idx_train[i] <<
+//                     ", v_full_idx_to_train_idx[" << arr_idx_train[i]<< "]: "
+//                      << v_full_idx_to_train_idx[arr_idx_train[i]]<< std::endl;
     }
 
 
@@ -845,8 +855,11 @@ void k_fold::cross_validation_class(int curr_iter,int total_iter, Mat& m_full_da
     PetscPrintf(PETSC_COMM_WORLD, "[KF][CV-C] arrays are freed \n");
 #endif
 
-    MatGetSubMatrix(m_full_data,is_train, NULL,MAT_INITIAL_MATRIX,&m_train_data);
+    MatGetSubMatrix(m_full_data,is_train, NULL,MAT_INITIAL_MATRIX,&m_train_data);       //deprecated after version 3.7
     MatGetSubMatrix(m_full_data,is_test, NULL,MAT_INITIAL_MATRIX,&m_test_data);
+
+//    MatCreateSubMatrix(m_full_data,is_train, NULL,MAT_INITIAL_MATRIX,&m_train_data);    //version 3.8 and beyond
+//    MatCreateSubMatrix(m_full_data,is_test, NULL,MAT_INITIAL_MATRIX,&m_test_data);
 
 #if dbl_KF_CVC >= 3
     PetscPrintf(PETSC_COMM_WORLD, "[KF][CV-C] sub matrices are created \n");
@@ -1228,14 +1241,14 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
     bool debug_flg_CVC_min=false;
     if(debug_status) debug_flg_CVC_min=true;
 
-    cross_validation_class(current_iteration, total_iterations, m_min_full_data, m_min_train_data, m_min_test_data, arr_min_idx_train, min_train_size,
+    cross_validation_class(current_iteration, total_iterations, m_min_full_data,
+                           m_min_train_data, m_min_test_data, arr_min_idx_train, min_train_size,
                            uset_min_test_idx,v_min_full_idx_train_dix, "minority", this->min_shuffled_indices_,debug_flg_CVC_min);
 #if dbl_exp_train_data ==1      //only for comparison with other solvers, not part of normal process
     write_output(Config_params::getInstance()->get_p_e_k_train_data_f_name() , m_min_train_data, "minority data");
 #endif
 #if dbl_KF_PDFI >= 1
     std::cout << "[KF][PDFI] min, train_size: " << min_train_size << std::endl;
-    std::cout << "[KF][PDFI] min, arr_min_idx_train[40]: " << arr_min_idx_train[40] << std::endl;
 #endif
 
     // - - - - - cross fold the data for negative class - - - - -
@@ -1247,7 +1260,8 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
     PetscMalloc1(size_maj_full_data, &arr_maj_idx_train);   //it should be allocate now, not inside the function https://goo.gl/SbGk0y
     PetscInt maj_train_size=0;
     std::vector<PetscInt> v_maj_full_idx_train_dix;
-    cross_validation_class(current_iteration, total_iterations, m_maj_full_data, m_maj_train_data, m_maj_test_data, arr_maj_idx_train, maj_train_size,
+    cross_validation_class(current_iteration, total_iterations, m_maj_full_data,
+                           m_maj_train_data, m_maj_test_data, arr_maj_idx_train, maj_train_size,
                            uset_maj_test_idx,v_maj_full_idx_train_dix, "majority", this->maj_shuffled_indices_);
 #if dbl_exp_train_data ==1      //only for comparison with other solvers, not part of normal process
     write_output(Config_params::getInstance()->get_n_e_k_train_data_f_name(), m_maj_train_data, "majority data");
@@ -1285,8 +1299,11 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
     bool debug_flg=false;
     if(debug_status) debug_flg=true;
     ld.create_WA_matrix(m_min_filtered_indices,m_min_filtered_dists,m_min_WA,"minority",debug_flg);
-    if(debug_status) exit(1);
-//    exit(1); //@@
+    if(debug_status){
+        std::cout << "[KF][PDFI] debug is on and exit!: " << std::endl;
+        exit(1);
+    }
+
     ld.create_WA_matrix(m_maj_filtered_indices,m_maj_filtered_dists,m_maj_WA,"majority");
 
     v_min_vol = ld.init_volume(1,min_train_size);
@@ -1299,7 +1316,7 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
                        PetscInt * arr_train_indices, PetscInt& train_size, std::vector<PetscInt>& v_full_idx_to_train_idx,
                        Mat& m_filtered_NN_indices, Mat& m_filtered_NN_dists, const std::string& info,bool debug_status){
     ETimer t_all;
-    int count = 0;
+    int count_index, count_col_id = 0;
     const int required_num_NN = Config_params::getInstance()->get_nn_number_of_neighbors();
 
 #if dbl_KF_FN >= 3
@@ -1316,34 +1333,67 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
     PetscInt i=0, idx_ncols, dis_ncols;
     const PetscInt    *idx_cols, *dis_cols;
     const PetscScalar *idx_vals, *dis_vals;
-    //WARNING: the indices are changed as the data is divided to train and test, the indices in the m_full_NN_indices are not valid and needs to be mapped
+    //WARNING: the indices are changed as the data is divided to train and test,
+    //the indices in the m_full_NN_indices are not valid and needs to be mapped
     //MatCreate row: train_size, col: required_num_NN  ,nnz: required_num_NN
     MatCreateSeqAIJ(PETSC_COMM_SELF,train_size , required_num_NN , required_num_NN, PETSC_NULL, &m_filtered_NN_indices);
     MatCreateSeqAIJ(PETSC_COMM_SELF,train_size , required_num_NN , required_num_NN, PETSC_NULL, &m_filtered_NN_dists);
 
+    std::cout << "[KF][FilterNN] filtering"<< std::endl;
     for(i=0; i< train_size; i++){
         MatGetRow(m_full_NN_indices,arr_train_indices[i], &idx_ncols,&idx_cols,&idx_vals);
         MatGetRow(m_full_NN_dists,arr_train_indices[i], &dis_ncols,&dis_cols,&dis_vals);
-        count = 0;
-//        std::cout << "[KF][FilterNN] row:" << i << std::endl;
-        for(int j=0; j < idx_ncols ; j++){
-//            std::cout << "[KF][FilterNN] j:"<<j<<", idx_vals[j]:"<<idx_vals[j]<<", count:"<<count<< std::endl;
-            if(uset_test_indices.find(idx_vals[j]) == uset_test_indices.end()){ //it is not in test data(equal to end of unordered_set means not found)
-                //therefore, it is in training data        //row:i, col:count, value: index of full data converted to index in train data using
-//                std::cout << "[KF][FilterNN]i:" <<i <<", j:"<<j<<", idx_vals[j]:"<<idx_vals[j]<<
-//                             ",v_full_idx_to_train_idx[idx_vals[j]]" << v_full_idx_to_train_idx[idx_vals[j]] << ", count:"<<count<< std::endl;
-                MatSetValue(m_filtered_NN_indices, i, count, v_full_idx_to_train_idx[idx_vals[j]], INSERT_VALUES);
-                //row, col are same as above, the value is corresponding distance at same location which is dis_vals[j]
-                MatSetValue(m_filtered_NN_dists, i, count, dis_vals[j], INSERT_VALUES);
-                ++count;
-                if(count == (required_num_NN )) break;     //stop adding more NN for this row(data point)
+        count_index = 0;
+        count_col_id =0;
+
+
+//        full row --> filtered row
+        int full_row_index= arr_train_indices[i];
+#if dbl_KF_FN >= 0
+        std::cout << "full_row_index:"<<full_row_index << " ------>  filtered_row_index:" << i <<std::endl;
+#endif
+        for(int index_col=0; index_col < idx_ncols ; index_col++){
+            if(uset_test_indices.find(idx_vals[index_col]) == uset_test_indices.end()){
+                if(dis_cols[0] != 0 && count_col_id == 0)            //check if the first dist is zero, then jump to the right index
+                    count_col_id = dis_cols[0];
+        //it is not in test data(equal to end of unordered_set means not found)
+        //therefore, it is in training data
+        //filtered row index:i, col:count, value: index of full data converted to index in train data using
+        // i is the filtered (train) row idx
+        // arr_train_indices[i]  is the full idx
+        //full row --> filtered row,
+        //idx:(i,j)        (i,j)
+        //dis:(i,d)        (i,d)
+
+#if dbl_KF_FN >= 0
+                double full_NN_idx = idx_vals[index_col];                                     //debug
+                double filtered_NN_idx = v_full_idx_to_train_idx[idx_vals[index_col]];
+
+                std::cout << "index:(" << idx_cols[index_col] << "," <<full_NN_idx <<") \t "<<
+                             index_col<< "(" << count_index << "," << filtered_NN_idx <<")\n";
+
+                if(count_col_id < dis_ncols) //the distance zero reduces the size of distance row
+                    std::cout << "dist:(" << dis_cols[index_col] << "," << dis_vals[index_col] <<") \t "<<
+                             "(" << count_col_id << "," << dis_vals[index_col] <<")\n";
+#endif
+
+                MatSetValue(m_filtered_NN_indices, i, count_index, v_full_idx_to_train_idx[idx_vals[index_col]], INSERT_VALUES);
+                // -row, col are same as above, the value is corresponding distance at same location which is dis_vals[index_col]
+
+                // -The distance between a point to itself is zero
+                //      the sparse format in the filter_NN ignores it and the first distance is not for count 0
+                //      we use the col index of indices for the distances and stop before reaching the end of distances
+                if(count_col_id < dis_ncols) //the distance zero reduces the size of distance row
+                    MatSetValue(m_filtered_NN_dists, i, count_col_id, dis_vals[index_col], INSERT_VALUES);
+                ++count_index;
+                ++count_col_id;
+
+                if(count_index == (required_num_NN )) break;     //stop adding more NN for this row(data point)
             }
         }
 
         MatRestoreRow(m_full_NN_dists,arr_train_indices[i], &dis_ncols,&dis_cols,&dis_vals);
         MatRestoreRow(m_full_NN_indices,arr_train_indices[i], &idx_ncols,&idx_cols,&idx_vals);
-
-
     }
     MatAssemblyBegin(m_filtered_NN_indices, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_filtered_NN_indices, MAT_FINAL_ASSEMBLY);
@@ -1353,7 +1403,7 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
 //    MatDestroy(&m_full_NN_indices);                             //do not release them since they will release in the end of main.cc
 //    MatDestroy(&m_full_NN_dists);
     PetscFree(arr_train_indices);     //memory allocated in cross_validation_class
-#if dbl_KF_FN >= 7
+#if dbl_KF_FN >= 0
     printf("[KF][FN] Matrix of filtered NN indices:\n");                                               //$$debug
     MatView(m_filtered_NN_indices,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
     printf("[KF][FN] Matrix of filtered NN dists:\n");                                               //$$debug

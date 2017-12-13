@@ -7,7 +7,7 @@
 
   <mlsvm_version stringVal="0.0.45"/> 
   <!-- ****************** Main ********************-->
-  <cpp_srand_seed stringVal= ""/>	 	    <!--for real runs should be empty string ""-->
+  <cpp_srand_seed stringVal= "1"/>	 	    <!--for real runs should be empty string ""-->
   
   <main_num_repeat_exp intVal = "1"/>; 		<!--set the number of repeats in the Main file over the whole cross-validation -->
   <main_num_kf_iter intVal = "5"/>; 		<!--set the number of cross-validation in the Main file-->

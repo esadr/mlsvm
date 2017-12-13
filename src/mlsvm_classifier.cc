@@ -13,8 +13,8 @@ Config_params* Config_params::instance = NULL;
 
 int main(int argc, char **argv)
 {
-//    PetscInitialize(&argc, &argv, NULL, NULL);
-    PetscInitialize(NULL, NULL, NULL, NULL);
+    PetscInitialize(&argc, &argv, NULL, NULL);
+//    PetscInitialize(NULL, NULL, NULL, NULL);
     Config_params::getInstance()->read_params("./params.xml", argc, argv);  // read parameters
     switch(Config_params::getInstance()->get_main_function()){
     ///*********************************************************************
@@ -54,11 +54,13 @@ int main(int argc, char **argv)
                 Mat m_min_train_data,m_min_WA;
                 Mat m_maj_train_data,m_maj_WA;
                 Vec v_p_vol, v_n_vol;
-                Config_params::getInstance()->set_current_iter_file_names(r, i); // r is the current experiment, i is the current iteration (k-fold id)
+                // r is the current experiment, i is the current iteration (k-fold id)
+                Config_params::getInstance()->set_current_iter_file_names(r, i);
 
-                kf.prepare_data_for_iteration(i,num_kf_iter_,m_min_full_data,m_min_train_data,m_min_full_NN_indices,m_min_full_NN_dists,m_min_WA,v_p_vol
-                                              ,m_maj_full_data,m_maj_train_data,m_maj_full_NN_indices,m_maj_full_NN_dists,m_maj_WA,v_n_vol);
-
+                kf.prepare_data_for_iteration(i,num_kf_iter_,m_min_full_data,m_min_train_data,
+                                              m_min_full_NN_indices,m_min_full_NN_dists,m_min_WA,v_p_vol
+                                              ,m_maj_full_data,m_maj_train_data,m_maj_full_NN_indices,
+                                              m_maj_full_NN_dists,m_maj_WA,v_n_vol);
 
             // bypass the classification to export the cross-validation training data (comparison with other solvers)
             #if dbl_exp_train_data == 0
@@ -66,8 +68,10 @@ int main(int argc, char **argv)
                 ETimer t_sample;
                 Mat m_VD_p, m_VD_n;
                 CommonFuncs cf;
-                m_VD_p = cf.sample_data(m_min_train_data, Config_params::getInstance()->get_ms_VD_sample_size_fraction(), Config_params::getInstance()->get_cpp_srand_seed());
-                m_VD_n = cf.sample_data(m_maj_train_data, Config_params::getInstance()->get_ms_VD_sample_size_fraction(), Config_params::getInstance()->get_cpp_srand_seed());
+                m_VD_p = cf.sample_data(m_min_train_data, Config_params::getInstance()->get_ms_VD_sample_size_fraction(),
+                                        Config_params::getInstance()->get_cpp_srand_seed());
+                m_VD_n = cf.sample_data(m_maj_train_data, Config_params::getInstance()->get_ms_VD_sample_size_fraction(),
+                                        Config_params::getInstance()->get_cpp_srand_seed());
 
                 t_sample.stop_timer("[MC] validation data is sampled from the finest training data");
             //====================== Multilevel Solver ===============================

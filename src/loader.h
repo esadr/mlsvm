@@ -37,8 +37,7 @@ public :
     Loader(){}   // added at 0819_1555 for loading the test data
 
     Mat load_WA_binary(const char * );
-    Mat load_flann_binary_old();            //deprecated at version 0.0.37 method (Jan 20,2017)
-    Mat load_flann_binary();                //current method (Jan 20,2017)
+    Mat load_flann_binary();                //not active method of mlsvm_classifier
 
 
     void create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::string& info,bool debug_status=false);
