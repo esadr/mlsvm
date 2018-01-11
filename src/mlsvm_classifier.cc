@@ -101,7 +101,7 @@ int main(int argc, char **argv)
                 t_iteration.stop_timer("[MC] Vcycle (including loading datasets) at iteration ",std::to_string(i));
                 //save the final metadata for models of the current k-fold   @072617-1157
                 Config_params::getInstance()->update_master_models_info();
-            #endif //dbl_exp_train_data
+
 
 //            std::cout << "[MC] EXIT\n" ;            exit(1);
             // 1 saves the test files for comparison or run standalone prediction
@@ -111,7 +111,8 @@ int main(int argc, char **argv)
                 remove(info_file.c_str());
                 if( remove(test_file.c_str())==0)
                     std::cout << "[MC] test data file is removed successfully from " << test_file << std::endl;
-            #endif
+            #endif // end of save_test_file
+            #endif //dbl_exp_train_data
 
             }   // end of for loop for "Whole cross validation"
         }   // end of for loop for "Repeat the experiment"

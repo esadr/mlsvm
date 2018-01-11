@@ -1295,6 +1295,8 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
     filter_NN(m_maj_full_NN_indices,m_maj_full_NN_dists,uset_maj_test_idx,arr_maj_idx_train,maj_train_size,
               v_maj_full_idx_train_dix,m_maj_filtered_indices, m_maj_filtered_dists,"majority");
 
+
+#if dbl_exp_train_data == 0     //skip below part in case of exporting the data for other usage rather than classify it
     Loader ld;
     bool debug_flg=false;
     if(debug_status) debug_flg=true;
@@ -1308,6 +1310,7 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
 
     v_min_vol = ld.init_volume(1,min_train_size);
     v_maj_vol = ld.init_volume(1,maj_train_size);
+#endif
 }
 
 
