@@ -11,4 +11,5 @@ export PETSC_DIR=$PWD
 --download-metis=1 \
 --download-parmetis=1 \
 --download-blacs=1 \
+--download-cmake \
 --download-f2cblaslapack=1 
