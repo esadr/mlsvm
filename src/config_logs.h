@@ -88,7 +88,7 @@
 //---- Solver ----
 #define dbl_SV_free_solver          0           // 0 Default, 1 prints which class called the free method
 #define dbl_SV_malloc_weights       0           // 0 Default, 1 prints the labels for classes
-#define dbl_SV_read_problem         0           // 0 Default, 1 prints the number of points in classes
+#define dbl_SV_read_problem         3           // 0 Default, 1 prints the number of points in classes
 #define dbl_SV_RPIB                 0           // 0 Default    //read_problem_index_base
 #define dbl_SV_SWNP                 0           // 0 Default    //set_weights_num_points
 #define dbl_SV_SWSV                 0           // 0 Default    //set_weights_sum_volume

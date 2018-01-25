@@ -28,6 +28,8 @@ SAT_OBJS = $(SAT_SRCS:.cc=.o)
 SATIW_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_weighted.cc solver.cc ./tools/single_svm_train_instance_weight.cc
 SATIW_OBJS = $(SATIW_SRCS:.cc=.o)
 
+SATL_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc linear.cc solver_linear.cc ./tools/single_linear_svm_train.cc 
+SATL_OBJS = $(SATL_SRCS:.cc=.o)
 
 SAP_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_weighted.cc solver.cc ./tools/single_svm_predict.cc
 SAP_OBJS = $(SAP_SRCS:.cc=.o)
@@ -111,7 +113,11 @@ sat_weighted: $(SATIW_OBJS) chkopts
 	-${CLINKER} $(SATIW_OBJS)  ${PETSC_MAT_LIB} -o sat_weighted 
 	${RM} sat_weighted.o 
 
+sat_linear: $(SATL_OBJS) chkopts
+	-${CLINKER} $(SATL_OBJS)  ${PETSC_MAT_LIB} -o sat_linear 
+	${RM} sat_linear.o 
 
+	
 sap: $(SAP_OBJS) chkopts
 	-${CLINKER} $(SAP_OBJS)  ${PETSC_MAT_LIB} -o sap 
 	${RM} sap.o 
@@ -147,11 +153,19 @@ cvt: $(ConvertTools_OBJS) chkopts
 mlsvm_libsvm_petsc: $(Convert_libsvm_PETSc_OBJS) chkopts
 	-${CLINKER} $(Convert_libsvm_PETSc_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_libsvm_petsc
 	${RM} mlsvm_libsvm_petsc.o 
-	
-	
+
 mlsvm_save_knn: $(mlsvm_Save_knn_OBJS) chkopts
 	-${CLINKER} $(mlsvm_Save_knn_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_save_knn
 	${RM} mlsvm_save_knn.o 
+
+tron.o: tron.cc tron.h
+	$(CXX) $(CFLAGS) -c -o tron.o tron.cc
+
+linear.o: linear.cc linear.h
+	$(CXX) $(CFLAGS) -c -o linear.o linear.cc
+
+blas/blas.a: blas/*.c blas/*.h
+	make -C blas OPTFLAGS='$(CFLAGS)' CC='$(CC)';
 
 clean_main:	#PETSc Makefile has clean method which conflict with clean method here, therefore this one is created
 	make clean

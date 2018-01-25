@@ -25,7 +25,7 @@ void Config_params::print_classification_training_params(){
 
     std::cout << "\ncpp_srand_seed: " <<get_cpp_srand_seed()<< std::endl;
 ///*
-    std::cout << "--- Main file Paramters ---"      <<
+    std::cout << "--- Main file Parameters ---"      <<
                  "\nmain_num_repeat_exp: "          << get_main_num_repeat_exp()        <<
                  "\nmain_num_kf_iter: "             << get_main_num_kf_iter()           <<
                  "\nexp_info: "                     << get_exp_info()                   <<
@@ -33,18 +33,18 @@ void Config_params::print_classification_training_params(){
                  "\nML_status: "                    << get_multi_level_status()         <<
                  std::endl;
 
-    std::cout << "--- NN Paramters ---"     <<
+    std::cout << "--- NN Parameters ---"     <<
                  "\nnn_number: "            << get_nn_number_of_neighbors()     <<
                  "\nnn_distance_type:"      << get_nn_distance_type()           << std::endl;
 
-    std::cout << "--- Loader Paramters ---"     <<
+    std::cout << "--- Loader Parameters ---"     <<
                  "\npre_init_loader_matrix: "   << get_pre_init_loader_matrix()   <<
                  "\ninverse_weight: "           << get_inverse_weight()           <<
                  "\nld_weight_type: "           << get_ld_weight_type()           <<
                  "\nld_weight_param: "           << get_ld_weight_param()         <<
                  std::endl;
 
-    std::cout << "--- Coarsening Paramters ---" <<
+    std::cout << "--- Coarsening Parameters ---" <<
                  "\ncoarse_Eta: "           << get_coarse_Eta()           <<
                  "\ncoarse_threshold: "     << get_coarse_threshold()     <<
                  "\ncoarse_q: "             << get_coarse_q()             <<
@@ -57,7 +57,7 @@ void Config_params::print_classification_training_params(){
 //                 "\ncs_boundary_points_max_num: "    << get_cs_boundary_points_max_num()    <<
                  std::endl;
 
-    std::cout << "--- ModelSelection Paramters ---" <<
+    std::cout << "--- ModelSelection Parameters ---" <<
                  "\nms_status: "                   << get_ms_status()                     <<
                  "\nms_limit: "                    << get_ms_limit()                      <<
                  "\nms_first_stage: "              << get_ms_first_stage()                <<
@@ -69,7 +69,24 @@ void Config_params::print_classification_training_params(){
                  std::endl;
 //                 "\nms_validation_part: " << get_ms_validation_part()   <<
 
-    std::cout << "--- SVM Paramters ---" <<
+                print_svm_parameter();
+
+    std::cout << "--- Refinement Parameters ---" <<
+                 "\nadd_fraction: "             << get_rf_add_fraction()                <<
+                 "\nrf_add_distant_point_status(2nd): "   << get_rf_add_distant_point_status()      <<
+                 "\nrf_weight_vol: "            << get_rf_weight_vol()                  <<
+                 "\npr_start_partitioning: "    << get_pr_start_partitioning()          <<
+                 std::endl;
+
+    std::cout << "--- Partitioning Parameters ---" <<
+                 "\npr_partition_max_size: "      << get_pr_partition_max_size()        <<
+                 "\npr_maj_voting_id: "           << get_pr_maj_voting_id()             <<
+                 std::endl;
+//    */
+}
+
+void Config_params::print_svm_parameter(){
+    std::cout << "--- SVM Parameters ---" <<
                  "\nsvm_type: "         << get_svm_svm_type()       <<
                  "\nkernel_type: "      << get_svm_kernel_type()    <<
                  "\ndegree: "           << degree                   <<
@@ -83,20 +100,6 @@ void Config_params::print_classification_training_params(){
                  "\nshrinking: "        << get_svm_shrinking()      <<
                  "\nprobability: "      << get_svm_probability()    <<
                  std::endl;
-
-
-    std::cout << "--- Refinement Paramters ---" <<
-                 "\nadd_fraction: "             << get_rf_add_fraction()                <<
-                 "\nrf_add_distant_point_status(2nd): "   << get_rf_add_distant_point_status()      <<
-                 "\nrf_weight_vol: "            << get_rf_weight_vol()                  <<
-                 "\npr_start_partitioning: "    << get_pr_start_partitioning()          <<
-                 std::endl;
-
-    std::cout << "--- Partitioning Paramters ---" <<
-                 "\npr_partition_max_size: "      << get_pr_partition_max_size()        <<
-                 "\npr_maj_voting_id: "           << get_pr_maj_voting_id()             <<
-                 std::endl;
-//    */
 }
 
 void Config_params::print_classification_prediction_params(){
@@ -116,8 +119,16 @@ void Config_params::print_convert_files_params(){
                  "\ntmp_path: "             << get_tmp_path()          << std::endl;
 }
 
+void Config_params::print_sa_svm_linear_params(){
+    std::cout << "mlsvm_version:"           << mlsvm_version           <<
+                 "\nds_path: "              << get_ds_path()           <<
+                 "\nds_name: "              << get_ds_name()           <<
+                 "\ntmp_path: "             << get_tmp_path()          << std::endl;
+    print_svm_parameter();
+}
+
 void Config_params::print_flann_params(){
-    std::cout << "--- NN Paramters ---"         <<
+    std::cout << "--- NN Parameters ---"         <<
                  "\nnn_number_of_classes: "     << get_nn_number_of_classes()   <<
                  "\nnn_number_of_neighbors: "   << get_nn_number_of_neighbors() <<
                  "\nnn_distance_type: "         << get_nn_distance_type()       << std::endl;
@@ -222,6 +233,11 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
     case convert_files:
         read_convert_files_parameters(root, argc, argv);//@080517-1120
         print_convert_files_params();
+        break;
+
+    case sa_svm_linear:
+        read_sa_svm_linear_parameters(root, argc, argv);
+        print_sa_svm_linear_params();
         break;
     }
 }
@@ -394,8 +410,6 @@ void Config_params::read_classification_prediction_parameters(pugi::xml_node& ro
 
 
 void Config_params::read_convert_files_parameters(pugi::xml_node& root,int argc, char * argv[]){
-
-
     mlsvm_version = root.child("mlsvm_version").attribute("stringVal").value();
 
     /// read the parameters from the XML file (params.xml)
@@ -406,6 +420,45 @@ void Config_params::read_convert_files_parameters(pugi::xml_node& root,int argc,
     parser_.add_option("--ds_p")                       .dest("ds_path")             .set_default(ds_path);
     parser_.add_option("-f", "--ds_f", "--file")       .dest("ds_name")             .set_default(ds_name);
     parser_.add_option("--tmp_p")                      .dest("tmp_path")            .set_default(tmp_path);
+
+    this->options_ = parser_.parse_args(argc, argv);
+    std::vector<std::string> args = parser_.args();
+    std::cout << "[CP] input convert_files parameters are read" << std::endl;
+}
+
+void Config_params::read_sa_svm_linear_parameters(pugi::xml_node& root,int argc, char * argv[]){
+    mlsvm_version = root.child("mlsvm_version").attribute("stringVal").value();
+
+    /// read the parameters from the XML file (params.xml)
+    ds_path             = root.child("ds_path").attribute("stringVal").value();
+    ds_name             = root.child("ds_name").attribute("stringVal").value();
+    tmp_path            = root.child("tmp_path").attribute("stringVal").value();
+
+    svm_type    = root.child("svm_svm_type").attribute("intVal").as_int();
+    kernel_type = root.child("svm_kernel_type").attribute("intVal").as_int();
+    degree      = root.child("svm_degree").attribute("intVal").as_int();
+    gamma       = root.child("svm_gamma").attribute("doubleVal").as_double();
+    coef0       = root.child("svm_coef0").attribute("doubleVal").as_double();
+    nu          = root.child("svm_nu").attribute("doubleVal").as_double();
+    cache_size  = root.child("svm_cache_size").attribute("doubleVal").as_double();
+    C           = root.child("svm_C").attribute("doubleVal").as_double();
+    eps         = root.child("svm_eps").attribute("doubleVal").as_double();
+    p           = root.child("svm_p").attribute("doubleVal").as_double();
+    shrinking   = root.child("svm_shrinking").attribute("intVal").as_int();
+    probability = root.child("svm_probability").attribute("intVal").as_int();
+    nr_weight   = root.child("svm_nr_weight").attribute("intVal").as_int();
+
+    /// read the parameters from input arguments ()
+    parser_.add_option("--ds_p")                       .dest("ds_path")             .set_default(ds_path);
+    parser_.add_option("-f", "--ds_f", "--file")       .dest("ds_name")             .set_default(ds_name);
+    parser_.add_option("--tmp_p")                      .dest("tmp_path")            .set_default(tmp_path);
+
+    parser_.add_option("--ms_k")                             .dest("kernel_type")  .set_default(kernel_type);
+    parser_.add_option("-g", "--ms_g")                       .dest("gamma")  .set_default(gamma);
+    parser_.add_option("-c", "--ms_c")                       .dest("C")  .set_default(C);
+    parser_.add_option("-e", "--ms_eps")                     .dest("eps")  .set_default(eps);
+    parser_.add_option("--ms_shrinking")                     .dest("shrinking")  .set_default(shrinking);
+    parser_.add_option("--ms_probability")                   .dest("probability")  .set_default(probability);
 
 
     this->options_ = parser_.parse_args(argc, argv);

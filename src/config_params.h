@@ -133,7 +133,14 @@ private:
     void read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_classification_prediction_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_convert_files_parameters(pugi::xml_node& root,int argc, char * argv[]);
+    void read_sa_svm_linear_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_clustering_parameters(pugi::xml_node& root,int argc, char * argv[]);
+
+    void print_svm_parameter();
+    void print_classification_training_params();
+    void print_classification_prediction_params();
+    void print_convert_files_params();
+    void print_sa_svm_linear_params();
 
     //======= Timers ========
     std::clock_t t_start_coarsening;
@@ -142,13 +149,11 @@ private:
 
 
 public:
-    enum program_parts {main, convert_files, zscore, flann, svm, prediction, clustring} ;
+    enum program_parts {main, convert_files, zscore, flann, svm, sa_svm_linear, prediction, clustring} ;
     static Config_params* getInstance();
     int  get_main_function() const { return main_function;  }
 
-    void print_classification_training_params();
-    void print_classification_prediction_params();
-    void print_convert_files_params();
+
     void read_flann_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_zscore_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void print_flann_params();
@@ -224,9 +229,9 @@ public:
     int    get_main_current_exp_id()        const {return main_current_exp_id;}        //for export models
     int    get_main_current_kf_id()         const {return main_current_kf_id;}         //for export models
     int    get_main_current_level_id()      const {return main_current_level_id;}      //for export models
-    int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
-    int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
-    int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+    void    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+    void    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+    void    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
     void   set_current_iter_file_names(int curr_exp, int curr_iter);
     // Loader
     bool   get_inverse_weight()     const { return inverse_weight; }

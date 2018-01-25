@@ -1,7 +1,7 @@
  #ifndef SOLVER_H
 #define SOLVER_H
 
-#define weight_instance 1
+#define weight_instance 0
 
 #if weight_instance == 1
     #include "svm_weighted.h"       //support instance weights, version 3.20 at 09/05/2016
@@ -19,6 +19,7 @@
 #include <memory>
 
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type)) //from svm_train
+
 
 
 struct weight_info{
@@ -43,7 +44,7 @@ private:
     int predict_probability=0;
     const char * test_dataset_f_name;
 
-    void read_parameters();
+    void read_parameters(bool set_gamma=1);
     void print_parameters();
     void read_problem_index_base(Mat& p_train_data, Mat& n_train_data,
                                  std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
@@ -75,6 +76,10 @@ public:
         predict_probability = Config_params::getInstance()->get_svm_probability();
     }
 
+    Solver(bool stand_alone){
+        std::cout << "The solver is called as a stand alone solver!" << std::endl;
+    }
+
     void set_local_model(svm_model * in_model){
         local_model = in_model;
     }
@@ -93,6 +98,8 @@ public:
     void stand_alone_train_without_instance_weight(Mat& m_data_p, Mat& m_data_n, std::string model_fname);
 
     void stand_alone_train_instance_weight(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, std::string model_fname);
+
+    void stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, std::string model_fname);
 
     void PD_train_model_index_base(Mat& m_data, std::vector<int>& v_lbl,
                                             const PetscScalar * arr_train_index, PetscInt num_nnz_train,

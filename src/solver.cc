@@ -240,6 +240,50 @@ void Solver::stand_alone_train_instance_weight(Mat& m_data_p , Vec& v_vol_p, Mat
     t_sv_sat.stop_timer("stand alone train");
 }
 
+void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, std::string model_fname){
+    ETimer t_sv_sat;
+    // - - - - - get dimensions - - - - -
+    PetscInt p_num_row_, n_num_row_, num_col_;
+    MatGetSize(m_data_p, &p_num_row_, &num_col_);
+    MatGetSize(m_data_n, &n_num_row_, NULL);
+
+
+    read_parameters(0); //set_gamma=0 skipps the Gmama
+
+
+    std::cout << "[SV][SATL] param.svm_type:" << param.svm_type << std::endl;
+    std::cout << "[SV][SATL] param.C:" << param.C << std::endl;
+    std::cout << "[SV][SATL] param.gamma:" << param.gamma << std::endl;
+    std::cout << "[SV][SATL] param.e:" << param.eps << std::endl;
+    const char *error_msg;                                  //check parameters
+    error_msg = svm_check_parameter(&prob,&param);
+    if(error_msg) {
+        fprintf(stderr,"[SV][SATL] ERROR: %s\n",error_msg);
+        print_parameters();
+        exit(1);
+    }
+    // now prob and param are loaded and checked
+
+    read_problem(m_data_p,v_vol_p,m_data_n,v_vol_n);
+
+
+    // - - - - the instance weights are set instead of simple class weights - - - -
+    param.weight = NULL;
+    param.weight_label=NULL;
+    param.nr_weight=0;
+
+
+
+    local_model = svm_train(&prob,&param);
+    exit(1);
+    solution tmp_sol;
+    prepare_solution_single_model(local_model, p_num_row_, tmp_sol);
+
+    svm_save_model(model_fname.c_str(), local_model);
+    printf("\nmodel saved in %s file\n", model_fname.c_str());
+    t_sv_sat.stop_timer("stand alone train");
+}
+
 
 void Solver::PD_train_model_index_base(Mat& m_data, std::vector<int>& v_target_lbl,
                                         const PetscScalar * arr_train_index, PetscInt num_nnz_train,
@@ -1328,11 +1372,12 @@ void Solver::alloc_memory_for_weights(svm_parameter& in_param, bool free_first){
 
 
 //======================================================================
-void Solver::read_parameters(){
+void Solver::read_parameters(bool set_gamma){
     param.svm_type = Config_params::getInstance()->get_svm_svm_type();
     param.kernel_type = Config_params::getInstance()->get_svm_kernel_type();
     param.degree = Config_params::getInstance()->get_svm_degree();
-    param.gamma = Config_params::getInstance()->get_svm_gamma();
+    if(set_gamma)
+        param.gamma = Config_params::getInstance()->get_svm_gamma();
 //    param.coef0 = Config_params::getInstance()->get_svm_coef0();
 //    param.nu = Config_params::getInstance()->get_svm_nu();
     param.cache_size = Config_params::getInstance()->get_svm_cache_size();
