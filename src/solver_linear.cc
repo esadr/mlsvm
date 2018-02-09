@@ -8,7 +8,7 @@
 
 
 ////======================================================================
-//void Solver::free_solver(std::string caller_name){
+//void SolverLinear::free_solver(std::string caller_name){
 //#if dbl_SV_free_solver >= 1 // 1 default
 //    std::cout <<"free solver is called by: "<< caller_name << std::endl;
 //#endif
@@ -23,7 +23,7 @@
 
 
 
-//model * Solver::train_model(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n,
+//model * SolverLinear::train_model(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n,
 //                                bool inherit_params, double param_c, double param_gamma){
 
 //    ETimer t_sv_tm;
@@ -91,7 +91,7 @@
 
 
 
-//model * Solver::train_model_index_base(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n,
+//model * SolverLinear::train_model_index_base(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n,
 //                                           std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
 //                                           PetscInt iter_p_end, PetscInt iter_n_end,
 //                                           bool inherit_params, double param_c, double param_gamma){
@@ -146,7 +146,7 @@
 
 
 
-//void Solver::stand_alone_train_without_instance_weight(Mat& m_data_p, Mat& m_data_n, std::string model_fname){
+//void SolverLinear::stand_alone_train_without_instance_weight(Mat& m_data_p, Mat& m_data_n, std::string model_fname){
 //    ETimer t_sv_sat;
 //    // - - - - - get dimensions - - - - -
 //    PetscInt p_num_row_, n_num_row_, num_col_;
@@ -201,7 +201,7 @@
 
 
 
-//void Solver::stand_alone_train_instance_weight(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, std::string model_fname){
+//void SolverLinear::stand_alone_train_instance_weight(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, std::string model_fname){
 //    ETimer t_sv_sat;
 //    // - - - - - get dimensions - - - - -
 //    PetscInt p_num_row_, n_num_row_, num_col_;
@@ -240,7 +240,7 @@
 //    t_sv_sat.stop_timer("stand alone train");
 //}
 
-void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, std::string model_fname){
+void SolverLinear::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, std::string model_fname){
     ETimer t_sv_sat;
     // - - - - - get dimensions - - - - -
     PetscInt p_num_row_, n_num_row_, num_col_;
@@ -264,16 +264,20 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
     // now prob and param are loaded and checked
 
     read_problem(m_data_p,v_vol_p,m_data_n,v_vol_n);
+    std::cout << "[SV][SATL] after read_problem" << std::endl;
 
 
     // - - - - the instance weights are set instead of simple class weights - - - -
-    param.weight = NULL;
-    param.weight_label=NULL;
     param.nr_weight=0;
+    param.weight_label=NULL;
+    param.weight = NULL;
 
+    std::cout << "[SV][SATL] after set weight" << std::endl;
 
-
+    //@@
     local_model = train(&prob,&param);
+    std::cout << "[SV][SATL] after train model" << std::endl;
+
     exit(1);
     solution tmp_sol;
     prepare_solution_single_model(local_model, p_num_row_, tmp_sol);
@@ -284,7 +288,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 }
 
 
-//void Solver::PD_train_model_index_base(Mat& m_data, std::vector<int>& v_target_lbl,
+//void SolverLinear::PD_train_model_index_base(Mat& m_data, std::vector<int>& v_target_lbl,
 //                                        const PetscScalar * arr_train_index, PetscInt num_nnz_train,
 //                                        bool inherit_params, double param_c, double param_gamma){
 
@@ -348,7 +352,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-//void Solver::partial_solver(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n, double last_c, double last_gamma,
+//void SolverLinear::partial_solver(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n, double last_c, double last_gamma,
 //                        int level, std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
 //                        std::unordered_set<PetscInt>& uset_SV_index_p, std::unordered_set<PetscInt>& uset_SV_index_n,
 //                        Mat& m_VD_p, Mat& m_VD_n, Mat& m_VD_both, Mat& m_all_predict_VD, Mat& m_testdata, int classifier_id, Mat& m_all_predict_TD){
@@ -437,7 +441,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-////void Solver::cross_fold_data(const Mat data_p, const Mat data_n,
+////void SolverLinear::cross_fold_data(const Mat data_p, const Mat data_n,
 ////                                        Mat& train_p_, Mat& train_n_, Mat& test_total_){
 //////divide data to train and test randomely
 ////    Mat             test_p_, test_n_;
@@ -585,7 +589,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 ////=================== combine_test_data ==============================
 //// Get 2 matrices and make a new one while destroy both initial matrices
-//void Solver::combine_test_data(Mat& test_total, Mat& dt_test_p,
+//void SolverLinear::combine_test_data(Mat& test_total, Mat& dt_test_p,
 //                                       PetscInt size_p, Mat& dt_test_n, PetscInt size_n, PetscInt max_num_col_){
 //    PetscInt num_row = size_p + size_n;
 //    PetscInt i, ncols;
@@ -636,12 +640,12 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 ////=========== read the training data using the vector of indices ============
-//void Solver::read_problem_index_base(Mat& m_train_data_p, Mat& m_train_data_n,
+//void SolverLinear::read_problem_index_base(Mat& m_train_data_p, Mat& m_train_data_n,
 //                                        std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
 //                                        PetscInt iter_p_end,PetscInt iter_n_end,
 //                                        Vec& v_vol_p, Vec& v_vol_n){
 //#if dbl_SV_RPIB >= 3
-//    printf("[SV][RPIB] DEBUG start Solver::read_problem_index_base\n");
+//    printf("[SV][RPIB] DEBUG start SolverLinear::read_problem_index_base\n");
 //#endif
 //    PetscInt i=0, j=0, l=0, k=0, ncols;
 //    const PetscInt    *cols;                        //if not NULL, the column numbers
@@ -855,7 +859,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 ////=========== read the training data using the vector of indices for Personalized classification ============
-//void Solver::PD_read_problem_index_base(Mat& m_data, std::vector<int>& v_target_lbl, const PetscScalar * arr_index, int num_nnz){
+//void SolverLinear::PD_read_problem_index_base(Mat& m_data, std::vector<int>& v_target_lbl, const PetscScalar * arr_index, int num_nnz){
 //    PetscInt i=0, j=0, l=0, k=0, ncols;
 //    const PetscInt    *cols;                        //if not NULL, the column numbers
 //    const PetscScalar *vals;
@@ -935,209 +939,151 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-////=========== read the training data (both of the matricex are training data not include test data)============
-////void Solver::read_problem(Mat& m_train_data_p, Mat& m_train_data_n){
-//void Solver::read_problem(Mat& m_train_data_p, Vec& v_vol_p, Mat& m_train_data_n, Vec& v_vol_n){
+//=========== read the training data (both of the matricex are training data not include test data)============
+//void SolverLinear::read_problem(Mat& m_train_data_p, Mat& m_train_data_n){
+void SolverLinear::read_problem(Mat& m_train_data_p, Vec& v_vol_p, Mat& m_train_data_n, Vec& v_vol_n){
 
-//    PetscInt i=0, j=0, l=0, k=0, ncols;
-//    const PetscInt    *cols;                        //if not NULL, the column numbers
-//    const PetscScalar *vals;
-//    PetscInt num_col=0, num_total_nodes=0;  //num_row=0,
-//    PetscInt p_num_node_=0, n_num_node_=0, num_elements_=0;
+    PetscInt i=0, j=0, l=0, k=0, ncols;
+    const PetscInt    *cols;                        //if not NULL, the column numbers
+    const PetscScalar *vals;
+    PetscInt num_col=0, num_total_nodes=0;  //num_row=0,
+    PetscInt p_num_node_=0, n_num_node_=0, num_elements_=0;
 
-//    PetscScalar sum_all_vol_p=0, sum_all_vol_n=0;       //calculate the sum of all the volumes in each class of the current training set
-//    VecSum(v_vol_p, &sum_all_vol_p);
-//    VecSum(v_vol_n, &sum_all_vol_n);
-////    printf("\n[SV][RP] Debug weight instance sum_p:%g, sum_n:%g\n\n", sum_all_vol_p, sum_all_vol_n);
-//#if dbl_SV_read_problem >= 7
-//    printf("[SV][RP] m_train_data_p matrix:\n");                   //$$debug
-//    MatView(m_train_data_p, PETSC_VIEWER_STDOUT_WORLD);
-//    printf("[SV][RP] m_train_data_n matrix:\n");                   //$$debug
-//    MatView(m_train_data_n, PETSC_VIEWER_STDOUT_WORLD);
-//#endif
+    PetscScalar sum_all_vol_p=0, sum_all_vol_n=0;       //calculate the sum of all the volumes in each class of the current training set
+    VecSum(v_vol_p, &sum_all_vol_p);
+    VecSum(v_vol_n, &sum_all_vol_n);
+//    printf("\n[SV][RP] Debug weight instance sum_p:%g, sum_n:%g\n\n", sum_all_vol_p, sum_all_vol_n);
+#if dbl_SV_read_problem >= 7
+    printf("[SV][RP] m_train_data_p matrix:\n");                   //$$debug
+    MatView(m_train_data_p, PETSC_VIEWER_STDOUT_WORLD);
+    printf("[SV][RP] m_train_data_n matrix:\n");                   //$$debug
+    MatView(m_train_data_n, PETSC_VIEWER_STDOUT_WORLD);
+#endif
 
-///// find number of nodes and elements
-//    MatGetSize(m_train_data_p,&p_num_node_,&num_col);    //m returns the number of rows globally
-//    MatGetSize(m_train_data_n,&n_num_node_,NULL);    //m returns the number of rows globally
-//    num_total_nodes = p_num_node_ + n_num_node_;
-//#if dbl_SV_read_problem >= 1
-//    printf("[SV][RP] number of P_data: %d, N_data: %d, total_nodes :%d \n",
-//                               p_num_node_,n_num_node_,num_total_nodes);     //$$debug
-//#endif
-////---- Count number of non zero elements -----
-//    // for positive class
-//    for (i=0; i< p_num_node_;i++){
-//        MatGetRow(m_train_data_p,i,&ncols, &cols, &vals);
-//        num_elements_ += ncols + 1;
-//        MatRestoreRow(m_train_data_p,i,&ncols, &cols, &vals);
-//    }
-//#if dbl_SV_read_problem >= 3
-//    printf("[SV][RP] number of p elems:%d\n",num_elements_);
-//#endif
-//    // for negative class
-//    for (i=0; i< n_num_node_;i++){
-//        MatGetRow(m_train_data_n,i,&ncols, &cols, &vals);
-//        num_elements_ += ncols + 1;
-//        MatRestoreRow(m_train_data_n,i,&ncols, &cols, &vals);
-//    }
-//#if dbl_SV_read_problem >= 5
-//    printf("[SV][RP]{correct _ NNZ} number of total elems(one column as terminator [-1,0]):%d\n",num_elements_);
-//#endif
+/// find number of nodes and elements
+    MatGetSize(m_train_data_p,&p_num_node_,&num_col);    //m returns the number of rows globally
+    MatGetSize(m_train_data_n,&n_num_node_,NULL);    //m returns the number of rows globally
+    num_total_nodes = p_num_node_ + n_num_node_;
+#if dbl_SV_read_problem >= 1
+    printf("[SV][RP] number of P_data: %d, N_data: %d, total_nodes :%d \n",
+                               p_num_node_,n_num_node_,num_total_nodes);     //$$debug
+#endif
+//---- Count number of non zero elements -----
+    // for positive class
+    for (i=0; i< p_num_node_;i++){
+        MatGetRow(m_train_data_p,i,&ncols, &cols, &vals);
+        num_elements_ += ncols + 1;
+        MatRestoreRow(m_train_data_p,i,&ncols, &cols, &vals);
+    }
+#if dbl_SV_read_problem >= 3
+    printf("[SV][RP] number of p elems:%d\n",num_elements_);
+#endif
+    // for negative class
+    for (i=0; i< n_num_node_;i++){
+        MatGetRow(m_train_data_n,i,&ncols, &cols, &vals);
+        num_elements_ += ncols + 1;
+        MatRestoreRow(m_train_data_n,i,&ncols, &cols, &vals);
+    }
+#if dbl_SV_read_problem >= 5
+    printf("[SV][RP]{correct _ NNZ} number of total elems(one column as terminator [-1,0]):%d\n",num_elements_);
+#endif
 
-////---- read the data to prob for libsvm -----
-//    this->prob.y = Malloc(double, num_total_nodes );
+//---- read the data to prob for libsvm -----
+    this->prob.y = Malloc(double, num_total_nodes );    // line 387 of train.c: prob.y = Malloc(double,prob.l);
+    this->prob.x = Malloc(struct feature_node *, num_total_nodes );
+    this->x_space = Malloc(struct feature_node, num_elements_ );        //new code in liblinear is different than before
+                                                                        //x_space = Malloc(struct feature_node,elements+prob.l);
+#if dbl_SV_read_problem >= 3
+    printf("[SV][RP] After Malloc\n");
+#endif
 
-//    #if weight_instance == 1
-//        this->prob.W = Malloc(double, num_total_nodes );
-//    #endif
+    // - - - - set the problem from the data and volume - - - -
+    prob.l = num_total_nodes;
+    //read positive data
+    #if weight_instance == 1
+        VecGetArray(v_vol_p,&arr_vol_p);
+    #endif
+    j=0;                //set the j as an index to go through the x_space
+    for (i=0; i< p_num_node_;i++){
+        prob.y[i] = 1;
 
-//    this->prob.x = Malloc(struct svm_node *, num_total_nodes );
-//    this->x_space = Malloc(struct svm_node, num_elements_ );
+        prob.x[i] = &x_space[j];
+        MatGetRow(m_train_data_p,i,&ncols, &cols, &vals);
+        l=0;
+#if dbl_SV_read_problem >= 3
+        if(ncols == 0){
+            printf("[SV][RP] *** Error *** Empty row at %d row in m_train_data_p\n",i);
+            exit(1);
+        }
+#endif
+        for (k=0; k< num_col; k++) {    //note this is num_col instead of ncols because of j increament
+            if(k == cols[l] &&  fabs(vals[l]) > 0.000001)
+            {
+                x_space[j].index = k+1;   //the libsvm use 1 index instead of zero
+                x_space[j].value = vals[l];
+                l++;
+#if dbl_SV_read_problem >= 7            //default is 7
+            printf("[SV][RP]{P} i:%d j:%d prob.y[i]:%g x_space[j].index:%d x_space[j].value:%g\n",
+                                        i, j, prob.y[i], x_space[j].index, x_space[j].value);     //$$debug
+//            printf("k:%d ,l:%d, cols[l]:%d, vals[l]:%g\n",
+//                   k, l, cols[l], vals[l]);
+#endif
+                ++j;
+            }
+        }
+        //create the end element of each node (-1,0)
+        x_space[j].index = -1;
+        x_space[j].value = 0;
+        ++j;
 
-//#if dbl_SV_read_problem >= 3
-//    printf("[SV][RP]After Malloc\n");
-//#endif
+        MatRestoreRow(m_train_data_p,i,&ncols, &cols, &vals);
+    }
+#if dbl_SV_read_problem >= 3 //default is 3
+    printf("\n[SV][RP] end of positive class, i is :%d,num of elements(j) is :%d\n",i,j);
+#endif
+//    printf("\n\n[SV][RP] Debug weight instance");
+    //read negative data
+    for (i=0; i< n_num_node_;i++){
+        prob.y[i+p_num_node_] = -1;
+        prob.x[i+p_num_node_] = &x_space[j];
+        MatGetRow(m_train_data_n,i,&ncols, &cols, &vals);
 
-//    #if weight_instance == 1
-//        //prepare the vector of volumes
-//        PetscScalar        * arr_vol_p, * arr_vol_n;
-//        PetscMalloc1(p_num_node_, &arr_vol_p);
-//        PetscMalloc1(n_num_node_, &arr_vol_n);
-//        PetscScalar        min_vol=0, max_vol=0;
-//        PetscScalar        sq_inv_sum_vol_p=pow(1.0/sum_all_vol_p, 2);
-//        PetscScalar        sq_inv_sum_vol_n=pow(1.0/sum_all_vol_n, 2);
-////        printf("[SV][RP] sq_inv_sum_vol_p:%.12f, sq_inv_sum_vol_n:%.12f\n",sq_inv_sum_vol_p,sq_inv_sum_vol_n);         //$$debug
-//    #endif
+        l=0;
+//        for (k=0; k< ncols; k++) {
+        for (k=0; k< num_col; k++) {
+            if(k == cols[l] &&  fabs(vals[l]) > 0.000001)
+            {
+                x_space[j].index = k+1;   //the libsvm use 1 index instead of zero
+                x_space[j].value = vals[l];
+                l++;
+#if dbl_SV_read_problem >= 7
+            printf("[SV][RP]{N} i:%d j:%d prob.y[i+p_num_node_]:%g x_space[j].index:%d x_space[j].value:%g\n",
+                                        i, j, prob.y[i+p_num_node_], x_space[j].index, x_space[j].value);     //$$debug
+//            printf("k:%d ,l:%d, cols[l]:%d, vals[l]:%g\n",
+//                   k, l, cols[l], vals[l]);
+#endif
+                ++j;
 
+            }
+        }
+        //create the end element of each node (-1,0)
+        x_space[j].index = -1;
+        x_space[j].value = 0;
+        ++j;
 
-
-//    // - - - - set the problem from the data and volume - - - -
-//    prob.l = num_total_nodes;
-//    //read positive data
-//    #if weight_instance == 1
-//        VecGetArray(v_vol_p,&arr_vol_p);
-//    #endif
-//    j=0;                //set the j as an index to go through the x_space
-//    for (i=0; i< p_num_node_;i++){
-//        prob.y[i] = 1;
-
-//        #if weight_instance == 1
-//            prob.W[i] = arr_vol_p[i] * sq_inv_sum_vol_p;    // (vol_x / sum_all_vol_in_same_class) * (1 / sum_all_vol_in_same_class)
-//                                                            // the left part is importance inside class and the right is between min and maj classes
-////            printf("wi:%g\n",arr_vol_p[i]);                  //$$debug
-////            printf("%d,%.8f\t, ",i,prob.W[i]);                  //$$debug
-//            if(prob.W[i] < min_vol)
-//                min_vol = prob.W[i];    //store the min
-//            if(prob.W[i] > max_vol)
-//                max_vol = prob.W[i];    //store the max
-//        #endif
-
-//        prob.x[i] = &x_space[j];
-//        MatGetRow(m_train_data_p,i,&ncols, &cols, &vals);
-//        l=0;
-//#if dbl_SV_read_problem >= 3
-//        if(ncols == 0){
-//            printf("[SV][RP] *** Error *** Empty row at %d row in m_train_data_p\n",i);
-//            exit(1);
-//        }
-//#endif
-//        for (k=0; k< num_col; k++) {    //note this is num_col instead of ncols because of j increament
-//            if(k == cols[l] &&  fabs(vals[l]) > 0.000001)
-//            {
-//                x_space[j].index = k+1;   //the libsvm use 1 index instead of zero
-//                x_space[j].value = vals[l];
-//                l++;
-//#if dbl_SV_read_problem >= 7            //default is 7
-//            printf("[SV][RP]{P} i:%d j:%d prob.y[i]:%g x_space[j].index:%d x_space[j].value:%g\n",
-//                                        i, j, prob.y[i], x_space[j].index, x_space[j].value);     //$$debug
-////            printf("k:%d ,l:%d, cols[l]:%d, vals[l]:%g\n",
-////                   k, l, cols[l], vals[l]);
-//#endif
-//                ++j;
-
-//            }
-//        }
-//        //create the end element of each node (-1,0)
-//        x_space[j].index = -1;
-//        x_space[j].value = 0;
-//        ++j;
-
-//        MatRestoreRow(m_train_data_p,i,&ncols, &cols, &vals);
-//    }
-//    #if weight_instance == 1
-//        VecRestoreArray(v_vol_p,&arr_vol_p);
-//    #endif
-//#if dbl_SV_read_problem >= 3 //default is 3
-//    printf("\n[SV][RP] end of positive class, i is :%d,num of elements(j) is :%d\n",i,j);
-//#endif
-////    printf("\n\n[SV][RP] Debug weight instance");
-//    //read negative data
-//    #if weight_instance == 1
-//        VecGetArray(v_vol_n,&arr_vol_n);
-//    #endif
-//    for (i=0; i< n_num_node_;i++){
-//        prob.y[i+p_num_node_] = -1;
-
-//        #if weight_instance == 1
-//            prob.W[i+p_num_node_] = arr_vol_n[i] * sq_inv_sum_vol_n;
-////            printf("%d,%.8f\t",i+p_num_node_, prob.W[i+p_num_node_]);                              //$$debug
-//            if(prob.W[i+p_num_node_] < min_vol)
-//                min_vol = prob.W[i+p_num_node_];    //store the min
-//            if(prob.W[i+p_num_node_] > max_vol)
-//                max_vol = prob.W[i+p_num_node_];    //store the max
-//        #endif
-
-//        prob.x[i+p_num_node_] = &x_space[j];
-//        MatGetRow(m_train_data_n,i,&ncols, &cols, &vals);
-
-//        l=0;
-////        for (k=0; k< ncols; k++) {
-//        for (k=0; k< num_col; k++) {
-//            if(k == cols[l] &&  fabs(vals[l]) > 0.000001)
-//            {
-//                x_space[j].index = k+1;   //the libsvm use 1 index instead of zero
-//                x_space[j].value = vals[l];
-//                l++;
-//#if dbl_SV_read_problem >= 7
-//            printf("[SV][RP]{N} i:%d j:%d prob.y[i+p_num_node_]:%g x_space[j].index:%d x_space[j].value:%g\n",
-//                                        i, j, prob.y[i+p_num_node_], x_space[j].index, x_space[j].value);     //$$debug
-////            printf("k:%d ,l:%d, cols[l]:%d, vals[l]:%g\n",
-////                   k, l, cols[l], vals[l]);
-//#endif
-//                ++j;
-
-//            }
-//        }
-//        //create the end element of each node (-1,0)
-//        x_space[j].index = -1;
-//        x_space[j].value = 0;
-//        ++j;
-
-//        MatRestoreRow(m_train_data_n,i,&ncols, &cols, &vals);
-//    }
-//    #if weight_instance == 1
-//        VecRestoreArray(v_vol_n,&arr_vol_n);
-//    #endif
-//#if dbl_SV_read_problem >= 5
-//    printf("[SV][RP] end of negative class, i is :%d,num of elements(j) is :%d\n",i,j);
-//#endif
-
-//#if weight_instance == 1
-//    // - - - - normaliz instance weights between 0 and 1
-//    PetscScalar vol_range = max_vol - min_vol;
-////    printf("\n\n[SV][RP] vol range is:%.20f, min vol:%.20f, max vol:%.20f\n",vol_range, min_vol, max_vol);            //$$debug
-//    for(unsigned int i = 0; i < num_total_nodes; i++){
-//        prob.W[i] = (prob.W[i] - min_vol) / vol_range ;
-////        printf("%d,%.8f\t",i, prob.W[i]);                              //$$debug
-//    }
-//#endif
-
-////    Destroy p_data, n_data    ( They are deleted after 2nd stage of model selection )
-////    exit(1);
-//}
+        MatRestoreRow(m_train_data_n,i,&ncols, &cols, &vals);
+    }
+#if dbl_SV_read_problem >= 3
+    printf("[SV][RP] end of negative class, i is :%d,num of elements(j) is :%d\n",i,j);
+#endif
 
 
-//void Solver::read_problem_without_instance_weight(Mat& m_train_data_p, Mat& m_train_data_n){
+//    Destroy p_data, n_data    ( They are deleted after 2nd stage of model selection )
+//    exit(1);
+}
+
+
+//void SolverLinear::read_problem_without_instance_weight(Mat& m_train_data_p, Mat& m_train_data_n){
 
 //    PetscInt i=0, j=0, l=0, k=0, ncols;
 //    const PetscInt    *cols;                        //if not NULL, the column numbers
@@ -1270,7 +1216,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-//void Solver::set_weights_num_points(svm_parameter& param_, PetscInt num_p_point, PetscInt num_n_point){
+//void SolverLinear::set_weights_num_points(svm_parameter& param_, PetscInt num_p_point, PetscInt num_n_point){
 //    param_.weight[0]= 1.0 / num_p_point;
 //    param_.weight[1]= 1.0 / num_n_point;
 //#if dbl_SV_SWNP >= 1
@@ -1279,7 +1225,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 //#endif
 //}
 
-//void Solver::set_weights_sum_volume(svm_parameter& param_, Vec& v_vol_p, Vec& v_vol_n){
+//void SolverLinear::set_weights_sum_volume(svm_parameter& param_, Vec& v_vol_p, Vec& v_vol_n){
 //    PetscScalar sum_vol_p, sum_vol_n;
 //    VecSum(v_vol_p, &sum_vol_p);
 //    VecSum(v_vol_n, &sum_vol_n);
@@ -1291,7 +1237,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 //#endif
 //}
 
-//void Solver::set_weights_sum_volume_index_base(svm_parameter& param_, Vec& v_vol_p, Vec& v_vol_n,
+//void SolverLinear::set_weights_sum_volume_index_base(svm_parameter& param_, Vec& v_vol_p, Vec& v_vol_n,
 //                                               std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
 //                                               PetscInt iter_p_end, PetscInt iter_n_end ){  //@@
 //    PetscScalar sum_vol_p = 0, sum_vol_n=0;
@@ -1329,7 +1275,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-//void Solver::PD_set_weights_sum_num_point_IB(svm_parameter& param_,std::vector<int>& v_target_lbl, const PetscScalar * arr_index, int num_nnz){  //@@
+//void SolverLinear::PD_set_weights_sum_num_point_IB(svm_parameter& param_,std::vector<int>& v_target_lbl, const PetscScalar * arr_index, int num_nnz){  //@@
 //    PetscScalar sum_num_p = 0, sum_num_n=0;
 //    PetscInt i;
 
@@ -1353,7 +1299,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-//void Solver::alloc_memory_for_weights(svm_parameter& in_param, bool free_first){
+//void SolverLinear::alloc_memory_for_weights(svm_parameter& in_param, bool free_first){
 //    if(free_first){
 //        free(in_param.weight_label);
 //        free(in_param.weight);
@@ -1370,38 +1316,37 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 //}
 
 
-////======================================================================
-//void Solver::read_parameters(bool set_gamma){
-//    param.svm_type = Config_params::getInstance()->get_svm_svm_type();
-//    param.kernel_type = Config_params::getInstance()->get_svm_kernel_type();
-//    param.degree = Config_params::getInstance()->get_svm_degree();
+//======================================================================
+void SolverLinear::read_parameters(bool set_gamma){
+//    param.svm_type = Config_params::getInstance()->get_svm_svm_type();    // nonlinear
+    param.solver_type = Config_params::getInstance()->get_svm_svm_type();
+//    param.kernel_type = Config_params::getInstance()->get_svm_kernel_type();  //double check, it seems it doesn't exist on liblinear
+//    param.degree = Config_params::getInstance()->get_svm_degree();            //double check, it seems it doesn't exist on liblinear
 //    if(set_gamma)
-//        param.gamma = Config_params::getInstance()->get_svm_gamma();
-////    param.coef0 = Config_params::getInstance()->get_svm_coef0();
-////    param.nu = Config_params::getInstance()->get_svm_nu();
+//        param.gamma = Config_params::getInstance()->get_svm_gamma();          //not there definitly
+//    param.coef0 = Config_params::getInstance()->get_svm_coef0();
+//    param.nu = Config_params::getInstance()->get_svm_nu();
 //    param.cache_size = Config_params::getInstance()->get_svm_cache_size();
-//    param.C = Config_params::getInstance()->get_svm_C();
-//    param.eps = Config_params::getInstance()->get_svm_eps();
-////    param.p = Config_params::getInstance()->get_svm_p();
+    param.C = Config_params::getInstance()->get_svm_C();
+    param.eps = Config_params::getInstance()->get_svm_eps();
+//    param.p = Config_params::getInstance()->get_svm_p();
 //    param.shrinking = Config_params::getInstance()->get_svm_shrinking();
 //    param.probability = Config_params::getInstance()->get_svm_probability();
-//    param.nr_weight = Config_params::getInstance()->get_svm_nr_weight();
-//    param.weight_label = NULL;
-//    param.weight = NULL;
-//}
+    param.nr_weight = Config_params::getInstance()->get_svm_nr_weight();
+    param.weight_label = NULL;
+    param.weight = NULL;
 
-//void Solver::print_parameters(){
-//    PetscPrintf(PETSC_COMM_WORLD,"[SV][Print_Parameter] config params are: svm_type:%d\nkernel_type:%d\ndegree:%d\ngamma:%g\ncache_size(MB):%g\nC:%g\neps:%g\n",
-//                Config_params::getInstance()->get_svm_svm_type(), Config_params::getInstance()->get_svm_kernel_type(),
-//                Config_params::getInstance()->get_svm_degree(), Config_params::getInstance()->get_svm_gamma(),
-//                Config_params::getInstance()->get_svm_cache_size(), Config_params::getInstance()->get_svm_C(),
-//                Config_params::getInstance()->get_svm_eps());
-//    PetscPrintf(PETSC_COMM_WORLD,"[SV][Print_Parameter] local params which are set and checked are: svm_type:%d\nkernel_type:%d\ndegree:%d\ngamma:%g\ncache_size(MB):%g\nC:%g\neps:%g\n",
-//                param.svm_type, param.kernel_type,param.degree, param.gamma, param.cache_size, param.C, param.eps);
-//}
+    // #todo there are more parameters which I need to add including the -B, -p epsilon like -e but I need to understand the difference
+}
 
-
-
+void SolverLinear::print_parameters(){
+    PetscPrintf(PETSC_COMM_WORLD,"[SV][Print_Parameter] config params are: svm_type:%d\nC:%g\neps:%g\n",
+                Config_params::getInstance()->get_svm_svm_type(),
+                Config_params::getInstance()->get_svm_C(),
+                Config_params::getInstance()->get_svm_eps());
+    PetscPrintf(PETSC_COMM_WORLD,"[SV][Print_Parameter] local params which are set and checked are: svm_type:%d\nC:%g\neps:%g\n",
+                param.solver_type, param.C, param.eps);
+}
 
 
 
@@ -1409,7 +1354,10 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-//void Solver::evaluate_testdata(int level, summary& final_summary){
+
+
+
+//void SolverLinear::evaluate_testdata(int level, summary& final_summary){
 //    Loader test_loader;
 //    Mat untouched_test_data ;
 //    untouched_test_data = test_loader.load_norm_data_sep(Config_params::getInstance()->get_test_ds_f_name() );
@@ -1428,7 +1376,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 ///*
 // * use the input matrix as testdata and not destroy the matrix
 // */
-//void Solver::evaluate_testdata(Mat& untouched_test_data, int level, summary& final_summary){
+//void SolverLinear::evaluate_testdata(Mat& untouched_test_data, int level, summary& final_summary){
 ////    Loader test_loader;
 ////    Mat untouched_test_data ;
 ////    untouched_test_data = test_loader.load_norm_data_sep(Config_params::getInstance()->get_test_ds_f_name() );
@@ -1448,8 +1396,8 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-////std::map<measures,double> Solver::test_predict(Mat& test_data){
-//void Solver::test_predict(Mat& test_data, summary& result_summary, int iteration){
+////std::map<measures,double> SolverLinear::test_predict(Mat& test_data){
+//void SolverLinear::test_predict(Mat& test_data, summary& result_summary, int iteration){
 //#if dbl_SV_test_predict >= 7
 //    printf("[SV][test_predict] test_predict_data Matrix:\n");                                       //$$debug
 //    MatView(test_data,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
@@ -1582,7 +1530,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-//void Solver::predict_validation_data(Mat& m_VD_p,Mat& m_VD_n, summary& result_summary, int iteration){
+//void SolverLinear::predict_validation_data(Mat& m_VD_p,Mat& m_VD_n, summary& result_summary, int iteration){
 //#if dbl_SV_predict_VD >= 7
 //    printf("[SV][Predict_VD] m_VD_p Matrix:\n");                              //$$debug
 //    MatView(m_VD_p,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
@@ -1683,7 +1631,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-//void Solver::test_predict_index_base(Mat& m_data_p, Mat& m_data_n,
+//void SolverLinear::test_predict_index_base(Mat& m_data_p, Mat& m_data_n,
 //                                               std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
 //                                               PetscInt iter_p_end, PetscInt iter_n_end, summary& result_summary, int iteration){
 
@@ -1797,7 +1745,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-//void Solver::test_predict_index_base_separate_validation(Mat& m_data_p, Mat& m_data_n,
+//void SolverLinear::test_predict_index_base_separate_validation(Mat& m_data_p, Mat& m_data_n,
 //                                               std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
 //                                               PetscInt iter_p_end, PetscInt iter_n_end, summary& result_summary, int iteration,
 //                                               Mat& m_VD_p, Mat& m_VD_n){
@@ -1915,7 +1863,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 // * the value is the prediction value from model
 // */
 
-//void Solver::predict_test_data_in_matrix_output(Mat& test_data, int target_row, Mat& m_predicted_label){
+//void SolverLinear::predict_test_data_in_matrix_output(Mat& test_data, int target_row, Mat& m_predicted_label){
 //#if dbl_SV_predict_label1 >= 7
 //    printf("[SV][test_predict] predict_label1 test_data Matrix:\n");                                       //$$debug
 //    MatView(test_data,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
@@ -1981,7 +1929,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 // * Notice: there is no label in the beginning of the m_VD_X matrices compare to test_data matrix in similar methods
 // */
 
-//void Solver::predict_VD_in_output_matrix(Mat& m_VD_p,Mat& m_VD_n, int target_row, Mat& m_predicted_label){
+//void SolverLinear::predict_VD_in_output_matrix(Mat& m_VD_p,Mat& m_VD_n, int target_row, Mat& m_predicted_label){
 //    int svm_type=svm_get_svm_type(local_model);
 //    double *prob_estimates=NULL;
 ////start of reading the VD_p points
@@ -2052,7 +2000,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-//void Solver::PD_test_predict_index_base(Mat& m_data, std::vector<PetscInt> v_target_lbl, const PetscScalar * arr_train_index,
+//void SolverLinear::PD_test_predict_index_base(Mat& m_data, std::vector<PetscInt> v_target_lbl, const PetscScalar * arr_train_index,
 //                            PetscInt idx_start_test, PetscInt idx_end_test, summary& result_summary, int iteration){
 
 //    int correct = 0;
@@ -2146,7 +2094,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 ///*
 // * Notice the data is not contains the labels at all
 // */
-//int Solver::PD_predict_a_label(Mat& m_data, int target_row){
+//int SolverLinear::PD_predict_a_label(Mat& m_data, int target_row){
 //    int svm_type=svm_get_svm_type(local_model);
 
 ////start of reading the test points
@@ -2193,7 +2141,7 @@ void Solver::stand_alone_train_linear(Mat& m_data_p , Vec& v_vol_p, Mat& m_data_
 
 
 
-void Solver::prepare_solution_single_model(model * model_, int num_point_p, solution& sol_single_model){
+void SolverLinear::prepare_solution_single_model(model * model_, int num_point_p, solution& sol_single_model){
     PetscInt i;
     sol_single_model.C = model_->param.C;
     sol_single_model.gamma = 0;
@@ -2221,39 +2169,46 @@ void Solver::prepare_solution_single_model(model * model_, int num_point_p, solu
     #endif
 #endif
 
-    sol_single_model.p_index.reserve(model_->nSV[0] );
-    for (i=0; i < model_->nSV[0];i++){
-        // -1 because sv_indice start from 1, while petsc row start from 0
-        sol_single_model.p_index.push_back(model_->sv_indices[i] - 1);
+//    sol_single_model.p_index.reserve(model_->nSV[0] );
+
+    std::cout << " Let's look inside the param init_sol" << std::cout;
+    for(int i =0; i < 3; i++)    {
+        std::cout << model_->param.init_sol[i] << std::cout;
     }
+    exit(1);
 
-    sol_single_model.n_index.reserve(model_->nSV[1] );
-    // add the index in the model for it after subtract from number of minority in training data
-    for (int i=0; i < model_->nSV[1];i++){
-        // -1 the same as pos class, p_num_row because they are after each other
+//    for (i=0; i < model_->nSV[0];i++){
+//        // -1 because sv_indice start from 1, while petsc row start from 0
+//        sol_single_model.p_index.push_back(model_->sv_indices[i] - 1);
+//    }
 
-//        sol_single_model.n_index.push_back(model_->sv_indices[model_->nSV[0] + i] - 1 - num_point_p); //for normal libsvm
-        sol_single_model.n_index.push_back(model_->sv_indices[model_->nSV[0] + i] - 1 - num_point_p); //for instance weighted libsvm
+//    sol_single_model.n_index.reserve(model_->nSV[1] );
+//    // add the index in the model for it after subtract from number of minority in training data
+//    for (int i=0; i < model_->nSV[1];i++){
+//        // -1 the same as pos class, p_num_row because they are after each other
 
-    }
+////        sol_single_model.n_index.push_back(model_->sv_indices[model_->nSV[0] + i] - 1 - num_point_p); //for normal libsvm
+//        sol_single_model.n_index.push_back(model_->sv_indices[model_->nSV[0] + i] - 1 - num_point_p); //for instance weighted libsvm
 
-#if dbl_SV_PSSM >= 3
-    printf("\n\n[SV][PSSM] solution has nSV+:%d, nSV-:%d, l:%d\n", model_->nSV[0], model_->nSV[1], model_->l);
-#endif
+//    }
 
-#if export_SVM_models == 1      //export the models
-    //save the models in a local folder
-    //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
-    //append the model to summary file after each export
-    //make sure to close and open the summary file at each level to prevent losing models in the case of crash or error
-    std::string output_file = "./svm_models/" + Config_params::getInstance()->get_ds_name()+
-            "_exp_" + std::to_string(Config_params::getInstance()->get_main_current_exp_id()) +
-            "_kf_" + std::to_string(Config_params::getInstance()->get_main_current_kf_id()) +
-            "_level_" + std::to_string(Config_params::getInstance()->get_main_current_level_id()) + ".svmmodel";
-    save_model(output_file.c_str(), local_model);
-    Config_params::getInstance()->update_levels_models_info(Config_params::getInstance()->get_main_current_level_id(), 1);
-//    printf("[SV][PSSM] model %s is saved\n", output_file.c_str());
-#endif
+//#if dbl_SV_PSSM >= 3
+//    printf("\n\n[SV][PSSM] solution has nSV+:%d, nSV-:%d, l:%d\n", model_->nSV[0], model_->nSV[1], model_->l);
+//#endif
+
+//#if export_SVM_models == 1      //export the models
+//    //save the models in a local folder
+//    //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
+//    //append the model to summary file after each export
+//    //make sure to close and open the summary file at each level to prevent losing models in the case of crash or error
+//    std::string output_file = "./svm_models/" + Config_params::getInstance()->get_ds_name()+
+//            "_exp_" + std::to_string(Config_params::getInstance()->get_main_current_exp_id()) +
+//            "_kf_" + std::to_string(Config_params::getInstance()->get_main_current_kf_id()) +
+//            "_level_" + std::to_string(Config_params::getInstance()->get_main_current_level_id()) + ".svmmodel";
+//    save_model(output_file.c_str(), local_model);
+//    Config_params::getInstance()->update_levels_models_info(Config_params::getInstance()->get_main_current_level_id(), 1);
+////    printf("[SV][PSSM] model %s is saved\n", output_file.c_str());
+//#endif
 
 
 }
@@ -2263,7 +2218,7 @@ void Solver::prepare_solution_single_model(model * model_, int num_point_p, solu
 
 
 
-//void Solver::get_separate_matrices(Mat& m_data, std::vector<int>& v_target_lbl,
+//void SolverLinear::get_separate_matrices(Mat& m_data, std::vector<int>& v_target_lbl,
 //                                   const PetscScalar * arr_train_index, PetscInt num_nnz,
 //                                         Mat& m_p_data, Mat& m_n_data){
 //    IS              is_min_, is_maj_;

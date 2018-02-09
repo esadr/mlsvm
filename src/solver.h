@@ -1,4 +1,4 @@
- #ifndef SOLVER_H
+#ifndef SOLVER_H
 #define SOLVER_H
 
 #define weight_instance 0

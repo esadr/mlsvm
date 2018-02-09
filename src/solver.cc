@@ -25,6 +25,9 @@ void Solver::free_solver(std::string caller_name){
 
 svm_model * Solver::train_model(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n,
                                 bool inherit_params, double param_c, double param_gamma){
+#if dbl_SV_TM >= 3
+    std::cout << "[SV][TM] LibSVM library is used!"<<  std::endl;
+#endif
 
     ETimer t_sv_tm;
     // - - - - - get dimensions - - - - -

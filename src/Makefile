@@ -28,7 +28,7 @@ SAT_OBJS = $(SAT_SRCS:.cc=.o)
 SATIW_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_weighted.cc solver.cc ./tools/single_svm_train_instance_weight.cc
 SATIW_OBJS = $(SATIW_SRCS:.cc=.o)
 
-SATL_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc linear.cc solver_linear.cc ./tools/single_linear_svm_train.cc 
+SATL_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc tron.cc linear.cc solver_linear.cc ./tools/single_linear_svm_train.cc 
 SATL_OBJS = $(SATL_SRCS:.cc=.o)
 
 SAP_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc svm_weighted.cc solver.cc ./tools/single_svm_predict.cc

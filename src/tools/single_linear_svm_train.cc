@@ -47,7 +47,7 @@ int main(int argc, char **argv){
     std::cout << "P vol size:" << num_p << ",N vol size:" << num_n << std::endl;
 
     // - - - - - train the model - - - - -
-    Solver sv(1); //call stand alone constructor which doesn't need any parameter
+    SolverLinear sv(1); //call stand alone constructor which doesn't need any parameter
 
     sv.stand_alone_train_linear(m_p_data, v_p_vol, m_n_data,v_n_vol,"./debug/sat_linear_svm.model");
 //    Config_params::getInstance()->print_params();

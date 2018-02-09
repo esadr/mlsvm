@@ -21,7 +21,7 @@ struct weight_info{
 };
 
 
-class Solver{
+class SolverLinear{
 private:
 
     struct weight_info{
@@ -65,12 +65,12 @@ private:
 
 
 public:
-    Solver(){
+    SolverLinear(){
         test_dataset_f_name = Config_params::getInstance()->get_test_ds_f_name().c_str();
         predict_probability = Config_params::getInstance()->get_svm_probability();
     }
 
-    Solver(bool stand_alone){
+    SolverLinear(bool stand_alone){
         std::cout << "The solver is called as a stand alone solver!" << std::endl;
     }
 

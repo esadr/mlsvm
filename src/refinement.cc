@@ -596,12 +596,15 @@ void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data
         local_param_c = Config_params::getInstance()->get_best_C();
         local_param_gamma = Config_params::getInstance()->get_best_gamma();
     }
+
+#if dbl_RF_PCL >= 3
+        std::cout << "\n\n[RF][PCL] [DEBUG] before calling the solver at Iteration "<<
+                     Config_params::getInstance()->get_main_current_kf_id() <<
+                     ", level: " << level << std::endl;
+#endif
+
                                             // - - - - - load the validation data - - - - -
     if(Config_params::getInstance()->get_ms_status()){      // - - - - model selection - - - -
-
-//        std::cout << "\n\n refinement ----  Iteration "<<
-//                     Config_params::getInstance()->get_main_current_kf_id() <<
-//                     ", level: " << Config_params::getInstance()->get_main_current_level_id() << std::endl;
 
         // call model selection method
         ModelSelection ms_coarsest;
