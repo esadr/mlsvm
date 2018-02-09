@@ -4,6 +4,8 @@ echo "Installing FLANN"
 
 pushd ./flann
 
+sudo apt-get install cmake -y
+
 mkdir build
 cd build/
 sudo cmake ..
