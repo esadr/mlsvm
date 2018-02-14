@@ -1318,23 +1318,21 @@ void SolverLinear::read_problem(Mat& m_train_data_p, Vec& v_vol_p, Mat& m_train_
 
 //======================================================================
 void SolverLinear::read_parameters(bool set_gamma){
-//    param.svm_type = Config_params::getInstance()->get_svm_svm_type();    // nonlinear
-    param.solver_type = Config_params::getInstance()->get_svm_svm_type();
-//    param.kernel_type = Config_params::getInstance()->get_svm_kernel_type();  //double check, it seems it doesn't exist on liblinear
-//    param.degree = Config_params::getInstance()->get_svm_degree();            //double check, it seems it doesn't exist on liblinear
-//    if(set_gamma)
-//        param.gamma = Config_params::getInstance()->get_svm_gamma();          //not there definitly
-//    param.coef0 = Config_params::getInstance()->get_svm_coef0();
-//    param.nu = Config_params::getInstance()->get_svm_nu();
-//    param.cache_size = Config_params::getInstance()->get_svm_cache_size();
-    param.C = Config_params::getInstance()->get_svm_C();
-    param.eps = Config_params::getInstance()->get_svm_eps();
-//    param.p = Config_params::getInstance()->get_svm_p();
-//    param.shrinking = Config_params::getInstance()->get_svm_shrinking();
-//    param.probability = Config_params::getInstance()->get_svm_probability();
-    param.nr_weight = Config_params::getInstance()->get_svm_nr_weight();
+//    param.solver_type =  L2R_L2LOSS_SVC_DUAL;//Config_params::getInstance()->get_svm_svm_type();
+//    param.C = Config_params::getInstance()->get_svm_C();
+//    param.eps = Config_params::getInstance()->get_svm_eps();
+//    param.nr_weight = Config_params::getInstance()->get_svm_nr_weight();
+//    param.weight_label = NULL;
+//    param.weight = NULL;
+    param.solver_type = L2R_L2LOSS_SVC_DUAL;
+    param.C = 1;
+    param.eps = 0.01;
+    param.p = 0.1;
+    param.nr_weight = 0;
     param.weight_label = NULL;
     param.weight = NULL;
+    param.init_sol = NULL;
+
 
     // #todo there are more parameters which I need to add including the -B, -p epsilon like -e but I need to understand the difference
 }
