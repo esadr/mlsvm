@@ -1,0 +1,19 @@
+pushd "/home/"`whoami`"/es/my_git/mlsvm/src/"
+
+#make sure to get the latest version from git
+
+#make clean && make
+
+mkdir -p "/scratch2/"`whoami`"/mlsvm/run2/temp/"
+cp ./mlsvm_classifier "/scratch2/"`whoami`"/mlsvm/run2"
+cp ./params.xml "/scratch2/"`whoami`"/mlsvm/run2"
+
+popd
+
+
+
+
+./mlsvm_classifier -f higgs --ds_p /scratch2/bsadrfa/datasets/ -r 4 -x 1 -k 5 -v .1 -s 100 > ~/es/results/v0.0.46higgs/test_r4_x1_k5_v.1_s10_nodemath.log 2>&1
+
+
+higgs_x1_k10_eps0.001_r2_we0.01_mv2_csbps_rf2nd0_prs5000_prm1000_v0.1_s10_121217_2258_node0638.palmetto.clemson.edu.log 

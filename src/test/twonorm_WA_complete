@@ -1,0 +1,734 @@
+[CP][read_params] param.xml path : ./params.xml
+mlsvm_version:0.0.46
+============= dataset info =============
+ds_path: ./datasets/
+ds_name: twonorm
+tmp_path: ./temp/
+
+cpp_srand_seed: 1513180258464
+--- Main file Paramters ---
+main_num_repeat_exp: 1
+main_num_kf_iter: 5
+exp_info: 0.1
+ML_status: 0
+--- NN Paramters ---
+nn_number: 10
+nn_distance_type:1
+--- Loader Paramters ---
+pre_init_loader_matrix: 300
+inverse_weight: 1
+ld_weight_type: 1
+ld_weight_param: 0.005
+--- Coarsening Paramters ---
+coarse_Eta: 2
+coarse_threshold: 300
+coarse_q: 0.4
+coarse_r: 4
+cs_max_coarse_level: 30
+cs_use_real_points: 0
+cs_weak_edges_ft: 0.001
+--- ModelSelection Paramters ---
+ms_status: 1
+ms_limit: 10000
+ms_first_stage: 9
+ms_second_stage: 5
+ms_best_selection: 1
+ms_VD_sample_size_fraction: 0.1
+ms_svm_id: 2
+ms_bs_gm_threshold: 1e-05
+--- SVM Paramters ---
+svm_type: 0
+kernel_type: 2
+degree: 3
+gamma: 0.5
+coef0: 0
+nu: 0.5
+cache_size: 40000
+C: 100
+eps: 0.001
+p: 0.1
+shrinking: 1
+probability: 0
+--- Refinement Paramters ---
+add_fraction: 1
+rf_add_distant_point_status(2nd): 0
+rf_weight_vol: 1
+pr_start_partitioning: 5000
+--- Partitioning Paramters ---
+pr_partition_max_size: 1000
+pr_maj_voting_id: 2
+[CPU Time] [k_fold] read_in_divided_data takes 0.009012 seconds 
+[CPU Time] [KF] initialize vectors takes 1.4e-05 seconds 
+[CPU Time] [k_fold] read_in_full_NN takes 0.008411 seconds 
+[CPU Time] [k_fold] shuffle_data takes 0.000155 seconds 
+
+           ==================== Exp:0, Iteration 0 ==================== 
+[CPU Time] [KF][CTC] takes 0.004057 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of minority takes 0.008004 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of majority takes 0.008392 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.006553 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.008064 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  minority takes 0.016534 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.00566 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.007974 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  majority takes 0.015513 seconds 
+[CPU Time] [MC] validation data is sampled from the finest training data takes 0.000615 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:1              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:57		Min:4		Avg:13.1779		Median:11
+[CPU Time] [CO][CAD] takes 0.007545 seconds 
+[CPU Time] remove loops from WA_c takes 0.003974 seconds 
+[CO][CSN] level:1, class:minority, num_row:2963, num_col:2963, exact nz_used=39046
+[CPU Time] [CO][CRW] calc real weight takes 0.080429 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.001275 seconds 
+[CO][FWE]{Minority} level:1, all edges:63049, filtered:0, remained:63049, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:50		Min:3		Avg:13.29		Median:12.00
+[CPU Time] [CO][CAD] takes 0.01 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:1, class:majority, num_row:2958, num_col:2958, exact nz_used=39300
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:1, all edges:63420, filtered:0, remained:63420, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+[CPU Time] [MR] total coarsening for both class at level 1 takes 0.31 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:2              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:366		Min:14		Avg:113.19		Median:106.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:minority, num_row:1114, num_col:1114, exact nz_used=126099
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:2, all edges:58166, filtered:0, remained:58166, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.01 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:297		Min:13		Avg:111.95		Median:106.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:majority, num_row:1133, num_col:1133, exact nz_used=126840
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:2, all edges:59150, filtered:0, remained:59150, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.01 seconds 
+[CPU Time] [MR] total coarsening for both class at level 2 takes 0.38 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:3              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:358		Min:52		Avg:323.14		Median:335.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:minority, num_row:360, num_col:360, exact nz_used=116332
+[CPU Time] [CO][CRW] calc real weight takes 0.02 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:3, all edges:10873, filtered:0, remained:10873, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:366		Min:54		Avg:322.35		Median:334.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:majority, num_row:367, num_col:367, exact nz_used=118301
+[CPU Time] [CO][CRW] calc real weight takes 0.01 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:3, all edges:10878, filtered:0, remained:10878, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+[CPU Time] [MR] total coarsening for both class at level 3 takes 0.08 seconds 
+
+           \   /  \   /  \   /     End of Coarsening     \   /  \   /  \   /  
+            \_/    \_/    \_/            level:4          \_/    \_/    \_/ 
+[MR][main] num points P:148, N:148
+[CPU Time] [MS][UDSepVal] stage 1 at level 4 takes 0.10 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 4 takes 0.02 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:4, AC:0.98, SN:0.98, SP:0.97, PPV:0.97, NPV:0.98, F1:0.98, GM:0.976
+[CPU Time] [MS][UDSepVal] Prepare solution at level 4 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 4 takes 0.12 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:3             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:69, n:78
+[CPU Time] [MS][UDSepVal] stage 1 at level 3 takes 0.04 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 3 takes 0.01 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:3, AC:0.98, SN:0.98, SP:0.98, PPV:0.98, NPV:0.98, F1:0.98, GM:0.977
+[CPU Time] [MS][UDSepVal] Prepare solution at level 3 takes 0.00 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 3 takes 0.06 seconds 
+[CPU Time] [MR] Refinement at level: 3 takes 0.06 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:2             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:147, n:113
+[CPU Time] [MS][UDSepVal] stage 1 at level 2 takes 0.06 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 2 takes 0.02 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:2, AC:0.97, SN:0.98, SP:0.97, PPV:0.97, NPV:0.98, F1:0.97, GM:0.974
+[CPU Time] [MS][UDSepVal] Prepare solution at level 2 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 2 takes 0.08 seconds 
+[CPU Time] [MR] Refinement at level: 2 takes 0.09 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:1             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:265, n:252
+[CPU Time] [MS][UDSepVal] stage 1 at level 1 takes 0.18 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 1 takes 0.04 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:1, AC:0.96, SN:0.98, SP:0.95, PPV:0.95, NPV:0.98, F1:0.96, GM:0.964
+[CPU Time] [MS][UDSepVal] Prepare solution at level 1 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 1 takes 0.24 seconds 
+[CPU Time] [MR] Refinement at level: 1 takes 0.24 seconds 
+[CPU Time] (complexity analysis) coarsening takes 0.77, refinement takes 0.51 seconds 
+[CPU Time] [MC] Vcycle (including loading datasets) at iteration  0 takes 1.35 seconds 
+[MC] test data file is removed successfully from ./temp/kfold_test_data_exp_0_fold_0_exp_0.1
+
+           ==================== Exp:0, Iteration 1 ==================== 
+[CPU Time] [KF][CTC] takes 0.00 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of minority takes 0.01 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of majority takes 0.01 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.01 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.01 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  minority takes 0.02 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.01 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.01 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  majority takes 0.02 seconds 
+[CPU Time] [MC] validation data is sampled from the finest training data takes 0.00 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:1              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:56		Min:3		Avg:13.42		Median:12.00
+[CPU Time] [CO][CAD] takes 0.01 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:1, class:minority, num_row:2963, num_col:2963, exact nz_used=39758
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:1, all edges:64262, filtered:0, remained:64262, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:52		Min:4		Avg:13.29		Median:12.00
+[CPU Time] [CO][CAD] takes 0.01 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:1, class:majority, num_row:2958, num_col:2958, exact nz_used=39312
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:1, all edges:63682, filtered:0, remained:63682, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+[CPU Time] [MR] total coarsening for both class at level 1 takes 0.31 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:2              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:352		Min:15		Avg:114.96		Median:113.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:minority, num_row:1118, num_col:1118, exact nz_used=128524
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:2, all edges:61094, filtered:0, remained:61094, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:346		Min:13		Avg:113.31		Median:108.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:majority, num_row:1124, num_col:1124, exact nz_used=127364
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:2, all edges:61282, filtered:0, remained:61282, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+[CPU Time] [MR] total coarsening for both class at level 2 takes 0.38 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:3              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:373		Min:65		Avg:326.71		Median:340.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:minority, num_row:374, num_col:374, exact nz_used=122188
+[CPU Time] [CO][CRW] calc real weight takes 0.02 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:3, all edges:11628, filtered:0, remained:11628, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:366		Min:51		Avg:333.06		Median:345.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:majority, num_row:368, num_col:368, exact nz_used=122565
+[CPU Time] [CO][CRW] calc real weight takes 0.02 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:3, all edges:11025, filtered:0, remained:11025, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+[CPU Time] [MR] total coarsening for both class at level 3 takes 0.09 seconds 
+
+           \   /  \   /  \   /     End of Coarsening     \   /  \   /  \   /  
+            \_/    \_/    \_/            level:4          \_/    \_/    \_/ 
+[MR][main] num points P:153, N:149
+[CPU Time] [MS][UDSepVal] stage 1 at level 4 takes 0.10 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 4 takes 0.02 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:4, AC:0.97, SN:0.97, SP:0.97, PPV:0.97, NPV:0.97, F1:0.97, GM:0.970
+[CPU Time] [MS][UDSepVal] Prepare solution at level 4 takes 0.02 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 4 takes 0.15 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:3             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:342, n:333
+[CPU Time] [MS][UDSepVal] stage 1 at level 3 takes 0.21 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 3 takes 0.05 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:3, AC:0.97, SN:0.97, SP:0.97, PPV:0.97, NPV:0.97, F1:0.97, GM:0.972
+[CPU Time] [MS][UDSepVal] Prepare solution at level 3 takes 0.02 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 3 takes 0.28 seconds 
+[CPU Time] [MR] Refinement at level: 3 takes 0.28 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:2             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:623, n:612
+[CPU Time] [MS][UDSepVal] stage 1 at level 2 takes 0.63 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 2 takes 0.28 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:2, AC:0.97, SN:0.96, SP:0.97, PPV:0.97, NPV:0.96, F1:0.97, GM:0.966
+[CPU Time] [MS][UDSepVal] Prepare solution at level 2 takes 0.04 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 2 takes 0.95 seconds 
+[CPU Time] [MR] Refinement at level: 2 takes 0.95 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:1             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:1347, n:1373
+[CPU Time] [MS][UDSepVal] stage 1 at level 1 takes 3.00 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 1 takes 1.16 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:1, AC:0.97, SN:0.97, SP:0.97, PPV:0.97, NPV:0.97, F1:0.97, GM:0.972
+[CPU Time] [MS][UDSepVal] Prepare solution at level 1 takes 0.11 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 1 takes 4.28 seconds 
+[CPU Time] [MR] Refinement at level: 1 takes 4.29 seconds 
+[CPU Time] (complexity analysis) coarsening takes 0.78, refinement takes 5.67 seconds 
+[CPU Time] [MC] Vcycle (including loading datasets) at iteration  1 takes 6.51 seconds 
+[MC] test data file is removed successfully from ./temp/kfold_test_data_exp_0_fold_1_exp_0.1
+
+           ==================== Exp:0, Iteration 2 ==================== 
+[CPU Time] [KF][CTC] takes 0.00 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of minority takes 0.01 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of majority takes 0.01 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.01 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.01 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  minority takes 0.02 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.01 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.01 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  majority takes 0.02 seconds 
+[CPU Time] [MC] validation data is sampled from the finest training data takes 0.00 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:1              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:59		Min:3		Avg:13.26		Median:12.00
+[CPU Time] [CO][CAD] takes 0.01 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:1, class:minority, num_row:2963, num_col:2963, exact nz_used=39292
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:1, all edges:62854, filtered:0, remained:62854, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:56		Min:2		Avg:13.17		Median:11.00
+[CPU Time] [CO][CAD] takes 0.01 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:1, class:majority, num_row:2958, num_col:2958, exact nz_used=38964
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:1, all edges:63273, filtered:0, remained:63273, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+[CPU Time] [MR] total coarsening for both class at level 1 takes 0.30 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:2              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:321		Min:15		Avg:111.54		Median:107.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:minority, num_row:1127, num_col:1127, exact nz_used=125708
+[CPU Time] [CO][CRW] calc real weight takes 0.07 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:2, all edges:57525, filtered:0, remained:57525, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.01 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:306		Min:16		Avg:112.49		Median:109.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:majority, num_row:1125, num_col:1125, exact nz_used=126546
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:2, all edges:61714, filtered:0, remained:61714, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+[CPU Time] [MR] total coarsening for both class at level 2 takes 0.38 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:3              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:365		Min:37		Avg:314.35		Median:327.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:minority, num_row:366, num_col:366, exact nz_used=115051
+[CPU Time] [CO][CRW] calc real weight takes 0.02 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:3, all edges:11623, filtered:0, remained:11623, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:367		Min:53		Avg:332.69		Median:345.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:majority, num_row:371, num_col:371, exact nz_used=123429
+[CPU Time] [CO][CRW] calc real weight takes 0.02 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:3, all edges:11321, filtered:0, remained:11321, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+[CPU Time] [MR] total coarsening for both class at level 3 takes 0.09 seconds 
+
+           \   /  \   /  \   /     End of Coarsening     \   /  \   /  \   /  
+            \_/    \_/    \_/            level:4          \_/    \_/    \_/ 
+[MR][main] num points P:153, N:151
+[CPU Time] [MS][UDSepVal] stage 1 at level 4 takes 0.10 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 4 takes 0.01 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:4, AC:0.97, SN:0.99, SP:0.95, PPV:0.95, NPV:0.99, F1:0.97, GM:0.969
+[CPU Time] [MS][UDSepVal] Prepare solution at level 4 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 4 takes 0.13 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:3             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:34, n:32
+[CPU Time] [MS][UDSepVal] stage 1 at level 3 takes 0.02 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 3 takes 0.01 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:3, AC:0.98, SN:0.99, SP:0.97, PPV:0.97, NPV:0.99, F1:0.98, GM:0.981
+[CPU Time] [MS][UDSepVal] Prepare solution at level 3 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 3 takes 0.03 seconds 
+[CPU Time] [MR] Refinement at level: 3 takes 0.04 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:2             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:311, n:307
+[CPU Time] [MS][UDSepVal] stage 1 at level 2 takes 0.20 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 2 takes 0.04 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:2, AC:0.98, SN:0.99, SP:0.97, PPV:0.97, NPV:0.99, F1:0.98, GM:0.978
+[CPU Time] [MS][UDSepVal] Prepare solution at level 2 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 2 takes 0.24 seconds 
+[CPU Time] [MR] Refinement at level: 2 takes 0.24 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:1             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:185, n:177
+[CPU Time] [MS][UDSepVal] stage 1 at level 1 takes 0.09 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 1 takes 0.05 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:1, AC:0.97, SN:0.99, SP:0.94, PPV:0.95, NPV:0.99, F1:0.97, GM:0.967
+[CPU Time] [MS][UDSepVal] Prepare solution at level 1 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 1 takes 0.15 seconds 
+[CPU Time] [MR] Refinement at level: 1 takes 0.16 seconds 
+[CPU Time] (complexity analysis) coarsening takes 0.77, refinement takes 0.56 seconds 
+[CPU Time] [MC] Vcycle (including loading datasets) at iteration  2 takes 1.40 seconds 
+[MC] test data file is removed successfully from ./temp/kfold_test_data_exp_0_fold_2_exp_0.1
+
+           ==================== Exp:0, Iteration 3 ==================== 
+[CPU Time] [KF][CTC] takes 0.00 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of minority takes 0.01 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of majority takes 0.01 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.01 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.01 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  minority takes 0.02 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.01 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.01 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  majority takes 0.02 seconds 
+[CPU Time] [MC] validation data is sampled from the finest training data takes 0.00 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:1              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:57		Min:3		Avg:13.30		Median:11.00
+[CPU Time] [CO][CAD] takes 0.01 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:1, class:minority, num_row:2963, num_col:2963, exact nz_used=39396
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:1, all edges:63736, filtered:0, remained:63736, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:56		Min:3		Avg:13.19		Median:12.00
+[CPU Time] [CO][CAD] takes 0.01 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:1, class:majority, num_row:2958, num_col:2958, exact nz_used=39024
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:1, all edges:63115, filtered:0, remained:63115, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+[CPU Time] [MR] total coarsening for both class at level 1 takes 0.30 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:2              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:346		Min:15		Avg:114.12		Median:110.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:minority, num_row:1117, num_col:1117, exact nz_used=127472
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:2, all edges:61815, filtered:0, remained:61815, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:328		Min:13		Avg:112.40		Median:109.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:majority, num_row:1123, num_col:1123, exact nz_used=126230
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:2, all edges:60027, filtered:0, remained:60027, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.01 seconds 
+[CPU Time] [MR] total coarsening for both class at level 2 takes 0.38 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:3              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:365		Min:108		Avg:336.87		Median:348.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:minority, num_row:367, num_col:367, exact nz_used=123630
+[CPU Time] [CO][CRW] calc real weight takes 0.02 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:3, all edges:11626, filtered:0, remained:11626, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:365		Min:138		Avg:328.02		Median:337.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:majority, num_row:366, num_col:366, exact nz_used=120055
+[CPU Time] [CO][CRW] calc real weight takes 0.02 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:3, all edges:11025, filtered:0, remained:11025, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+[CPU Time] [MR] total coarsening for both class at level 3 takes 0.09 seconds 
+
+           \   /  \   /  \   /     End of Coarsening     \   /  \   /  \   /  
+            \_/    \_/    \_/            level:4          \_/    \_/    \_/ 
+[MR][main] num points P:153, N:149
+[CPU Time] [MS][UDSepVal] stage 1 at level 4 takes 0.11 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 4 takes 0.02 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:4, AC:0.98, SN:0.99, SP:0.98, PPV:0.98, NPV:0.99, F1:0.98, GM:0.984
+[CPU Time] [MS][UDSepVal] Prepare solution at level 4 takes 0.02 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 4 takes 0.15 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:3             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:336, n:333
+[CPU Time] [MS][UDSepVal] stage 1 at level 3 takes 0.21 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 3 takes 0.05 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:3, AC:0.98, SN:0.99, SP:0.98, PPV:0.98, NPV:0.99, F1:0.98, GM:0.983
+[CPU Time] [MS][UDSepVal] Prepare solution at level 3 takes 0.02 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 3 takes 0.29 seconds 
+[CPU Time] [MR] Refinement at level: 3 takes 0.29 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:2             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:736, n:752
+[CPU Time] [MS][UDSepVal] stage 1 at level 2 takes 0.84 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 2 takes 0.40 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:2, AC:0.99, SN:0.99, SP:0.99, PPV:0.99, NPV:0.99, F1:0.99, GM:0.985
+[CPU Time] [MS][UDSepVal] Prepare solution at level 2 takes 0.04 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 2 takes 1.28 seconds 
+[CPU Time] [MR] Refinement at level: 2 takes 1.28 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:1             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:1478, n:1545
+[CPU Time] [MS][UDSepVal] stage 1 at level 1 takes 3.72 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 1 takes 1.48 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:1, AC:0.98, SN:0.98, SP:0.98, PPV:0.98, NPV:0.98, F1:0.98, GM:0.983
+[CPU Time] [MS][UDSepVal] Prepare solution at level 1 takes 0.12 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 1 takes 5.32 seconds 
+[CPU Time] [MR] Refinement at level: 1 takes 5.33 seconds 
+[CPU Time] (complexity analysis) coarsening takes 0.78, refinement takes 7.05 seconds 
+[CPU Time] [MC] Vcycle (including loading datasets) at iteration  3 takes 7.89 seconds 
+[MC] test data file is removed successfully from ./temp/kfold_test_data_exp_0_fold_3_exp_0.1
+
+           ==================== Exp:0, Iteration 4 ==================== 
+[CPU Time] [KF][CTC] takes 0.00 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of minority takes 0.01 seconds 
+[CPU Time] [KF][FN] filtering NN for the class of majority takes 0.01 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.01 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.01 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  minority takes 0.02 seconds 
+[CPU Time] [LD][CWAM] calc number of non-zeros in each row for WA  takes 0.01 seconds 
+[CPU Time] [LD][CWAM] insert triangular part of WA takes 0.01 seconds 
+[CPU Time] [LD][CWAM] whole WA matrix for class  majority takes 0.02 seconds 
+[CPU Time] [MC] validation data is sampled from the finest training data takes 0.00 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:1              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:55		Min:4		Avg:13.12		Median:11.00
+[CPU Time] [CO][CAD] takes 0.01 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:1, class:minority, num_row:2963, num_col:2963, exact nz_used=38888
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:1, all edges:62548, filtered:0, remained:62548, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:55		Min:3		Avg:13.15		Median:11.00
+[CPU Time] [CO][CAD] takes 0.01 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:1, class:majority, num_row:2958, num_col:2958, exact nz_used=38890
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:1, all edges:63475, filtered:0, remained:63475, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+[CPU Time] [MR] total coarsening for both class at level 1 takes 0.30 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:2              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:334		Min:17		Avg:110.22		Median:106.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:minority, num_row:1135, num_col:1135, exact nz_used=125097
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:2, all edges:60696, filtered:0, remained:60696, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:332		Min:9		Avg:113.65		Median:110.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:2, class:majority, num_row:1117, num_col:1117, exact nz_used=126951
+[CPU Time] [CO][CRW] calc real weight takes 0.08 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:2, all edges:61766, filtered:0, remained:61766, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.02 seconds 
+[CPU Time] [MR] total coarsening for both class at level 2 takes 0.39 seconds 
+
+           \  /  \  /  \  /           Coarsening            \  /  \  /  \  /  
+            \/    \/    \/              level:3              \/    \/    \/ 
+[MR][main] + + + + + + + + Positive class + + + + + + + + 
+[CO][calc_p]{Minority} Degrees	 Max:374		Min:42		Avg:322.85		Median:337.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:minority, num_row:376, num_col:376, exact nz_used=121392
+[CPU Time] [CO][CRW] calc real weight takes 0.02 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Minority} level:3, all edges:11173, filtered:0, remained:11173, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+
+[MR][main] - - - - - - - - Negative class - - - - - - - -
+[CO][calc_p]{Majority} Degrees	 Max:367		Min:52		Avg:335.69		Median:347.00
+[CPU Time] [CO][CAD] takes 0.00 seconds 
+[CPU Time] remove loops from WA_c takes 0.00 seconds 
+[CO][CSN] level:3, class:majority, num_row:368, num_col:368, exact nz_used=123533
+[CPU Time] [CO][CRW] calc real weight takes 0.02 seconds 
+[CPU Time] [CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements takes 0.00 seconds 
+[CO][FWE]{Majority} level:3, all edges:11025, filtered:0, remained:11025, filtered:0.00%
+[CPU Time] [CO][FWE] filter weak edges takes takes 0.00 seconds 
+[CPU Time] [MR] total coarsening for both class at level 3 takes 0.09 seconds 
+
+           \   /  \   /  \   /     End of Coarsening     \   /  \   /  \   /  
+            \_/    \_/    \_/            level:4          \_/    \_/    \_/ 
+[MR][main] num points P:150, N:149
+[CPU Time] [MS][UDSepVal] stage 1 at level 4 takes 0.10 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 4 takes 0.01 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:4, AC:0.97, SN:0.98, SP:0.96, PPV:0.96, NPV:0.98, F1:0.97, GM:0.966
+[CPU Time] [MS][UDSepVal] Prepare solution at level 4 takes 0.00 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 4 takes 0.12 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:3             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:13, n:8
+[CPU Time] [MS][UDSepVal] stage 1 at level 3 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 3 takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:3, AC:0.95, SN:0.97, SP:0.94, PPV:0.94, NPV:0.97, F1:0.96, GM:0.955
+[CPU Time] [MS][UDSepVal] Prepare solution at level 3 takes 0.00 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 3 takes 0.02 seconds 
+[CPU Time] [MR] Refinement at level: 3 takes 0.02 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:2             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:180, n:97
+[CPU Time] [MS][UDSepVal] stage 1 at level 2 takes 0.08 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 2 takes 0.02 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:2, AC:0.96, SN:0.99, SP:0.93, PPV:0.94, NPV:0.99, F1:0.96, GM:0.961
+[CPU Time] [MS][UDSepVal] Prepare solution at level 2 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 2 takes 0.11 seconds 
+[CPU Time] [MR] Refinement at level: 2 takes 0.11 seconds 
+
+            /\    /\    /\            Refinement             /\    /\    /\    
+           /  \  /  \  /  \             level:1             /  \  /  \  /  \ 
+[RF][main] num new neighbor p:254, n:264
+[CPU Time] [MS][UDSepVal] stage 1 at level 1 takes 0.18 seconds 
+[CPU Time] [MS][UDSepVal] stage 2 at level 1 takes 0.07 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.00 seconds 
+[SV][ETD], l:1, AC:0.95, SN:0.99, SP:0.91, PPV:0.92, NPV:0.99, F1:0.95, GM:0.951
+[CPU Time] [MS][UDSepVal] Prepare solution at level 1 takes 0.01 seconds 
+[CPU Time] [MS][UDSepVal] whole UDSepVal including stage1,2 and preparing the solution at level 1 takes 0.27 seconds 
+[CPU Time] [MR] Refinement at level: 1 takes 0.27 seconds 
+[CPU Time] (complexity analysis) coarsening takes 0.78, refinement takes 0.52 seconds 
+[CPU Time] [MC] Vcycle (including loading datasets) at iteration  4 takes 1.36 seconds 
+[MC] test data file is removed successfully from ./temp/kfold_test_data_exp_0_fold_4_exp_0.1
+[MC] End of all experiments
+           >   >   >   >   >   >         Final Results         <   <   <   <   <   < 
+[CP][PFR],it:0, BestL:4, AC:0.98, SN:0.98, SP:0.97, PPV:0.97, NPV:0.98, F1:0.98, GM:0.98
+[CP][PFR],it:1, BestL:1, AC:0.97, SN:0.97, SP:0.97, PPV:0.97, NPV:0.97, F1:0.97, GM:0.97
+[CP][PFR],it:2, BestL:2, AC:0.98, SN:0.99, SP:0.97, PPV:0.97, NPV:0.99, F1:0.98, GM:0.98
+[CP][PFR],it:3, BestL:1, AC:0.98, SN:0.98, SP:0.98, PPV:0.98, NPV:0.98, F1:0.98, GM:0.98
+[CP][PFR],it:4, BestL:4, AC:0.97, SN:0.98, SP:0.96, PPV:0.96, NPV:0.98, F1:0.97, GM:0.97
+
+           *  *  *  *  *  * *  *  *  *  * *  *  *  *  * *  *  *  *  *  *  *  *  *  *
+           *                            Average Results                            *
+           *                                                                       *
+           *   Acc:0.97, SN:0.98, SP:0.97, PPV:0.97, NPV:0.98, F1:0.98, GM:0.97    *
+           *  *  *  *  *  * *  *  *  *  * *  *  *  *  * *  *  *  *  *  *  *  *  *  *
+[CPU Time] [MC] Whole test including all iterations takes 18.53 seconds 
+[MC] Total number of iterations:5 
+[MC] MLSVM Classifier finished successfully!

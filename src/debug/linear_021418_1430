@@ -1,0 +1,45 @@
+[CP][read_params] param.xml path : ./params.xml
+[CP] input convert_files parameters are read
+mlsvm_version:0.0.46
+ds_path: ./sat_data/
+ds_name: twonorm
+tmp_path: ./temp/
+--- SVM Parameters ---
+svm_type: 0
+kernel_type: 2
+degree: 3
+gamma: 0.5
+coef0: 0
+nu: 0.5
+cache_size: 40000
+C: 100
+eps: 0.001
+p: 0.1
+shrinking: 1
+probability: 0
+p data:./sat_data//m_train_data_p.dat
+n data:./sat_data//m_train_data_n.dat
+[CPU Time] [LD][LNDS] reading data matrix takes 0.004731 seconds 
+[CPU Time] [LD][LNDS] reading data matrix takes 0.004072 seconds 
+P data size:3703x20,N data size:3697x20
+P vol size:3703,N vol size:3697
+The solver is called as a stand alone solver!
+[SV][SATL] param.solver_type:1
+[SV][SATL] param.C:1
+[SV][SATL] param.eps:0.01
+[SV][RP] number of P_data: 3703, N_data: 3697, total_nodes :7400 
+[SV][RP] number of p elems:77763
+[SV][RP] After Malloc
+
+[SV][RP] end of positive class, i is :3703,num of elements(j) is :77763
+[SV][RP] end of negative class, i is :3697,num of elements(j) is :155400
+[SV][SATL] after read_problem
+[SV][SATL] after set weight
+[linear.cc] in the beginning of train
+[linear.cc] step 1
+[linear.cc] step 2
+...................................*.**
+optimization finished, #iter = 368
+Objective value = -516.305726
+nSV = 876
+[SV][SATL] after train model

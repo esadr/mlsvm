@@ -1,0 +1,324 @@
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o pugixml.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/pugixml.cc
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o etimer.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/etimer.cc
+/home/esfp/dev/my_git/mlsvm/src/etimer.cc: In member function ‘void ETimer::stop_timer(std::string)’:
+/home/esfp/dev/my_git/mlsvm/src/etimer.cc:18:12: warning: unused variable ‘cpu_duration’ [-Wunused-variable]
+     double cpu_duration = (std::clock() - start_cpu_time) / (double)CLOCKS_PER_SEC;
+            ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o common_funcs.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/common_funcs.cc
+/home/esfp/dev/my_git/mlsvm/src/common_funcs.cc: In member function ‘std::string CommonFuncs::run_ext_command_single_output(std::string)’:
+/home/esfp/dev/my_git/mlsvm/src/common_funcs.cc:406:27: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+     while(i < result.size())
+                           ^
+/home/esfp/dev/my_git/mlsvm/src/common_funcs.cc: In member function ‘double CommonFuncs::convert_distance_to_weight(double)’:
+/home/esfp/dev/my_git/mlsvm/src/common_funcs.cc:156:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o OptionParser.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/OptionParser.cc
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o k_fold.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/k_fold.cc
+In file included from include/loader.h:8:0,
+                 from /home/esfp/dev/my_git/mlsvm/src/k_fold.cc:2:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o svm_weighted.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/svm_weighted.cc
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o config_params.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/config_params.cc
+In file included from /home/esfp/dev/my_git/mlsvm/src/config_params.cc:1:0:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/dev/my_git/mlsvm/src/config_params.cc: In member function ‘void Config_params::read_params(std::string, int, char**, Config_params::program_parts)’:
+/home/esfp/dev/my_git/mlsvm/src/config_params.cc:162:11: warning: enumeration value ‘svm’ not handled in switch [-Wswitch]
+     switch(caller_func){
+           ^
+/home/esfp/dev/my_git/mlsvm/src/config_params.cc:162:11: warning: enumeration value ‘clustring’ not handled in switch [-Wswitch]
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o model_selection.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/model_selection.cc
+In file included from include/solver.h:18:0,
+                 from include/model_selection.h:4,
+                 from /home/esfp/dev/my_git/mlsvm/src/model_selection.cc:1:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc: In member function ‘void ModelSelection::uniform_design(_p_Mat*&, _p_Vec*&, _p_Mat*&, _p_Vec*&, bool, double, double, int, solution&)’:
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:418:25: warning: variable ‘curr_svm_model’ set but not used [-Wunused-but-set-variable]
+             svm_model * curr_svm_model;
+                         ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:445:25: warning: variable ‘curr_svm_model’ set but not used [-Wunused-but-set-variable]
+             svm_model * curr_svm_model;
+                         ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:476:21: warning: variable ‘whole_trd_model’ set but not used [-Wunused-but-set-variable]
+         svm_model * whole_trd_model;
+                     ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc: In member function ‘void ModelSelection::uniform_design_separate_validation(_p_Mat*&, _p_Vec*&, _p_Mat*&, _p_Vec*&, bool, double, double, _p_Mat*&, _p_Mat*&, int, solution&, std::vector<ref_results>&)’:
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:549:21: warning: variable ‘curr_svm_model’ set but not used [-Wunused-but-set-variable]
+         svm_model * curr_svm_model;
+                     ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:583:21: warning: variable ‘curr_svm_model’ set but not used [-Wunused-but-set-variable]
+         svm_model * curr_svm_model;
+                     ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc: In member function ‘void ModelSelection::uniform_design_index_base(_p_Mat*&, _p_Vec*&, _p_Mat*&, _p_Vec*&, bool, double, double, int, std::vector<int>&, std::vector<int>&, std::unordered_set<int>&, std::unordered_set<int>&, _p_Mat*&, int, _p_Mat*&)’:
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:718:21: warning: variable ‘curr_svm_model’ set but not used [-Wunused-but-set-variable]
+         svm_model * curr_svm_model;
+                     ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:743:21: warning: variable ‘curr_svm_model’ set but not used [-Wunused-but-set-variable]
+         svm_model * curr_svm_model;
+                     ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:710:9: warning: variable ‘stage’ set but not used [-Wunused-but-set-variable]
+     int stage = 1;
+         ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc: In member function ‘void ModelSelection::uniform_design_index_base_separate_validation(_p_Mat*&, _p_Vec*&, _p_Mat*&, _p_Vec*&, bool, double, double, int, std::vector<int>&, std::vector<int>&, std::unordered_set<int>&, std::unordered_set<int>&, _p_Mat*&, _p_Mat*&, _p_Mat*&, _p_Mat*&, _p_Mat*&, int, _p_Mat*&)’:
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:827:21: warning: variable ‘curr_svm_model’ set but not used [-Wunused-but-set-variable]
+         svm_model * curr_svm_model;
+                     ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:853:21: warning: variable ‘curr_svm_model’ set but not used [-Wunused-but-set-variable]
+         svm_model * curr_svm_model;
+                     ^
+/home/esfp/dev/my_git/mlsvm/src/model_selection.cc:819:9: warning: variable ‘stage’ set but not used [-Wunused-but-set-variable]
+     int stage = 1;
+         ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o solver.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/solver.cc
+In file included from include/solver.h:18:0,
+                 from /home/esfp/dev/my_git/mlsvm/src/solver.cc:1:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/dev/my_git/mlsvm/src/solver.cc: In member function ‘void Solver::read_problem_index_base(_p_Mat*&, _p_Mat*&, std::vector<int>&, std::vector<int>&, PetscInt, PetscInt, _p_Vec*&, _p_Vec*&)’:
+/home/esfp/dev/my_git/mlsvm/src/solver.cc:791:33: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+     for(unsigned int i = 0; i < num_total_nodes; i++){
+                                 ^
+/home/esfp/dev/my_git/mlsvm/src/solver.cc: In member function ‘void Solver::read_problem(_p_Mat*&, _p_Vec*&, _p_Mat*&, _p_Vec*&)’:
+/home/esfp/dev/my_git/mlsvm/src/solver.cc:1086:33: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+     for(unsigned int i = 0; i < num_total_nodes; i++){
+                                 ^
+/home/esfp/dev/my_git/mlsvm/src/solver.cc: In member function ‘void Solver::predict_validation_data(_p_Mat*&, _p_Mat*&, summary&, int)’:
+/home/esfp/dev/my_git/mlsvm/src/solver.cc:1554:12: warning: variable ‘target_label’ set but not used [-Wunused-but-set-variable]
+     double target_label = 0, predict_label=0;
+            ^
+/home/esfp/dev/my_git/mlsvm/src/solver.cc: In member function ‘void Solver::predict_test_data_in_matrix_output(_p_Mat*&, int, _p_Mat*&)’:
+/home/esfp/dev/my_git/mlsvm/src/solver.cc:1905:16: warning: variable ‘target_label’ set but not used [-Wunused-but-set-variable]
+         double target_label, predict_label;//target is the one that is in the vector
+                ^
+/home/esfp/dev/my_git/mlsvm/src/solver.cc: In member function ‘void Solver::PD_test_predict_index_base(_p_Mat*&, std::vector<int>, const PetscScalar*, PetscInt, PetscInt, summary&, int)’:
+/home/esfp/dev/my_git/mlsvm/src/solver.cc:2037:12: warning: unused variable ‘predict_label’ [-Wunused-variable]
+     double predict_label;
+            ^
+/home/esfp/dev/my_git/mlsvm/src/solver.cc: In member function ‘int Solver::PD_predict_a_label(_p_Mat*&, int)’:
+/home/esfp/dev/my_git/mlsvm/src/solver.cc:2119:9: warning: unused variable ‘svm_type’ [-Wunused-variable]
+     int svm_type=svm_get_svm_type(local_model);
+         ^
+/home/esfp/dev/my_git/mlsvm/src/solver.cc:2122:14: warning: unused variable ‘i’ [-Wunused-variable]
+     PetscInt i=0, k=0, ncols=0,num_points=0,num_col=0;
+              ^
+/home/esfp/dev/my_git/mlsvm/src/solver.cc:2122:32: warning: unused variable ‘num_points’ [-Wunused-variable]
+     PetscInt i=0, k=0, ncols=0,num_points=0,num_col=0;
+                                ^
+In file included from /home/esfp/tools/libraries/petsc/include/petscis.h:7:0,
+                 from /home/esfp/tools/libraries/petsc/include/petscvec.h:9,
+                 from /home/esfp/tools/libraries/petsc/include/petscmat.h:6,
+                 from include/solver.h:13,
+                 from /home/esfp/dev/my_git/mlsvm/src/solver.cc:1:
+/home/esfp/tools/libraries/petsc/include/petscsys.h: In member function ‘void Solver::read_problem_index_base(_p_Mat*&, _p_Mat*&, std::vector<int>&, std::vector<int>&, PetscInt, PetscInt, _p_Vec*&, _p_Vec*&)’:
+/home/esfp/tools/libraries/petsc/include/petscsys.h:600:98: warning: ‘max_num_n’ is used uninitialized in this function [-Wuninitialized]
+ #define PetscMalloc(a,b)  ((*PetscTrMalloc)((a),__LINE__,PETSC_FUNCTION_NAME,__FILE__,(void**)(b)))
+                                                                                                  ^
+/home/esfp/dev/my_git/mlsvm/src/solver.cc:613:32: note: ‘max_num_n’ was declared here
+     PetscInt        max_num_p, max_num_n;
+                                ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o partitioning.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/partitioning.cc
+In file included from include/solver.h:18:0,
+                 from include/partitioning.h:9,
+                 from /home/esfp/dev/my_git/mlsvm/src/partitioning.cc:1:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/dev/my_git/mlsvm/src/partitioning.cc: In member function ‘void Partitioning::calc_center(_p_Mat*&, _p_Vec*&, std::vector<std::vector<int> >&, _p_Mat*&, _p_Mat*&, std::vector<double>&)’:
+/home/esfp/dev/my_git/mlsvm/src/partitioning.cc:425:22: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+         for(j=0; j < ncols; j++){
+                      ^
+/home/esfp/dev/my_git/mlsvm/src/partitioning.cc: In member function ‘void Partitioning::calc_avg_center(_p_Mat*&, _p_Mat*&, std::vector<std::pair<int, int> >&, std::vector<double>&, std::vector<double>&, _p_Mat*&)’:
+/home/esfp/dev/my_git/mlsvm/src/partitioning.cc:646:42: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+     for(it_grp=0; it_grp < v_groups.size(); it_grp++) {
+                                          ^
+/home/esfp/dev/my_git/mlsvm/src/partitioning.cc: In member function ‘void Partitioning::calc_center_volume(_p_Mat*&, std::vector<double>&, _p_Mat*&)’:
+/home/esfp/dev/my_git/mlsvm/src/partitioning.cc:688:43: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+     if( num_point != v_sum_vol_parts.size())    {
+                                           ^
+/home/esfp/dev/my_git/mlsvm/src/partitioning.cc: In member function ‘int Partitioning::get_parts(_p_Mat*&, _p_Vec*&, int, int, std::vector<std::vector<int> >&, _p_Mat*&, unsigned int)’:
+/home/esfp/dev/my_git/mlsvm/src/partitioning.cc:147:54: warning: ‘result’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+     std::cout << "[PR][get_parts] Metis result: " << result << std::endl;
+                                                      ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o refinement.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/refinement.cc
+In file included from include/solver.h:18:0,
+                 from include/model_selection.h:4,
+                 from include/refinement.h:4,
+                 from /home/esfp/dev/my_git/mlsvm/src/refinement.cc:1:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/dev/my_git/mlsvm/src/refinement.cc: In member function ‘solution Refinement::main(_p_Mat*&, _p_Mat*&, _p_Vec*&, _p_Mat*&, _p_Mat*&, _p_Mat*&, _p_Vec*&, _p_Mat*&, _p_Mat*&, _p_Mat*&, solution&, int, std::vector<ref_results>&)’:
+/home/esfp/dev/my_git/mlsvm/src/refinement.cc:212:46: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+             for(int i = 0; i < v_groups.size() ; i++ ){
+                                              ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o main_recursion.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/main_recursion.cc
+In file included from include/solver.h:18:0,
+                 from include/model_selection.h:4,
+                 from include/refinement.h:4,
+                 from include/main_recursion.h:5,
+                 from /home/esfp/dev/my_git/mlsvm/src/main_recursion.cc:1:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o coarsening.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/coarsening.cc
+In file included from /home/esfp/dev/my_git/mlsvm/src/coarsening.cc:3:0:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/dev/my_git/mlsvm/src/coarsening.cc: In member function ‘void Coarsening::filter_weak_edges(_p_Mat*&, double, int)’:
+/home/esfp/dev/my_git/mlsvm/src/coarsening.cc:777:13: warning: unused variable ‘nnz_real’ [-Wunused-variable]
+         int nnz_real=0;                                             //not needed if I don't create another matrix in the end
+             ^
+/home/esfp/dev/my_git/mlsvm/src/coarsening.cc:854:87: warning: passing NULL to non-pointer argument 4 of ‘PetscErrorCode MatCreateSeqAIJ(MPI_Comm, PetscInt, PetscInt, PetscInt, const PetscInt*, _p_Mat**)’ [-Wconversion-null]
+     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, PETSC_NULL, a_nnz_per_row, &m_Anz);
+                                                                                       ^
+/home/esfp/dev/my_git/mlsvm/src/coarsening.cc:760:25: warning: unused variable ‘avg_weight’ [-Wunused-variable]
+     double              avg_weight=0;
+                         ^
+/home/esfp/dev/my_git/mlsvm/src/coarsening.cc: In member function ‘_p_Mat* Coarsening::calc_real_weight(_p_Mat*&, _p_Mat*&)’:
+/home/esfp/dev/my_git/mlsvm/src/coarsening.cc:940:1: warning: no return statement in function returning non-void [-Wreturn-type]
+ }
+ ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o loader.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/loader.cc
+In file included from include/loader.h:8:0,
+                 from /home/esfp/dev/my_git/mlsvm/src/loader.cc:1:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o ds_node.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/ds_node.cc
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o ds_graph.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/ds_graph.cc
+In file included from /home/esfp/dev/my_git/mlsvm/src/ds_graph.cc:2:0:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -o mlsvm_classifier.o -c -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g  -fPIC    -I/home/esfp/tools/libraries/petsc/include -I/home/esfp/tools/libraries/petsc/linux-cxx-debug/include -I/usr/local/hdf5/include   -std=c++11 -g -O3 -Iinclude     `pwd`/mlsvm_classifier.cc
+In file included from include/loader.h:8:0,
+                 from /home/esfp/dev/my_git/mlsvm/src/mlsvm_classifier.cc:4:
+include/config_params.h: In member function ‘int Config_params::set_main_current_exp_id(int)’:
+include/config_params.h:225:86: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+                                                                                      ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_kf_id(int)’:
+include/config_params.h:226:85: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+                                                                                     ^
+include/config_params.h: In member function ‘int Config_params::set_main_current_level_id(int)’:
+include/config_params.h:227:88: warning: no return statement in function returning non-void [-Wreturn-type]
+     int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+                                                                                        ^
+/home/esfp/tools/libraries/petsc/linux-cxx-debug/bin/mpicxx -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -fvisibility=hidden -g -c -Iinclude	 pugixml.o etimer.o common_funcs.o OptionParser.o k_fold.o svm_weighted.o config_params.o model_selection.o solver.o partitioning.o refinement.o main_recursion.o coarsening.o loader.o ds_node.o ds_graph.o mlsvm_classifier.o  -Wl,-rpath,/home/esfp/tools/libraries/petsc/linux-cxx-debug/lib -L/home/esfp/tools/libraries/petsc/linux-cxx-debug/lib -Wl,-rpath,/home/esfp/tools/libraries/petsc/linux-cxx-debug/lib -Wl,-rpath,/usr/local/hdf5/lib -L/usr/local/hdf5/lib -Wl,-rpath,/usr/lib/gcc/x86_64-linux-gnu/4.8 -L/usr/lib/gcc/x86_64-linux-gnu/4.8 -Wl,-rpath,/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu -Wl,-rpath,/lib/x86_64-linux-gnu -L/lib/x86_64-linux-gnu -lpetsc -lsuperlu_dist -lparmetis -lmetis -lsuperlu -lf2clapack -lf2cblas -lm -lX11 -lhdf5hl_fortran -lhdf5_fortran -lhdf5_hl -lhdf5 -lhwloc -lm -lmpi_usempi -lmpi_mpifh -lgfortran -lm -lgfortran -lm -lquadmath -lmpi_cxx -lstdc++ -lm -Wl,-rpath,/home/esfp/tools/libraries/petsc/linux-cxx-debug/lib -L/home/esfp/tools/libraries/petsc/linux-cxx-debug/lib -Wl,-rpath,/usr/lib/gcc/x86_64-linux-gnu/4.8 -L/usr/lib/gcc/x86_64-linux-gnu/4.8 -Wl,-rpath,/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu -Wl,-rpath,/lib/x86_64-linux-gnu -L/lib/x86_64-linux-gnu -Wl,-rpath,/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu -ldl -Wl,-rpath,/home/esfp/tools/libraries/petsc/linux-cxx-debug/lib -lmpi -lgcc_s -lpthread -ldl  -o mlsvm_classifier
+g++: warning: pugixml.o: linker input file unused because linking not done
+g++: warning: etimer.o: linker input file unused because linking not done
+g++: warning: common_funcs.o: linker input file unused because linking not done
+g++: warning: OptionParser.o: linker input file unused because linking not done
+g++: warning: k_fold.o: linker input file unused because linking not done
+g++: warning: svm_weighted.o: linker input file unused because linking not done
+g++: warning: config_params.o: linker input file unused because linking not done
+g++: warning: model_selection.o: linker input file unused because linking not done
+g++: warning: solver.o: linker input file unused because linking not done
+g++: warning: partitioning.o: linker input file unused because linking not done
+g++: warning: refinement.o: linker input file unused because linking not done
+g++: warning: main_recursion.o: linker input file unused because linking not done
+g++: warning: coarsening.o: linker input file unused because linking not done
+g++: warning: loader.o: linker input file unused because linking not done
+g++: warning: ds_node.o: linker input file unused because linking not done
+g++: warning: ds_graph.o: linker input file unused because linking not done
+g++: warning: mlsvm_classifier.o: linker input file unused because linking not done
+/bin/rm -f mlsvm_classifier.o 
