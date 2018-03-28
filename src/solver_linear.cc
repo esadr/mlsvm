@@ -1324,7 +1324,7 @@ void SolverLinear::read_parameters(bool set_gamma){
 //    param.nr_weight = Config_params::getInstance()->get_svm_nr_weight();
 //    param.weight_label = NULL;
 //    param.weight = NULL;
-    param.solver_type = L2R_L2LOSS_SVC_DUAL;
+    param.solver_type = L2R_L2LOSS_SVC_DUAL; //@@ #Todo 021418_1500 the above lines are commented in dev branch
     param.C = 1;
     param.eps = 0.01;
     param.p = 0.1;
