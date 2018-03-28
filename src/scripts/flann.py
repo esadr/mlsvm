@@ -22,9 +22,9 @@ from numpy.random import *
 
 
 
-#dirs = environ['PETSC_DIR']
-#sys.path.insert(0, dirs+'/bin/')
-sys.path.insert(0, '/home/esfp/tools/libraries/petsc/bin/')
+dirs = environ['PETSC_DIR']
+sys.path.insert(0, dirs+'/bin/')
+#sys.path.insert(0, '/home/esfp/tools/libraries/petsc/bin/')
 import PetscBinaryIO
 
 
