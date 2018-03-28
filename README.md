@@ -1,5 +1,5 @@
 # MLSVM
-Multi level Support Vector Machines
+Multilevel Support Vector Machines
 
 
 The correspoding papers with experimental results are as follows:
