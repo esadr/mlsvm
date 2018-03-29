@@ -3,14 +3,36 @@ Multilevel Support Vector Machines
 
 
 The correspoding papers with experimental results are as follows:
-  * Sadrfaridpour, Ehsan, Talayeh Razzaghi, and Ilya Safro. "Engineering multilevel support vector machines." arXiv preprint arXiv:1707.07657 (2017).
+  * Sadrfaridpour, Ehsan, Talayeh Razzaghi, and Ilya Safro. "Engineering fast multilevel support vector machines" arXiv preprint arXiv:1707.07657 (2017).
   [(PDF)](https://arxiv.org/pdf/1707.07657.pdf) [(BibTex)](https://goo.gl/XPHioV)
   
   * Sadrfaridpour, Ehsan, Sandeep Jeereddy , Ken Kennedy, Andre Luckow, Talayeh Razzaghi, and Ilya Safro. "Algebraic multigrid support vector machines." ESANN 2017 proceedings, European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning.
   [(PDF)](https://www.elen.ucl.ac.be/Proceedings/esann/esannpdf/es2017-37.pdf)  [(BibTex)](https://raw.githubusercontent.com/esadr/mlsvm/master/Bibliography.txt)
 
 
-Download
+
+Download Virtual Machine
+-------------
+There is a Ubuntu Virtual Machine with all required packages ready to use.
+You can download it as a one file (3.9GB) or eight small file of 500MB each.
+[Download Link]{https://goo.gl/6MhLKq}
+
+For running it on your machine (Laptop, Desktop), you can download and install a Virtual Machine application such as VirtualBox.
+It allows you to run this Virtual Machine as a guest operating system on your current operating system (host) such Linux, Windows or Mac OS.
+Next, you can import the mlsvm.ovf file which is an Open Virtualization Format.
+
+
+How to use Virtual Machine
+-------------
+Both username and password are:demo (all lowercase)
+
+The library is installed in /home/demo/mlsvm/src/ and you can run it using 
+`./mlsvm_classifier [list of parameters]`
+
+The list of parameters are optional and you can set them using param.xml file as well.
+
+  
+Download Source
 -------------
 You can use the recursive parameter to download the required libraries as part of this reposetory.
 
