@@ -17,8 +17,8 @@ There is a Ubuntu Virtual Machine with all required packages ready to use.
 You can download it as a one file (3.9GB) or eight small file of 500MB each.
 [Download Link](https://goo.gl/6MhLKq)
 
-For running it on your machine (Laptop, Desktop), you can download and install a Virtual Machine application such as VirtualBox.
-It allows you to run this Virtual Machine as a guest operating system on your current operating system (host) such Linux, Windows or Mac OS.
+For running it on your machine (Laptop, Desktop), you can download and install a Virtual Machine application such as [VirtualBox](https://www.virtualbox.org/wiki/Downloads).
+This allows you to run this Virtual Machine as a guest operating system on your current (host) operating system such Linux, Windows or macOS.
 Next, you can import the mlsvm.ovf file which is an Open Virtualization Format.
 
 
