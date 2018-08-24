@@ -576,7 +576,7 @@ int Coarsening::normalize_vector(Vec& v_raw, Vec& v_norm ){
     VecGetArray(v_raw,&arr_raw);
 
     PetscScalar tmp_val = 0;
-    for (int i =0; i < num_row;i++){
+    for (PetscInt i =0; i < num_row;i++){
         tmp_val = arr_raw[i] / max_val;
         VecSetValues(v_norm, 1, &i, &tmp_val, INSERT_VALUES);
 #if dbl_CO_vNorm >= 7
