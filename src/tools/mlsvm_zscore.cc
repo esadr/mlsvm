@@ -22,19 +22,22 @@ int main(int argc, char **argv){
     // transpose the raw data matrix
     MatTranspose(m_raw_data,MAT_INITIAL_MATRIX,&m_raw_data_T);
     MatDestroy(&m_raw_data);
+    std::cout << "MatTranspose is done\n";
 
     Preprocessor pr;
     m_normalized_T = pr.normalizeDataZscore_Transposed(m_raw_data_T);
     MatDestroy(&m_raw_data_T);
+    std::cout << "Normalization is done\n";
 
     // transpose the normalized transposed data matrix
     MatTranspose(m_normalized_T,MAT_INITIAL_MATRIX,&m_normalized);
     MatDestroy(&m_normalized_T);
+    std::cout << "Transpose back to original form is done\n";
+
 
     //export to file
     std::string normalized_file_path_name = Config_params::getInstance()->get_ds_path() +
                     Config_params::getInstance()->get_ds_name() + "_zsc_data.dat";
-
 
     CommonFuncs cf;
     cf.exp_matrix(m_normalized, "", normalized_file_path_name , "mlsvm_zscore" );

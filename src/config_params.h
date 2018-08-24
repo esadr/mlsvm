@@ -7,6 +7,7 @@
 #include "OptionParser.h"
 #include "ds_global.h"
 #include <ctime>
+#include "petscvec.h"
 
 class Config_params{
 private:
@@ -18,7 +19,7 @@ private:
     optparse::Values options_;
 
 
-    int main_function;
+    PetscInt main_function;
 
     //----- debug_export parameters -----
     int     debug_exp_CS;
