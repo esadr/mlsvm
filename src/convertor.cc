@@ -94,10 +94,17 @@ void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_dat
             PetscScalar val;
             auto pos = tokens[i].find(":");
             if (pos != std::string::npos && pos <= num_col) {
-                idx= stoi(tokens[i].substr(0, pos)) - 1;                        //real index from file and -1 is for PETSc index that is from zero not one
-                val = stof(tokens[i].substr(pos+1,tokens[i].size()-1));       //value corresponding to the idx index
-//                std::cout << "pos: " << pos << std::endl;
-//                    std::cout << "curr_row:"<<curr_row << ",i:" <<i<< ",idx: " << idx << ", val: " << val << std::endl;
+                try{
+                //real index from file and -1 is for PETSc index that is from zero not one
+                idx= stoi(tokens[i].substr(0, pos)) - 1;
+
+                //value corresponding to the idx index
+                val = stof(tokens[i].substr(pos+1,tokens[i].size()-1));
+                }catch (const std::runtime_error& e) {
+                    std::cout << e.what();
+                    std::cout << "pos: " << pos << std::endl;
+                    std::cout << "curr_row:"<<curr_row << ",i:" <<i<< ",idx: " << idx << ", val: " << val << std::endl;
+                }
                 MatSetValue(m_data,curr_row,idx, val,INSERT_VALUES);
             }
         }
@@ -205,5 +212,9 @@ void Convertor::CSV_file_to_PETSc_format(){
     cf.exp_vector(v_lbl, "", out_fname + "_label.dat", "CSV_PETSc" );
     MatDestroy(&m_data_t);
     VecDestroy(&v_lbl);
+
+
+//TODO list: handle the empty lines Aug 24, 2018
+
 }
 
