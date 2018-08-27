@@ -85,7 +85,8 @@ void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_dat
         std::string item;
         std::vector<std::string> tokens;
         while (getline(ss, item, ' ')) {    //split by space, tokens[0] is label, and the rest of them are index:value
-            tokens.push_back(item);
+            if(item!="")
+		tokens.push_back(item);
         }
 
         VecSetValue(v_lbl, curr_row, stoi(tokens[0]), INSERT_VALUES);
