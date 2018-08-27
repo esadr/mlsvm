@@ -6,8 +6,10 @@ ds_name=$1
 echo "Path: "$ds_path
 echo "File name: "$ds_name
 #exit 1
-echo " * * * * * ""1 Converting csv file to petsc format"" * * * * * "
-./mlsvm_csv_petsc --ds_p $ds_path -f  $ds_name   --tmp_p $tmp_path          #1 convert csv to petsc format
+#echo " * * * * * ""1 Converting csv file to petsc format"" * * * * * "
+#./mlsvm_csv_petsc --ds_p $ds_path -f  $ds_name   --tmp_p $tmp_path          #1 convert csv to petsc format
+echo " * * * * * ""1 Converting LibSVM file to petsc format"" * * * * * "
+./mlsvm_libsvm_petsc --ds_p $ds_path -f  $ds_name   --tmp_p $tmp_path          #1 convert libsvm to petsc format
 exit 1
 echo " * * * * * ""#2 Normalizing the data using z-score"" * * * * * "
 ./mlsvm_zscore -f $ds_name                                       #2 normalized the data 
