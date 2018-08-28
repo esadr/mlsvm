@@ -8,3 +8,5 @@ mlsvm_save_knn
 get_mat_info
 get_vec_info
 TAGS
+data_libsvm/*
+datasets/*
