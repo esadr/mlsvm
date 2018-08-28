@@ -76,7 +76,8 @@ void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_dat
     VecCreateSeq(PETSC_COMM_SELF,num_row,&v_lbl);
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row ,num_col ,num_col ,PETSC_NULL, &m_data);
     //read the file withlibsvm format
-    std::ifstream file(in_file_name);
+    // std::ifstream file(in_file_name);
+    std::ifstream file(in_file_name + ".libsvm");
     std::string str;
     PetscInt curr_row=0;
     while (std::getline(file, str))
