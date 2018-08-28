@@ -37,7 +37,8 @@ void k_fold::read_in_data(std::string input_train_data, std::string input_train_
     if(data_size == label_size)
         this->num_data_points_ = data_size;
     else{
-        std::cout << "[k_fold] data size is:<<"<< data_size <<" label size is:"<< label_size << std::endl;
+        std::cout << "[k_fold] data size is:<<"<< data_size <<
+                     " label size is:"<< label_size << std::endl;
         PetscPrintf(PETSC_COMM_WORLD,"[KF][read_in_data] the data and label size are not match, Exit!\n");
         exit(1);
     }

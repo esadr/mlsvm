@@ -112,6 +112,7 @@ void run_flann(Mat& m_data, Mat& m_indices, Mat& m_dists){
     int num_nn = Config_params::getInstance()->get_nn_number_of_neighbors();
     MatGetSize(m_data, &num_row, &num_col);
 
+    assert(("Number of rows in the data are zero which is a problem!", num_row!=0));
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row, num_nn, num_nn, PETSC_NULL, &m_indices);
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row, num_nn, num_nn, PETSC_NULL, &m_dists);
     std::cout << "[KNN][RF] num_nn:"<< num_nn << std::endl;

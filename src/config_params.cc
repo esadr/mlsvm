@@ -208,7 +208,7 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
         break;
 
     case flann:
-        std::cout << "start reading clustering parameters\n";
+        std::cout << "start reading flann parameters\n";
         read_flann_parameters(root, argc, argv);
         set_file_names_for_save_flann();
         print_flann_params();
@@ -494,10 +494,6 @@ void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * 
     ds_path             = root.child("ds_path").attribute("stringVal").value();
     ds_name             = root.child("ds_name").attribute("stringVal").value();
     tmp_path            = root.child("tmp_path").attribute("stringVal").value();
-//    nn_path         = root.child("nn_path").attribute("stringVal").value();
-//    nn_data_fname1  = root.child("nn_data_fname1").attribute("stringVal").value();
-//    nn_data_fname2  = root.child("nn_data_fname2").attribute("stringVal").value();
-//    nn_tmp_path     = root.child("nn_tmp_path").attribute("stringVal").value();
     // read input arguments and saved them in options_
     parser_.add_option("--nn_c")                            .dest("nn_number_of_classes")  .set_default(nn_number_of_classes);
     parser_.add_option("--nn_n")                            .dest("nn_number_of_neighbors")  .set_default(nn_number_of_neighbors);
@@ -505,10 +501,6 @@ void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * 
     parser_.add_option("--ds_p")                             .dest("ds_path")  .set_default(ds_path);
     parser_.add_option("-f", "--ds_f", "--file")             .dest("ds_name")  .set_default(ds_name);
     parser_.add_option("--tmp_p")                            .dest("tmp_path")  .set_default(tmp_path);
-//    parser_.add_option("--nn_p")                            .dest("nn_path")  .set_default(nn_path);
-//    parser_.add_option("--nn_f1")                           .dest("nn_data_fname1")  .set_default(nn_data_fname1);
-//    parser_.add_option("--nn_f2")                           .dest("nn_data_fname2")  .set_default(nn_data_fname2);
-//    parser_.add_option("--tmp_p")                           .dest("nn_tmp_path")  .set_default(nn_tmp_path);
 
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
