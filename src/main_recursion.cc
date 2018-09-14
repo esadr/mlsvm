@@ -38,7 +38,11 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
     //both classes are small enough (coarsest level)
     if ((p_num_row <  c_limit) && (n_num_row <  c_limit))  {
         printf("\n\\   /\\   /\\   / End of Coarsening \\   /\\   /\\   /\n");
-        printf(  " \\_/  \\_/  \\_/       level:%d       \\_/  \\_/  \\_/ \n",
+        if(level >9)
+            printf(  " \\_/  \\_/  \\_/       level:%d      \\_/  \\_/  \\_/ \n",
+                 level);
+        else
+            printf(  " \\_/  \\_/  \\_/       level:%d       \\_/  \\_/  \\_/ \n",
                  level);
         cout << funcIdx + "num points P:" << p_num_row
                 << ", N:" << n_num_row << endl;
@@ -88,7 +92,11 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         cs_info ref_info_p, ref_info_n;
 #if dbl_MR_main >= 1
         printf("\n\\  /\\  /\\  /       Coarsening    \\  /\\  /\\  /\n");
-        printf(  " \\/  \\/  \\/         level:%d       \\/  \\/  \\/ \n"
+        if(level >9)
+            printf(  " \\/  \\/  \\/         level:%d      \\/  \\/  \\/ \n"
+                 , level);
+        else
+            printf(  " \\/  \\/  \\/         level:%d       \\/  \\/  \\/ \n"
                  , level);
 #endif
         if(p_num_row >= c_limit){
@@ -181,8 +189,13 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
         //because it comes from coarser level
 //        printf(funcIdx + "coarse solution from level:%d \n",level+1);
         printf("\n /\\  /\\  /\\        Refinement     /\\  /\\  /\\ \n");
-        printf(  "/  \\/  \\/  \\        level:%d      /  \\/  \\/  \\ \n"
+        if(level >9)
+            printf(  "/  \\/  \\/  \\        level:%d     /  \\/  \\/  \\ \n"
                  , level);
+        else
+            printf(  "/  \\/  \\/  \\        level:%d      /  \\/  \\/  \\ \n"
+                 , level);
+
 
 #if dbl_RF_INFO >= 1
         printf("                    Minority                        Majority              ");
