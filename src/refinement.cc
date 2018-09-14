@@ -6,7 +6,7 @@
 #include "common_funcs.h"
 #include "solver.h"
 #include "k_fold.h"
-
+#include <cassert>
 
 #include <thread>
 
@@ -15,7 +15,8 @@ struct selected_agg
     int index;
     double value;
 
-    selected_agg(int col_index, double fraction_val) : index(col_index), value(fraction_val) {}
+    selected_agg(int col_index, double fraction_val) :
+        index(col_index), value(fraction_val) {}
 
     bool operator > (const selected_agg sel_agg) const {
         return (value > sel_agg.value);
@@ -23,47 +24,61 @@ struct selected_agg
 };
 
 
-solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
-                          Mat& m_data_n, Mat& m_P_n, Vec& v_vol_n, Mat&m_WA_n, Mat& m_VD_p, Mat& m_VD_n,
-                          solution& sol_coarser,int level, std::vector<ref_results>& v_ref_results){
-    Config_params::getInstance()->set_main_current_level_id(level);
+solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
+                          , Mat& m_data_n, Mat& m_P_n, Vec& v_vol_n, Mat&m_WA_n
+                          , Mat& m_VD_p, Mat& m_VD_n
+                          , solution& sol_coarser,int level
+                          , std::vector<ref_results>& v_ref_results){
+    paramsInst->set_main_current_level_id(level);
 #if dbl_RF_main >=5
     PetscInt num_row_p_data =0, num_row_n_data =0;
     MatGetSize(m_data_p,&num_row_p_data,NULL);
     MatGetSize(m_data_n,&num_row_n_data,NULL);
-    printf("[RF][main]{beginnig} num fine data p:%d, n:%d\n",num_row_p_data,num_row_n_data);
+    printf("[RF][main]{beginnig} num fine data p:%d, n:%d\n"
+           ,num_row_p_data,num_row_n_data);
 
 
     PetscInt num_row_p_P =0, num_row_n_P =0, num_col_p_P =0, num_col_n_P =0;
     MatGetSize(m_P_p,&num_row_p_P, &num_col_p_P);
     MatGetSize(m_P_n,&num_row_n_P, &num_col_n_P);
-    PetscPrintf(PETSC_COMM_WORLD,"[RF][main]{beginnig} Minority class P matrix dim [%d,%d]\n",num_row_p_P,num_col_p_P);
-    PetscPrintf(PETSC_COMM_WORLD,"[RF][main]{beginnig} Majority class P matrix dim [%d,%d]\n",num_row_n_P,num_col_n_P);
+    printf("[RF][main]{beginnig} Minority class P matrix dim [%d,%d]\n"
+           ,num_row_p_P,num_col_p_P);
+    printf("[RF][main]{beginnig} Majority class P matrix dim [%d,%d]\n"
+           ,num_row_n_P,num_col_n_P);
 
-    PetscPrintf(PETSC_COMM_WORLD,"[RF][main] sol_coarser.p_index.size():%lu, sol_coarser.n_index.size():%lu\n",
-                                sol_coarser.p_index.size(),sol_coarser.n_index.size());
+    printf("[RF][main] sol_coarser.p_index.size():%lu, "
+           "sol_coarser.n_index.size():%lu\n"
+           , sol_coarser.p_index.size()
+           , sol_coarser.n_index.size());
 #endif
-    PetscScalar sum_all_vol_p,sum_all_vol_n;       // these are fix for all levels as the sum of volumes for all the points are preserved
+    // these are fix for all levels as the sum
+    // of volumes for all the points are preserved
+    PetscScalar sum_all_vol_p,sum_all_vol_n;
     VecSum(v_vol_p, &sum_all_vol_p);
     VecSum(v_vol_n, &sum_all_vol_n);
 
     Mat m_new_neigh_p, m_new_neigh_n;
     IS IS_neigh_p, IS_neigh_n;
     /// - - - - - - - get new points for finer level - - - - - - -
-    find_SV_neighbors(m_data_p,m_P_p,sol_coarser.p_index, m_WA_p, m_new_neigh_p,"Minority",IS_neigh_p);
-    find_SV_neighbors(m_data_n,m_P_n,sol_coarser.n_index, m_WA_n, m_new_neigh_n,"Majority",IS_neigh_n);
+    find_SV_neighbors(m_data_p,m_P_p,sol_coarser.p_index, m_WA_p
+                      , m_new_neigh_p,"Minority",IS_neigh_p);
+    find_SV_neighbors(m_data_n,m_P_n,sol_coarser.n_index, m_WA_n
+                      , m_new_neigh_n,"Majority",IS_neigh_n);
 
 
     // - - - - get the size of neighbors - - - -
     PetscInt num_neigh_row_p_ =0, num_neigh_row_n_ =0;
     MatGetSize(m_new_neigh_p,&num_neigh_row_p_,NULL);
     MatGetSize(m_new_neigh_n,&num_neigh_row_n_,NULL);
-    PetscPrintf(PETSC_COMM_WORLD,"[RF][main] num new neighbor p:%d, n:%d\n",num_neigh_row_p_,num_neigh_row_n_);
-    // check for errors
-    if(num_neigh_row_p_ == 0 || num_neigh_row_n_ == 0){
-        PetscPrintf(PETSC_COMM_WORLD,"\n[Error]:[MR][refinement] Empty matrices for new neighbors,\n Exit!\n");
-        exit(1);
-    }
+    printf("[RF][main] num new neighbor p:%d, n:%d\n"
+                ,num_neigh_row_p_,num_neigh_row_n_);
+
+//    if(num_neigh_row_p_ == 0 || num_neigh_row_n_ == 0){
+//        printf("\n[Error]:[MR][refinement] Empty matrices for new neighbors,\n Exit!\n");
+//        exit(1);
+//    }
+    assert (num_neigh_row_p_ && "[MR][refinement] Empty matrices for new neighbors");
+    assert (num_neigh_row_n_ && "[MR][refinement] Empty matrices for new neighbors");
 
     solution sol_refine;
     summary summary_TD;
@@ -78,7 +93,7 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
      *  m_neigh_WA: only specific rows and columns
      *  v_nei_vol: volumes for the points in the m_neigh_WA
      */
-    if( (num_neigh_row_p_ + num_neigh_row_n_)  > Config_params::getInstance()->get_pr_start_partitioning() ){
+    if( (num_neigh_row_p_ + num_neigh_row_n_)  > paramsInst->get_pr_start_partitioning() ){
         // - - - - get the neighbors data points - - - -
         Mat m_neigh_WA_p, m_neigh_WA_n;
         Vec v_neigh_Vol_p, v_neigh_Vol_n;
@@ -134,7 +149,7 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
             printf("[RF][main] + + + + Partitioning, level:%d, iter:%d + + + + \n",level,iter);
 
             // - - - - - - - - - - calc number of partitions - - - - - - - - - -  #1
-            int partition_max_size = Config_params::getInstance()->get_pr_partition_max_size();
+            int partition_max_size = paramsInst->get_pr_partition_max_size();
             PetscInt num_vertex_p, num_vertex_n;
             MatGetSize(m_neigh_WA_p, &num_vertex_p,NULL);
             MatGetSize(m_neigh_WA_n, &num_vertex_n,NULL);
@@ -233,7 +248,7 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
 
             }
 
-            Config_params::getInstance()->update_levels_models_info(level, v_groups.size());        // @072617
+            paramsInst->update_levels_models_info(level, v_groups.size());        // @072617
             t_all_parts_training.stop_timer("[RF][main] training for all partitions");
 
             /// - - - - - - - calculate the quality of the models on Validation Data (boosting, majority voting,...) - - - - - - -
@@ -269,8 +284,8 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
             MatDestroy(&v_mat_all_predict_TD[iter]);
         }
 
-        Config_params::getInstance()->print_summary(curr_level_validation_summary, "[RF][main] VD",level,-2);
-        Config_params::getInstance()->print_summary(summary_TD, "[RF][main] TD",level,-2);
+        paramsInst->print_summary(curr_level_validation_summary, "[RF][main] VD",level,-2);
+        paramsInst->print_summary(summary_TD, "[RF][main] TD",level,-2);
 
         // - - - - - - - - - - prepare the solution - - - - - - - - - -  #7
         if(level > 1 ){
@@ -312,8 +327,8 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p,
         printf("\n[RF][main] * * * * No Partitioning, level:%d * * * * \n",level);
 #endif
 
-        if(Config_params::getInstance()->get_ms_status() &&
-            (num_neigh_row_p_ + num_neigh_row_n_) < Config_params::getInstance()->get_ms_limit()    ){
+        if(paramsInst->get_ms_status() &&
+            (num_neigh_row_p_ + num_neigh_row_n_) < paramsInst->get_ms_limit()    ){
             // ------- call Model Selection (SVM) -------
             ModelSelection ms_refine;
             ms_refine.uniform_design_separate_validation(m_new_neigh_p, v_vol_p, m_new_neigh_n, v_vol_n, true,
@@ -461,7 +476,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 #endif
 
             // - - - select fraction of participants - - -
-            float add_frac_ = ceil(Config_params::getInstance()->get_rf_add_fraction() * ncols); // read add_fraction from parameters
+            float add_frac_ = ceil(paramsInst->get_rf_add_fraction() * ncols); // read add_fraction from parameters
             for (auto it = v_agg_.begin(); it != v_agg_.begin() + add_frac_ ; it++){
                 v_fine_neigh_id[it->index] =1 ;
             }
@@ -505,7 +520,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
     int cnt_agg_part_distant_neighbor = 0;
     int cnt_total=0;
     for(unsigned int i=0; i < v_fine_neigh_id.size(); i++){
-        if(Config_params::getInstance()->get_rf_add_distant_point_status()){
+        if(paramsInst->get_rf_add_distant_point_status()){
             if(v_fine_neigh_id[i] > 0 ){        // it participate directly(1) or it is a distant neighbor(2)
                 ind_[cnt_total] = i;
                 cnt_total++;
@@ -524,7 +539,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 
     // Using WA matrix, find the neighbors of points which are participated in SV's aggregate
 #if dbl_RF_FSN >=1      // this should be 1
-    if(Config_params::getInstance()->get_rf_add_distant_point_status()){
+    if(paramsInst->get_rf_add_distant_point_status()){
         std::cout  << "[RF][FSN]{" << cc_name << "} num of points participated in SV aggregates are: "<< cnt_total - cnt_agg_part_distant_neighbor  << std::endl;
         std::cout  << "[RF][FSN]{" << cc_name << "} num of distant 1 neighbor of above points are::"<< cnt_agg_part_distant_neighbor << std::endl;
     }else{
@@ -591,17 +606,17 @@ void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data
     bool l_inh_param=false;
     double local_param_c=1;
     double local_param_gamma=1;
-    if(Config_params::getInstance()->get_best_params_status()){     // use the best parameters from past trainings
+    if(paramsInst->get_best_params_status()){     // use the best parameters from past trainings
         l_inh_param = true;
-        local_param_c = Config_params::getInstance()->get_best_C();
-        local_param_gamma = Config_params::getInstance()->get_best_gamma();
+        local_param_c = paramsInst->get_best_C();
+        local_param_gamma = paramsInst->get_best_gamma();
     }
                                             // - - - - - load the validation data - - - - -
-    if(Config_params::getInstance()->get_ms_status()){      // - - - - model selection - - - -
+    if(paramsInst->get_ms_status()){      // - - - - model selection - - - -
 
 //        std::cout << "\n\n refinement ----  Iteration "<<
-//                     Config_params::getInstance()->get_main_current_kf_id() <<
-//                     ", level: " << Config_params::getInstance()->get_main_current_level_id() << std::endl;
+//                     paramsInst->get_main_current_kf_id() <<
+//                     ", level: " << paramsInst->get_main_current_level_id() << std::endl;
 
         // call model selection method
         ModelSelection ms_coarsest;
@@ -663,10 +678,10 @@ void Refinement::add_best_model(std::vector<ref_results>& v_ref_results) const{
 #if dbl_RF_ABM >=5
     printf("\n[RF][SBM] final model at each level of refinement (before sort)\n");
     for(auto it=v_ref_results.begin() ; it != v_ref_results.end(); ++it){
-        Config_params::getInstance()->print_summary(it->validation_data_summary, "[RF][SBM] (A v-cycle) VD", it-> level);
+        paramsInst->print_summary(it->validation_data_summary, "[RF][SBM] (A v-cycle) VD", it-> level);
     }
     for(auto it=v_ref_results.begin() ; it != v_ref_results.end(); ++it){
-        Config_params::getInstance()->print_summary(it->test_data_summary, "[RF][SBM] (A v-cycle) TD", it-> level);
+        paramsInst->print_summary(it->test_data_summary, "[RF][SBM] (A v-cycle) TD", it-> level);
     }
 #endif
 
@@ -675,13 +690,13 @@ void Refinement::add_best_model(std::vector<ref_results>& v_ref_results) const{
 #if dbl_RF_ABM >=3
     printf("\n[RF][SBM] final model at each level of refinement (after sort)\n");
     for(auto it=v_ref_results.begin() ; it != v_ref_results.end(); ++it){
-        Config_params::getInstance()->print_summary(it->validation_data_summary, "[RF][SBM] (A v-cycle) VD", it-> level);
+        paramsInst->print_summary(it->validation_data_summary, "[RF][SBM] (A v-cycle) VD", it-> level);
     }
     for(auto it=v_ref_results.begin() ; it != v_ref_results.end(); ++it){
-        Config_params::getInstance()->print_summary(it->test_data_summary, "[RF][SBM] (A v-cycle) TD", it-> level);
+        paramsInst->print_summary(it->test_data_summary, "[RF][SBM] (A v-cycle) TD", it-> level);
     }
 #endif
     // - - - - - add the best model to final results of experiment for this v-cycle - - - - -
-    Config_params::getInstance()->add_final_summary(v_ref_results[0].test_data_summary, v_ref_results[0].level);
+    paramsInst->add_final_summary(v_ref_results[0].test_data_summary, v_ref_results[0].level);
 
 }

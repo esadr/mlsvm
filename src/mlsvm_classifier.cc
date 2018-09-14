@@ -9,6 +9,7 @@
 #include "common_funcs.h"
 //#include "ut_mr.h"
 
+
 Config_params* Config_params::instance = NULL;
 
 int main(int argc, char **argv)

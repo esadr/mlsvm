@@ -7,26 +7,29 @@
 #include <unordered_map>
 #include <iomanip>  //for setprecision
 
+using std::cout; using std::endl;
 
-Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, cs_info& ref_info, bool debug) {
-
+Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices,
+                       cs_info& ref_info, bool debug) {
+    std::string funcIdx = "[CO][CP] ";
     PetscInt num_row;
     MatGetSize(WA,&num_row,0);    //num_row returns the number of rows globally
 //    printf("number of nodes : %d\n",num_row );        //$$debug
     ETimer t_WD;
-    Vec     D_vec;                  //sum of neighbors' weight for each node in the WA matrix
+    //sum of neighbors' weight for each node in the WA matrix
+    Vec     D_vec;
     PetscInt vol_rstart, vol_rend, i,j,D_vec_rstart, D_vec_rend,ncols;
     PetscScalar * vol_array, * D_vec_array;
 
     VecCreateSeq(PETSC_COMM_SELF,num_row,&D_vec);
-//    MatGetDiagonal(WA,D_vec);
-    MatGetRowSum(WA,D_vec);                                 //Calculate sum of each row of W matrix
+    //Calculate sum of each row of W matrix
+    MatGetRowSum(WA,D_vec);
 #if dbl_CO_calcP >= 7
     printf("[Coarsening] D_vec Vector:\n");
     VecView(D_vec,PETSC_VIEWER_STDOUT_WORLD);
 #endif
-
-    VecGetOwnershipRange(vol,&vol_rstart,&vol_rend);        //read the volume from vol vector
+    //read the volume from vol vector
+    VecGetOwnershipRange(vol,&vol_rstart,&vol_rend);
     VecGetArray(vol,&vol_array);
 
     VecGetOwnershipRange(D_vec,&D_vec_rstart,&D_vec_rend);
@@ -43,9 +46,10 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
     VecRestoreArray(D_vec,&D_vec_array);        //Free the D_vec_array
     VecDestroy(&D_vec);                         //Free the D_vector
 //==================== Calculate the future volume =======================
-    Volume      tmp_fut_vol =0;                     //temporary variable for future volume of each node
+    //temporary variable for future volume of each node
+    Volume      tmp_fut_vol =0;
     Volume      sum_future_volume = 0;
-    const PetscInt    *cols;                        //if not NULL, the column numbers
+    const PetscInt    *cols;
     const PetscScalar *vals;
 
 #if dbl_CO_calcP >= 1         //calculate the stat for number of edges
@@ -56,7 +60,8 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
     // For each row
     for(i =0; i <num_row; i++){
         tmp_fut_vol = vertexs.getNode(i).getVolume();       // V_i
-        MatGetRow(WA,i,&ncols,&cols,&vals); //ncols : number if non-zeros in the row
+        //ncols : number if non-zeros in the row
+        MatGetRow(WA,i,&ncols,&cols,&vals);
 
 #if dbl_CO_calcP >= 1         //calculate the stat for number of edges
         sum_nnz += ncols;                       //$$debug
@@ -65,17 +70,20 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
         // For each non-zero item in row i
         for (j=0; j<ncols; j++) {
             if(vertexs.getNode(cols[j]).getSumNeighborsWeight() != 0){
-                tmp_fut_vol += vertexs.getNode(cols[j]).getVolume() * ( vals[j] / vertexs.getNode(cols[j]).getSumNeighborsWeight() );
+                tmp_fut_vol += vertexs.getNode(cols[j]).getVolume()
+                    * ( vals[j] / vertexs.getNode(cols[j]).getSumNeighborsWeight());
             }
             else {
                 tmp_fut_vol += vertexs.getNode(cols[j]).getVolume();
             }
         }
         vertexs.getNode(i).setFutureVolume(tmp_fut_vol);
-        MatRestoreRow(WA,i,&ncols,&cols,&vals);       //Frees any temporary space allocated by MatGetRow()
+        //Frees any temporary space allocated by MatGetRow()
+        MatRestoreRow(WA,i,&ncols,&cols,&vals);
         sum_future_volume += tmp_fut_vol;
 #if dbl_CO_calcP >= 9
-        printf("[CO][calc_p]row: %d Fv: %.4f \n",i,vertexs.getNode(i).getFutureVolume());
+        printf(funcIdx+"row: %d Fv: %.4f \n"
+               , i,vertexs.getNode(i).getFutureVolume());
 #endif
     }//end of for each row (num_row)
 
@@ -83,27 +91,35 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 #if dbl_CO_calcP >= 1         //calculate the stat for number of edges
     ref_info.num_point = num_row;
     ref_info.num_edge = sum_nnz / 2;
-//    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} number of rows:"<< num_row <<
-//                "\t\tedges:"<< ref_info.num_edge << std::endl;
-    std::sort(stat_degree_.begin(), stat_degree_.end(), std::greater<tmp_degree>());     //Sort all edges in descending order
+//    cout <<funcIdx+"{" << this->cc_name <<"} number of rows:"<< num_row <<
+//                "\t\tedges:"<< ref_info.num_edge << endl;
+    //Sort all edges in descending order
+    std::sort(stat_degree_.begin(), stat_degree_.end()
+              , std::greater<tmp_degree>());
 
     ref_info.min_num_edge = stat_degree_[num_row-1].degree_;
-    ref_info.avg_num_edge = (PetscScalar)sum_nnz / (PetscScalar)num_row;    // this is average degree of nodes, which I should not consider unique edges
+    // this is average degree of nodes, which I should not consider unique edges
+    ref_info.avg_num_edge = (PetscScalar)sum_nnz / (PetscScalar)num_row;
     ref_info.max_num_edge = stat_degree_[0].degree_;
     if(num_row%2)   //odd number of rows
         ref_info.median_num_edge =  stat_degree_[num_row/2].degree_;
     else            //even number of rows
-        ref_info.median_num_edge =  (stat_degree_[num_row/2 - 1].degree_ + stat_degree_[num_row/2 ].degree_) / 2;
-    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} Degrees\t Max:" << ref_info.max_num_edge <<
-                "\t\tMin:" << ref_info.min_num_edge << "\t\tAvg:"<< ref_info.avg_num_edge  <<
-                "\t\tMedian:"<< ref_info.median_num_edge  << std::endl;
+        ref_info.median_num_edge =  (stat_degree_[num_row/2 - 1].degree_
+                + stat_degree_[num_row/2 ].degree_) / 2;
+//    cout <<funcIdx+"{" << this->cc_name <<"} Degrees | Max:"
+    cout <<funcIdx+" Degrees | Max:"
+        << ref_info.max_num_edge
+        << " | Min:" << ref_info.min_num_edge
+        << " | Mean:"<< ref_info.avg_num_edge
+        << " | Median:"<< ref_info.median_num_edge
+        << " |" << endl;
 #endif
 
     vertexs.setAvgFutureVolume( sum_future_volume / vertexs.getSize());
 
 #if dbl_CO_calcP >= 3
-    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} Average Future Volume:"<< sum_future_volume / vertexs.getSize() << std::endl;
-    t_WD.stop_timer("[CO][calc_p]Calc future volume");
+    cout <<funcIdx+"{" << this->cc_name <<"} Average Future Volume:"<< sum_future_volume / vertexs.getSize() << endl;
+    t_WD.stop_timer(funcIdx+"Calc future volume");
 #endif
 
 //==================== Select strong Seeds ============================
@@ -116,7 +132,7 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 #endif
 //        t_sseed.stop_timer("select strong seeds:");
 #if dbl_CO_calcP >=7
-    std::cout << "list of seeds that has larger future volume than average \n";                 //$$debug
+    cout << "list of seeds that has larger future volume than average \n";                 //$$debug
     vertexs.printSeeds();                                                                       //$$debug
 #endif
 
@@ -151,15 +167,15 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
         }
     }
 #if dbl_CO_calcP >=3
-    t_recalc_fv.stop_timer("[CO][calc_p]Recalc FV");
+    t_recalc_fv.stop_timer(funcIdx+"Recalc FV");
 #endif
 
     std::sort(F_nodes_.begin(), F_nodes_.end(), std::greater<tmp_future_volume>());     //Sort all F nodes in descending order
 
 #if dbl_CO_calcP >=7
-        std::cout<< "\nPrint temporary vector of nodes After sort :\n" ;        //$$debug
+        cout<< "\nPrint temporary vector of nodes After sort :\n" ;        //$$debug
         for (auto it = F_nodes_.begin(); it != F_nodes_.end(); ++it) {
-            std::cout << "Index : "<<it->node_index << " new FV :"<< it->future_volume << "\n";
+            cout << "Index : "<<it->node_index << " new FV :"<< it->future_volume << "\n";
         }
 #endif
 #if dbl_CO_calcP >=3
@@ -196,7 +212,7 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 #endif
     }
 #if dbl_CO_calcP >= 3
-    t_update_C.stop_timer("[CO][calc_p]Add points from F to C");
+    t_update_C.stop_timer(funcIdx+"Add points from F to C");
 #endif
 
     if (num_row < Config_params::getInstance()->get_coarse_threshold() ){       //when the data doesn't need coarsening anymore, move all nodes to C
@@ -229,18 +245,18 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
 //    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, Config_params::getInstance()->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
     float threshold=Config_params::getInstance()->get_cs_boundary_points_threshold();    //Experiment boundary points (Jan 9, 2017);
     size_t ultimate_estimated_fractions=Config_params::getInstance()->get_cs_boundary_points_max_num();    //Experiment boundary points (Jan 9, 2017)
-//    std::cout << "[CO][calc_p] DEBUG boundary points t:" << threshold << ", max fractions:" << ultimate_estimated_fractions << std::endl;
+//    cout << funcIdx+" DEBUG boundary points t:" << threshold << ", max fractions:" << ultimate_estimated_fractions << endl;
     
 //#if boundary_points == 0    //Experiment boundary points (Jan 9, 2017)
     bool is_boundary_points_active = Config_params::getInstance()->get_cs_boundary_points_status();
-//    std::cout << "[CO][calc_p] DEBUG boundary points status:" << is_boundary_points_active << std::endl;
+//    cout << funcIdx+" DEBUG boundary points status:" << is_boundary_points_active << endl;
     if(! is_boundary_points_active){
         MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, Config_params::getInstance()->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
-//        std::cout << "[CO][calc_p] DEBUG P matrix is created with fixed number of fractions (no boundary) nnz:" << Config_params::getInstance()->get_coarse_r() << std::endl;
+//        cout << funcIdx+" DEBUG P matrix is created with fixed number of fractions (no boundary) nnz:" << Config_params::getInstance()->get_coarse_r() << endl;
 //#else       //boundary_points == 1 , 20 is constant as the maximum number of estimated fractions for a fine point
     }else{
         MatCreateSeqAIJ(PETSC_COMM_SELF,num_row, this->num_coarse_points, ultimate_estimated_fractions, PETSC_NULL, &P);
-        std::cout << "[CO][calc_p] DEBUG P matrix is created for boundary points with nnz:" << ultimate_estimated_fractions << std::endl;
+        cout << funcIdx+" DEBUG P matrix is created for boundary points with nnz:" << ultimate_estimated_fractions << endl;
     }
 //#endif
 
@@ -252,7 +268,7 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
            num_row,this->num_coarse_points,Config_params::getInstance()->get_coarse_r());
 #endif
     for(i =0; i <num_row; ++i){                             //All nodes in V (i == node id )
-        if(debug) std::cout << i << ", ";
+        if(debug) cout << i << ", ";
         if(vertexs.getNode(i).getIsSeed()){                 //if the node is seed ==> value == 1
             MatSetValue(P,i,seeds_indices[i],1,INSERT_VALUES);
         }
@@ -310,11 +326,11 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices, c
                     max_fraction = std::min(filter_nodes_p.size() -1 , ultimate_estimated_fractions);  // it should not go beyound ultimate number of fractions which cause memory preallocation error in PETSc matrix
 //                    for (auto it = filter_nodes_p.begin(); it != filter_nodes_p.end(); it++) {
 //                        MatSetValue(P,i,it->seed_index,( it->p_value ) ,INSERT_VALUES);
-//                        if(debug) std::cout << "[CO][calc_p] inside filter nodes, i: " << i <<
+//                        if(debug) cout << funcIdx+" inside filter nodes, i: " << i <<
 //                                               ", seed index:" << it->seed_index  <<
-//                                               ", value:" << it->p_value  << std::endl;
+//                                               ", value:" << it->p_value  << endl;
 //                    }
-//                    if(debug) std::cout << "[CO][calc_p] fine row: " << i << " max_fraction:" << max_fraction << std::endl;
+//                    if(debug) cout << funcIdx+" fine row: " << i << " max_fraction:" << max_fraction << endl;
 
                 }else{  // Find the max number of fractions
                     if( Config_params::getInstance()->get_coarse_r() <  (filter_nodes_p.end() - filter_nodes_p.begin()) ){
@@ -399,15 +415,15 @@ Mat Coarsening::calc_P_without_shrinking(Mat& WA, Vec& vol,std::vector<NodeId>& 
 
     ref_info.num_point = num_row;
     ref_info.num_edge = sum_nnz / 2;
-    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} number of rows:"<< num_row <<
-                "\t\tedges:"<< ref_info.num_edge << std::endl;
+    cout <<"[CO][calc_p]{" << this->cc_name <<"} number of rows:"<< num_row <<
+                "\t\tedges:"<< ref_info.num_edge << endl;
     std::sort(stat_degree_.begin(), stat_degree_.end(), std::greater<tmp_degree>());     //Sort all edges in descending order
 
     ref_info.min_num_edge = stat_degree_[num_row-1].degree_;
     ref_info.avg_num_edge = (sum_nnz/2) / num_row;
     ref_info.max_num_edge = stat_degree_[0].degree_;
-    std::cout <<"[CO][calc_p]{" << this->cc_name <<"} Degrees\t Max:" << ref_info.max_num_edge <<
-                "\t\tMin:" << ref_info.min_num_edge << "\t\tAvg:"<< ref_info.avg_num_edge  <<  std::endl;
+    cout <<"[CO][calc_p]{" << this->cc_name <<"} Degrees\t Max:" << ref_info.max_num_edge <<
+                "\t\tMin:" << ref_info.min_num_edge << "\t\tAvg:"<< ref_info.avg_num_edge  <<  endl;
 #endif
 
 
@@ -443,15 +459,15 @@ Mat Coarsening::calc_P_without_shrinking(Mat& WA, Vec& vol,std::vector<NodeId>& 
 Mat Coarsening::calc_aggregate_data(Mat& P, Mat& data, Vec& v_vol, std::vector<NodeId>& v_seed_index) {
     ETimer t_calc_agg_data;
     if(Config_params::getInstance()->get_cs_use_real_points()){
-        std::cout << "[CO][CAD] Use Real points" << std::endl;
+        cout << "[CO][CAD] Use Real points" << endl;
         Mat m_dt_c;
         IS              is_seed_;
         PetscInt        * ind_seed_;
         PetscMalloc1(v_seed_index.size(), &ind_seed_);
 
-        std::cout << "[CO][CAD] number of seeds:" << v_seed_index.size() << std::endl;
+        cout << "[CO][CAD] number of seeds:" << v_seed_index.size() << endl;
         for (unsigned int i = 0; i != v_seed_index.size(); i++) {
-    //            std::cout << i << ":"<< v_seed_index[i]  << std::endl;
+    //            cout << i << ":"<< v_seed_index[i]  << endl;
             ind_seed_[i]=  v_seed_index[i];
         }
 
@@ -465,7 +481,7 @@ Mat Coarsening::calc_aggregate_data(Mat& P, Mat& data, Vec& v_vol, std::vector<N
         return m_dt_c;
 
     }else{      // default method which calculates the fake points for the coarser level
-//        std::cout << "[CO][CAD] Calc Fake points" << std::endl;
+//        cout << "[CO][CAD] Calc Fake points" << endl;
         Mat m_dt_c;
     #if dbl_CO_CAD >= 7
         printf("[CO][CAD] data matrix:\n");                           //$$debug
@@ -769,7 +785,7 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
     umap_marked.reserve(num_row*10);      //reserve the space for all rows  // 10 is not optimized
 //    t_fwe.stop_timer("[CO][FWE] checkpoint 1: sum of rows are calculated");
 //    ETimer t_mark_weak_edges;
-//    std::cout << "[CO][FWE] save edges" << std::endl;
+//    cout << "[CO][FWE] save edges" << endl;
     double trs_=0.00001;
     // - - - - 1st round on matrix to find weak edges - - - -
     for(PetscInt i=0; i<num_row; i++){
@@ -780,15 +796,15 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
 //        }
 
 //        avg_weight = a_sum_row[i] / nnz_real;  //calc average edge weight
-//        std::cout << "[CO][FWE] average edge weight"<<avg_weight << std::endl;
+//        cout << "[CO][FWE] average edge weight"<<avg_weight << endl;
 //        a_nnz_per_row[i] = nnz_real;                        // this is not ultimate num_nnz because, the weak edges are going to be removed later
         a_nnz_per_row[i] = ncols;                        // this is not ultimate num_nnz because, the weak edges are going to be removed later
 #if dbl_CO_FWE >=9
-//        std::cout << " alfa * aveg_weight:"<< alfa * avg_weight <<", nnz_real:"<<nnz_real<< std::endl;
-        std::cout << "alfa * sum_weigth:"<< alfa * a_sum_row[i] << std::endl;
+//        cout << " alfa * aveg_weight:"<< alfa * avg_weight <<", nnz_real:"<<nnz_real<< endl;
+        cout << "alfa * sum_weigth:"<< alfa * a_sum_row[i] << endl;
 #endif
         for(int j=0; j<ncols; j++){
-//            std::cout << "i:"<<i<<" vals[j]:"<< vals[j] << std::endl;
+//            cout << "i:"<<i<<" vals[j]:"<< vals[j] << endl;
 //            if( (i != cols[j]) && (vals[j] < (alfa * avg_weight)) ){
             if( (i != cols[j]) && (vals[j] < (alfa * a_sum_row[i])) ){      //since I don't need to divide it to degree of node which is nnz_real
                 //add to ds (i, cols[j])
@@ -806,7 +822,7 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
                     umap_marked[edge_pair] = false;
 
 #if dbl_CO_FWE >=9
-                std::cout << "(i:"<< i<<",j:"<< cols[j] <<")\n";
+                cout << "(i:"<< i<<",j:"<< cols[j] <<")\n";
 #endif
             }
         }
@@ -828,7 +844,7 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
             a_nnz_per_row[it->first.first]--;   //as an edge is removed from row i, in case another matrix is created based on this info
             cnt_filtered++;
         #if dbl_CO_FWE >=9
-            std::cout << "(i:"<< it->first.first<<",j:"<< it->first.second <<") is removed and vice versa\n";
+            cout << "(i:"<< it->first.first<<",j:"<< it->first.second <<") is removed and vice versa\n";
         #endif
 
         }
@@ -842,7 +858,7 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
 //    t_zero_weak_edges_assemble.stop_timer("[CO][FWE] zero weak edges in original adjacency (only Assembly part)");
 //    t_fwe.stop_timer("[CO][FWE] checkpoint 4: after assembly");
 #if dbl_CO_FWE >=3
-//    std::cout << "[CO][FWE]{" << this->cc_name <<"} "<< cnt_filtered /2 <<" edges are filtered from WA_c (coarser level)" << std::endl;
+//    cout << "[CO][FWE]{" << this->cc_name <<"} "<< cnt_filtered /2 <<" edges are filtered from WA_c (coarser level)" << endl;
     #if dbl_CO_FWE >=7
         printf("[CO][FWE] filtered matrix:\n");                                     //$$debug
         MatView(A,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
@@ -854,8 +870,8 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, PETSC_NULL, a_nnz_per_row, &m_Anz);
     PetscFree(a_nnz_per_row);
     MatGetSize(m_Anz,&num_row, &num_col);
-//    std::cout << "[CO][FWE] final matrix dimension is ("<<num_row <<"x"<<num_col<<")" << std::endl; // it is a symmetric matrix
-    t_fwe.stop_timer("[CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements");
+//    cout << "[CO][FWE] final matrix dimension is ("<<num_row <<"x"<<num_col<<")" << endl; // it is a symmetric matrix
+//    t_fwe.stop_timer("[CO][FWE] checkpoint 5: new matrix is created, before loop to copy all elements");
     // - - - - 2nd round : create clean matrix - - - -
     for(int i=0; i<num_row; i++){
         MatGetRow(A,i,&ncols,&cols,&vals);
@@ -877,8 +893,13 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
     PetscInt filtered_edges_ = cnt_filtered /2;
     PetscInt total_edges_ = filtered_edges_ + (num_real_non_zero /2);
     float percentage_ = ((double)filtered_edges_ / (double)total_edges_ ) * 100 ;
-    std::cout << "[CO][FWE]{" << this->cc_name << "} level:"<< level << ", all edges:"<< total_edges_ <<", filtered:"
-              << filtered_edges_ << ", remained:" << num_real_non_zero /2 << ", filtered:" << std::fixed << std::setprecision(2) << percentage_  <<"%\n" ;
+//    cout << "[CO][FWE]{" << this->cc_name << "} level:"<< level
+    cout << "[CO][FWE] level:"<< level
+         << ", all edges:"<< total_edges_
+         << ", filtered:" << filtered_edges_
+         << ", remained:" << num_real_non_zero /2
+         << ", filtered:" << std::fixed << std::setprecision(2) << percentage_
+         <<"%" << endl ;
 
 
 //    PetscPrintf(PETSC_COMM_WORLD, (", %2f\%\n", percentage_ );

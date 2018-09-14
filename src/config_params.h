@@ -9,6 +9,8 @@
 #include <ctime>
 #include "petscvec.h"
 
+#define paramsInst Config_params::getInstance()
+
 class Config_params{
 private:
     Config_params(){}

@@ -7,7 +7,7 @@
 #include <thread>
 #include <cassert>
 
-#define paramsInst Config_params::getInstance()
+
 using std::cout; using std::endl;
 
 solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
