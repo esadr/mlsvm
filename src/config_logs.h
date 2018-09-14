@@ -75,7 +75,7 @@
 #define dbl_PR_CPM                  0           // 0 Default    //calc_performance_measure  5 prints final predicted label
 //---- Model Selection ----
 #define dbl_MS_UD                   1           // 1 Default
-#define dbl_MS_UDSepVal             0           // 1 Default    //release 0
+#define dbl_MS_UDSepVal             1           // 1 Default   print the best validation results //release 0
 #define dbl_MS_UDIB                 1           // 1 Default
 #define dbl_MS_combine_test_data    0
 #define dbl_MS_ud_param_generator   0           // 0 Default, 3 shows new parameters
