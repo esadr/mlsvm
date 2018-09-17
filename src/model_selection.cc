@@ -650,7 +650,9 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
                                         , ud_params_st_1[i].C, ud_params_st_1[i].G);
         v_solver.push_back(sv);
         //predict the validation data not the test data
-        sv.predict_validation_data(m_VD_p, m_VD_n, current_summary, solver_id);
+        sv.predict_validation_data(m_VD_p, m_VD_n
+                                   , current_summary
+                                   , solver_id);
 //            sv.free_solver("[MS][UDSepVal] ");   //free the solver
         v_summary.push_back(current_summary);
 #if dbl_MS_UDSepVal >= 3

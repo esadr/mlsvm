@@ -119,7 +119,14 @@ public:
 //    std::map<measures,double> test_predict(Mat& );
     void test_predict(Mat& test_data, summary& result_summary, int iteration=-1);
     
-    void predict_validation_data(Mat& m_VD_p,Mat& m_VD_n, summary& result_summary, int iteration);
+    /*
+     * verbose added 091618-2113 to print the validation results
+     * in refinement with no model selection (for large datasets)
+     */
+    void predict_validation_data(Mat& m_VD_p,Mat& m_VD_n
+                                 , summary& result_summary
+                                 , int iteration
+                                 , bool verbose=false);
 
     svm_model * get_model(){return local_model;}
 

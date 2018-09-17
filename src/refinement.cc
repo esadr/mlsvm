@@ -10,6 +10,8 @@
 
 #include <thread>
 
+using std::cout; using std::endl;
+
 struct selected_agg
 {
     int index;
@@ -99,8 +101,10 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
         Vec v_neigh_Vol_p, v_neigh_Vol_n;
 
         printf("[RF][main] Get the neighbors WA, Vol at level:%d\n",level);
-        MatGetSubMatrix(m_WA_p, IS_neigh_p, IS_neigh_p,MAT_INITIAL_MATRIX,&m_neigh_WA_p);
-        MatGetSubMatrix(m_WA_n, IS_neigh_n, IS_neigh_n,MAT_INITIAL_MATRIX,&m_neigh_WA_n);
+        MatGetSubMatrix(m_WA_p, IS_neigh_p, IS_neigh_p,MAT_INITIAL_MATRIX
+                        , &m_neigh_WA_p);
+        MatGetSubMatrix(m_WA_n, IS_neigh_n, IS_neigh_n,MAT_INITIAL_MATRIX
+                        , &m_neigh_WA_n);
         VecGetSubVector(v_vol_p, IS_neigh_p, &v_neigh_Vol_p);
         VecGetSubVector(v_vol_n, IS_neigh_n, &v_neigh_Vol_n);
 
@@ -108,11 +112,14 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
         MatDestroy(&m_WA_n);
 
     #if dbl_RF_main >=5   //5
-        PetscInt num_row_neigh_WA_p, num_row_neigh_WA_n, num_col_neigh_WA_p, num_col_neigh_WA_n;
+        PetscInt num_row_neigh_WA_p, num_row_neigh_WA_n
+                , num_col_neigh_WA_p, num_col_neigh_WA_n;
         MatGetSize(m_neigh_WA_p,&num_row_neigh_WA_p, &num_col_neigh_WA_p);
         MatGetSize(m_neigh_WA_n,&num_row_neigh_WA_n, &num_col_neigh_WA_n);
-        PetscPrintf(PETSC_COMM_WORLD,"[RF][main]{beginnig} Minority class neigh_WA dim is:[%dx%d]\n",num_row_neigh_WA_p,num_col_neigh_WA_p);
-        PetscPrintf(PETSC_COMM_WORLD,"[RF][main]{beginnig} Majority class neigh_WA dim is:[%dx%d]\n",num_row_neigh_WA_n,num_col_neigh_WA_n);
+        printf("[RF][main]{beginnig} Minority class neigh_WA dim is:[%dx%d]\n"
+               , num_row_neigh_WA_p,num_col_neigh_WA_p);
+        printf("[RF][main]{beginnig} Majority class neigh_WA dim is:[%dx%d]\n"
+               , num_row_neigh_WA_n,num_col_neigh_WA_n);
     #endif
 
         // try different partitioning of same input data (1 ignores it), iter passes to get_parts as random seed to metis
@@ -168,8 +175,8 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
                 /* DEBUG
                 int num_non_empty_part_p = pt.get_parts(m_neigh_WA_p,v_neigh_Vol_p, num_partitions_p, level, vv_parts_p, m_parts_p);   // get partitions (Metis)
                 if(num_non_empty_part_p != num_partitions_p){
-                    std::cout << "[RF][main] inside while for get_part P num_part_p:" << num_partitions_p <<
-                                     ", num_non_empty_part_p:" << num_non_empty_part_p <<" Exit after export!" << std::endl;
+                    cout << "[RF][main] inside while for get_part P num_part_p:" << num_partitions_p <<
+                                     ", num_non_empty_part_p:" << num_non_empty_part_p <<" Exit after export!" << endl;
                     CommonFuncs cf;         /// - - - - export information to debug the problem - - - -
                     cf.exp_vector(v_vol_p, "./data","whole_v_vol_p.dat","[RF]");
                     cf.exp_vector(v_neigh_Vol_p, "./data","v_neigh_vol_p.dat","[RF]");
@@ -190,8 +197,8 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
                 std::vector<std::vector<PetscInt>> vv_parts_n(num_partitions_n);
                 int num_non_empty_part_n =  pt.get_parts(m_neigh_WA_n,v_neigh_Vol_n, num_partitions_n, level, vv_parts_n, m_parts_n,iter);
                 if(num_non_empty_part_n != num_partitions_n){   // debug empty partitions
-                    std::cout << "[RF][main] inside while for get_part N num_part_n:" << num_partitions_n <<
-                                     ", num_non_empty_part_n:" << num_non_empty_part_n <<" Exit after export!" << std::endl;
+                    cout << "[RF][main] inside while for get_part N num_part_n:" << num_partitions_n <<
+                                     ", num_non_empty_part_n:" << num_non_empty_part_n <<" Exit after export!" << endl;
                     CommonFuncs cf;         /// - - - - export information to debug the problem - - - -
                     cf.exp_vector(v_vol_n, "./data","whole_v_vol_n.dat","[RF]");
                     cf.exp_vector(v_neigh_Vol_n, "./data","v_neigh_vol_n.dat","[RF]");
@@ -289,20 +296,20 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
 
         // - - - - - - - - - - prepare the solution - - - - - - - - - -  #7
         if(level > 1 ){
-            std::cout << "[RF][main] prepareing the solution except for the finest level" << std::endl;
-//            std::cout << "[RF][main] before prepare solution minority" << std::endl;
+            cout << "[RF][main] prepareing the solution except for the finest level" << endl;
+//            cout << "[RF][main] before prepare solution minority" << endl;
             for(auto it = uset_SV_index_p.begin(); it!=uset_SV_index_p.end(); it++){
                     sol_refine.p_index.push_back(*it);
                 }
-//            std::cout << "[RF][main] before prepare solution majority" << std::endl;
+//            cout << "[RF][main] before prepare solution majority" << endl;
             for(auto it = uset_SV_index_n.begin(); it!=uset_SV_index_n.end(); it++){
                     sol_refine.n_index.push_back(*it);
                 }
-            std::cout << "[RF][main] after prepare solution majority" << std::endl;
+            cout << "[RF][main] after prepare solution majority" << endl;
             sol_refine.C = sol_coarser.C;
             sol_refine.gamma = sol_coarser.gamma;
         #if dbl_RF_main_with_partition >=3
-            std::cout << "[RF][main] nSV+:"<< uset_SV_index_p.size() << " nSV-:"<< uset_SV_index_n.size() << std::endl;
+            cout << "[RF][main] nSV+:"<< uset_SV_index_p.size() << " nSV-:"<< uset_SV_index_n.size() << endl;
         #endif
 
 
@@ -315,7 +322,7 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
         VecDestroy(&v_vol_p);   // I shouldn't destroy them as long as I haven't restore the subvector
         VecDestroy(&v_vol_n);
     #if dbl_RF_main_with_partition >= 3
-        std::cout << "\n[MS][PS] ------------ end of partitioning at level " << level << " ------------\n" << std::endl;
+        cout << "\n[MS][PS] ------------ end of partitioning at level " << level << " ------------\n" << endl;
     #endif
     }
     else
@@ -331,25 +338,58 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
             (num_neigh_row_p_ + num_neigh_row_n_) < paramsInst->get_ms_limit()    ){
             // ------- call Model Selection (SVM) -------
             ModelSelection ms_refine;
-            ms_refine.uniform_design_separate_validation(m_new_neigh_p, v_vol_p, m_new_neigh_n, v_vol_n, true,
-                                                         sol_coarser.C, sol_coarser.gamma, m_VD_p, m_VD_n, level, sol_refine, v_ref_results);
+            ms_refine.uniform_design_separate_validation(m_new_neigh_p, v_vol_p
+                                                         , m_new_neigh_n
+                                                         , v_vol_n, true
+                                                         , sol_coarser.C
+                                                         , sol_coarser.gamma
+                                                         , m_VD_p, m_VD_n
+                                                         , level, sol_refine
+                                                         , v_ref_results);
 #if dbl_RF_main_no_partition >=1
-            std::cout << "[RF]{no partitioning} ms_active uniform design is finished!\n";
+            cout << "[RF]{no partitioning} ms_active uniform design is finished!\n";
 #endif
 
         }else{  // No model selection either because it is disabled or the threshold is reached
             Solver sv_refine;
             svm_model * trained_model;
-            trained_model = sv_refine.train_model(m_new_neigh_p, v_vol_p, m_new_neigh_n, v_vol_n, 1, sol_coarser.C,sol_coarser.gamma) ;
+            trained_model = sv_refine.train_model(m_new_neigh_p, v_vol_p
+                                                  , m_new_neigh_n
+                                                  , v_vol_n, true
+                                                  , sol_coarser.C
+                                                  , sol_coarser.gamma) ;
+            /* Added 091618_1821
+            The validation is required to add this run to the rest of
+            the models for different levels which I can select the best
+            one in the end of refinement.
+            */
+
+            //map that contains all the measures
+            summary current_val_summary;
+            sv_refine.predict_validation_data(m_VD_p, m_VD_n
+                                              , current_val_summary
+                                              , 0, true);
             sv_refine.evaluate_testdata(level,summary_TD);
 
-            std::cout << "[RF]{no partitioning}{no model selection} the validation should be add, and the result should be saved!, EXIT!\n";
-            std::cout << "[RF]{no partitioning}{no model selection} Either increase the model selection threshold or reduce the start of partitioning to fix this.\n";
-            exit(1); // #todolist
+            ref_results refinement_results ;
+            refinement_results.validation_data_summary = current_val_summary;
+            refinement_results.test_data_summary = summary_TD;
+            refinement_results.level = level;
+            v_ref_results.push_back(refinement_results);
+
+//            cout << "[RF]{no partitioning}{no model selection}"
+//                 << " the validation should be add, and the result should be saved!, EXIT!\n";
+//            cout << "[RF]{no partitioning}{no model selection}"
+//                 << " Either increase the model selection threshold or"
+//                 << " reduce the start of partitioning to fix this.\n";
+//            exit(1); // #todolist
+            cout << "WARNING: no model selection for parameter fitting!"<< endl;
 //            v_perf_per_level_refinement.push_back(summary_TD);           //collect the final best model at each level
             sv_refine.prepare_solution_single_model(trained_model,num_neigh_row_p_,sol_refine);
             sv_refine.free_solver("[RF]");
             // models are exported in the solver class if it is needed
+
+
         }
 
     #if dbl_RF_main >=5
@@ -397,13 +437,13 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 
     MatGetSize(m_data,&num_row_fine_points,NULL);
 #if dbl_RF_FSN >=5
-    std::cout << "[RF][FSN]{" << cc_name << "} m_data num row as num_row_fine_points:"<< num_row_fine_points <<std::endl;
+    cout << "[RF][FSN]{" << cc_name << "} m_data num row as num_row_fine_points:"<< num_row_fine_points <<endl;
 #endif
     /// - - - - - - - - - Create P Transpose matrix - - - - - - - -
     // P' : find fine points in rows instead of columns due to performance issues with Aij matrix
     num_seeds = (int) seeds_ind.size();
 #if dbl_RF_FSN >=3
-    std::cout  << "[RF][FSN]{" << cc_name << "} initialize num_seeds:" << num_seeds << "\n";
+    cout  << "[RF][FSN]{" << cc_name << "} initialize num_seeds:" << num_seeds << "\n";
 #endif
     PetscMalloc1(num_row_fine_points,&ind_);
     Mat m_Pt_;
@@ -413,12 +453,12 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
     PetscInt num_row_m_Pt_, num_col_m_Pt_;
     MatGetSize(m_Pt_,&num_row_m_Pt_,&num_col_m_Pt_);
 #if dbl_RF_FSN >=5
-    std::cout << "[RF][FSN]{" << cc_name << "} P transpose dim ["<< num_row_m_Pt_ <<","<< num_col_m_Pt_ << "]" <<std::endl;
-    std::cout << "[RF][FSN]{" << cc_name << "} m_data num rows:"<< num_row_fine_points << std::endl;
+    cout << "[RF][FSN]{" << cc_name << "} P transpose dim ["<< num_row_m_Pt_ <<","<< num_col_m_Pt_ << "]" <<endl;
+    cout << "[RF][FSN]{" << cc_name << "} m_data num rows:"<< num_row_fine_points << endl;
     #if dbl_RF_FSN >=7            //should be above 7
-        std::cout << "[RF][FSN]{" << cc_name << "} list of all SVs are:\n";
+        cout << "[RF][FSN]{" << cc_name << "} list of all SVs are:\n";
 //        if(cc_name == "Majority"){
-            std::cout << "[RF][FSN]{" << cc_name << "} [HINT]for no fake point, they should start from zero, not couple hundreds:\n";
+            cout << "[RF][FSN]{" << cc_name << "} [HINT]for no fake point, they should start from zero, not couple hundreds:\n";
 //        }
         // num_seeds comes from number of SV from the solution from model selection
         for(unsigned int i=0; i < num_seeds ; i++){
@@ -443,13 +483,13 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 
 #if dbl_RF_FSN >=1
         if(ncols == 0){
-            std::cout  << "[RF][FSN]{" << cc_name << "} empty row in P' at row i:"<< i
-                       << " seeds_ind[i]:" << seeds_ind[i] << " ncols:" << ncols << std::endl;
+            cout  << "[RF][FSN]{" << cc_name << "} empty row in P' at row i:"<< i
+                       << " seeds_ind[i]:" << seeds_ind[i] << " ncols:" << ncols << endl;
             exit(1);
         }
         #if dbl_RF_FSN >=3
-            std::cout  << "[RF][FSN]{" << cc_name << "} MatGetRow of P' matrix in loop seeds_ind[i]:"
-                           << seeds_ind[i] << " ncols:" << ncols << std::endl;
+            cout  << "[RF][FSN]{" << cc_name << "} MatGetRow of P' matrix in loop seeds_ind[i]:"
+                           << seeds_ind[i] << " ncols:" << ncols << endl;
         #endif
 #endif
         // - - - - if there is only one node in this aggregate, select it - - - -
@@ -488,7 +528,7 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
     }
     MatDestroy(&m_Pt_);
 #if dbl_RF_FSN >=9
-    std::cout<<"[RF][find_SV_neighbors] num_seeds:"<<num_seeds<<std::endl;
+    cout<<"[RF][find_SV_neighbors] num_seeds:"<<num_seeds<<endl;
 #endif
     /// - - - - - - - - - Add distant points - - - - - - - - -
 
@@ -540,11 +580,11 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
     // Using WA matrix, find the neighbors of points which are participated in SV's aggregate
 #if dbl_RF_FSN >=1      // this should be 1
     if(paramsInst->get_rf_add_distant_point_status()){
-        std::cout  << "[RF][FSN]{" << cc_name << "} num of points participated in SV aggregates are: "<< cnt_total - cnt_agg_part_distant_neighbor  << std::endl;
-        std::cout  << "[RF][FSN]{" << cc_name << "} num of distant 1 neighbor of above points are::"<< cnt_agg_part_distant_neighbor << std::endl;
+        cout  << "[RF][FSN]{" << cc_name << "} num of points participated in SV aggregates are: "<< cnt_total - cnt_agg_part_distant_neighbor  << endl;
+        cout  << "[RF][FSN]{" << cc_name << "} num of distant 1 neighbor of above points are::"<< cnt_agg_part_distant_neighbor << endl;
     }else{
-        std::cout  << "[RF][FSN]{" << cc_name << "} num of points participated in SV aggregates are: "<< cnt_total <<
-                      " and distant neighbors are ignored!" << std::endl;
+        cout  << "[RF][FSN]{" << cc_name << "} num of points participated in SV aggregates are: "<< cnt_total <<
+                      " and distant neighbors are ignored!" << endl;
     }
 
 #endif
@@ -571,12 +611,12 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
     PetscInt m_neighbors_num_row =0, m_neighbors_num_col;
     MatGetSize(m_neighbors ,&m_neighbors_num_row,&m_neighbors_num_col);
 
-    std::cout  << "[RF][FSN]{" << cc_name
+    cout  << "[RF][FSN]{" << cc_name
                   << "} new sub matrix dimension #row:" << m_neighbors_num_row
-                  << ",#col:" <<m_neighbors_num_col << std::endl;
+                  << ",#col:" <<m_neighbors_num_col << endl;
 #endif
 #if dbl_RF_FSN >=7      //default is 7
-    std::cout  << "[RF][FSN]{" << cc_name << "} m_neighbors matrix:\n";                       //$$debug
+    cout  << "[RF][FSN]{" << cc_name << "} m_neighbors matrix:\n";                       //$$debug
     MatView(m_neighbors,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
 #endif
 //    ISDestroy(&IS_neigh_id);  // Don't destroy it. It is required later in the partitioning
@@ -592,13 +632,13 @@ void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data
     PetscInt check_num_row_VD;
     MatGetSize(m_VD_p, &check_num_row_VD, NULL );
     if(!check_num_row_VD){
-        std::cout << "[RF][PCL] empty validation data for minority class, Exit!" << std::endl;
+        cout << "[RF][PCL] empty validation data for minority class, Exit!" << endl;
         exit(1);
     }
 
     MatGetSize(m_VD_n, &check_num_row_VD, NULL );
     if(!check_num_row_VD){
-        std::cout << "[RF][PCL] empty validation data for majority class, Exit!" << std::endl;
+        cout << "[RF][PCL] empty validation data for majority class, Exit!" << endl;
         exit(1);
     }
 
@@ -614,15 +654,15 @@ void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data
                                             // - - - - - load the validation data - - - - -
     if(paramsInst->get_ms_status()){      // - - - - model selection - - - -
 
-//        std::cout << "\n\n refinement ----  Iteration "<<
+//        cout << "\n\n refinement ----  Iteration "<<
 //                     paramsInst->get_main_current_kf_id() <<
-//                     ", level: " << paramsInst->get_main_current_level_id() << std::endl;
+//                     ", level: " << paramsInst->get_main_current_level_id() << endl;
 
         // call model selection method
         ModelSelection ms_coarsest;
         ms_coarsest.uniform_design_separate_validation(m_data_p, v_vol_p, m_data_n, v_vol_n, l_inh_param, local_param_c, local_param_gamma,
                                                        m_VD_p, m_VD_n, level, sol_coarsest,v_ref_results);
-//        std::cout << "[RF][PCL] nSV+:" << sol_coarsest.p_index.size() << std::endl;     //$$debug
+//        cout << "[RF][PCL] nSV+:" << sol_coarsest.p_index.size() << endl;     //$$debug
 
     }else{                                          // - - - - No model selection (call solver directly) - - - -
 
@@ -633,7 +673,7 @@ void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data
         PetscInt num_row_p;
         MatGetSize(m_data_p, &num_row_p, NULL);
         prepare_single_solution(&coarsest_model, num_row_p, sol_coarsest);
-        std::cout << "[RF][PCL] the process_coarsest_level without model selection is incomplete, EXIT!" << std::endl;
+        cout << "[RF][PCL] the process_coarsest_level without model selection is incomplete, EXIT!" << endl;
         exit(1);
         sv_coarsest.free_solver("[RF][PCL]");        // Notice, the sv_coarsest is only availabel in this scope, and not accessible outside the else clause
     }
@@ -644,14 +684,14 @@ void Refinement::prepare_single_solution(svm_model **svm_trained_model, int num_
     PetscInt i;
     result_solution.C = (*svm_trained_model)->param.C;
     result_solution.gamma = (*svm_trained_model)->param.gamma;
-    std::cout << "[RF][PSS] params are set C:"<< result_solution.C << std::endl ;
+    cout << "[RF][PSS] params are set C:"<< result_solution.C << endl ;
 
     result_solution.p_index.reserve((*svm_trained_model)->nSV[0]);   //reserve the space for positive class
     for (i=0; i < (*svm_trained_model)->nSV[0];i++){
         // -1 because sv_indice start from 1, while petsc row start from 0
         result_solution.p_index.push_back((*svm_trained_model)->sv_indices[i] - 1);
     }
-    std::cout << "[RF][PSS] P class is prepared\n";
+    cout << "[RF][PSS] P class is prepared\n";
 
     result_solution.n_index.reserve((*svm_trained_model)->nSV[1]);   //reserve the space for negative class
     // start from 0 to #SV in majority
@@ -660,7 +700,7 @@ void Refinement::prepare_single_solution(svm_model **svm_trained_model, int num_
         // -1 the same as pos class, p_num_row because they are after each other
         result_solution.n_index.push_back((*svm_trained_model)->sv_indices[(*svm_trained_model)->nSV[0] + i] - 1 - num_row_p);
     }
-    std::cout << "[RF][PSS] N class is prepared\n";
+    cout << "[RF][PSS] N class is prepared\n";
 }
 
 
