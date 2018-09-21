@@ -7,6 +7,7 @@
 #include "common_funcs.h"
 #include "loader.h"     //only for testing the SNGM experiment Sep 21, 2016
 
+
 struct BetterGmean
 {
     bool operator () (const summary& a, const summary& b) const
@@ -392,11 +393,6 @@ std::vector<ud_point> ModelSelection::ud_param_generator(int stage, bool inh_par
 
 
 
-
-
-
-
-
 //======================================================================
 int ModelSelection::select_best_model(std::vector<summary> v_summary, int level, int stage){
 
@@ -599,7 +595,7 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
 
     ETimer t_stage1;
     int stage = 1;
-#if dbl_MS_UDSepVal >= 1
+#if dbl_MS_UDSepVal >= 3
     printf("[MS][UDSepVal] ------ stage:%d, level:%d------ \n", stage, level);
 #endif
     std::vector<ud_point> ud_params_st_1;
@@ -615,7 +611,7 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
         sv.predict_validation_data(m_VD_p, m_VD_n, current_summary, solver_id);
 //            sv.free_solver("[MS][UDSepVal] ");   //free the solver
         v_summary.push_back(current_summary);
-#if dbl_MS_UDSepVal >= 1
+#if dbl_MS_UDSepVal >= 3
         paramsInst->print_summary(current_summary,"[MS][UDSepVal]", level, i, stage);
 #endif
         ++solver_id;
@@ -629,7 +625,7 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
 
     ETimer t_stage2;
     stage = 2 ;
-#if dbl_MS_UDSepVal >= 1
+#if dbl_MS_UDSepVal >= 3
     printf("[MS][UDSepVal] ------ stage:%d, level:%d------ \n", stage, level);
     printf("[MS][UDSepVal] 2nd stage model selection center C:%g, G:%g\n",ud_params_st_1[best_1st_stage].C , ud_params_st_1[best_1st_stage].G);
 #endif
@@ -648,7 +644,7 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
         v_solver.push_back(sv);
 //            sv.free_solver("[MS][UDSepVal] ");   //free the solver
         v_summary.push_back(current_summary);
-#if dbl_MS_UDSepVal >= 1
+#if dbl_MS_UDSepVal >= 3
         paramsInst->print_summary(current_summary,"[MS][UDSepVal]", level, i, stage);
 #endif
         ++solver_id;
@@ -656,8 +652,10 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
     int best_of_all =  select_best_model(v_summary,level,2);
 
 #if dbl_MS_UDSepVal >= 1
-    printf("[MS][UDSepVal] best of both stage of UD is: (iter :%d)\n", best_of_all);
     paramsInst->print_summary(v_summary[best_of_all],"[MS][UDSepVal] Validation Data", level, -1, stage);
+    #if dbl_MS_UDSepVal >= 3
+    printf("[MS][UDSepVal] best of both stage of UD is: (iter :%d)\n", best_of_all);
+    #endif
 #endif
     t_stage2.stop_timer("[MS][UDSepVal] stage 2 at level", std::to_string(level) );
 
@@ -693,7 +691,7 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p, Vec
     v_ref_results.push_back(refinement_results);           //collect the final best model at each level
 //    paramsInst->print_ref_result(v_ref_results);
 //    exit(1);
-    #if dbl_MS_UDSepVal >= 1
+    #if dbl_MS_UDSepVal >= 3
         final_summary.iter = -1;       //not print the iteration is summary
         paramsInst->print_summary(final_summary,"[MS][UDSepVal] final TD ", level);
     #endif
@@ -722,13 +720,6 @@ summary ModelSelection::summary_factory_update_iter(const summary& in_summary, c
     printf("[MS][SPUI] iter %d created successfully!\n", iter);
     return summary_result;
 }
-
-
-
-
-
-
-
 
 
 

@@ -201,6 +201,7 @@ public:
     bool get_best_params_status() const{ return this->best_params_are_set; }
     double get_best_C() const{ return this->best_C; }
     double get_best_gamma() const{ return this->best_gamma; }
+    void reportFinalModelInVCycle() const;
     void print_final_results() const;
     void print_ref_result(const std::vector<ref_results>& v_ref_results) const;
 

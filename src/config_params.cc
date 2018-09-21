@@ -486,8 +486,6 @@ void Config_params::read_clustering_parameters(pugi::xml_node& root,int argc, ch
 }
 
 
-
-
 void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * argv[]){ //@ 040317-1842
     // read XML values
     nn_number_of_classes    = root.child("nn_number_of_classes").attribute("intVal").as_int();
@@ -510,15 +508,6 @@ void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * 
 }
 
 
-
-
-
-
-
-
-
-
-
 void Config_params::check_input_distance_parameters(){
     if(get_nn_distance_type() > 8 || get_nn_distance_type() <1){
         cout << "[CP] supported distance types are from 1 to 8!" << endl;
@@ -531,9 +520,11 @@ void Config_params::set_ds_path(std::string const new_ds_path){
     this->ds_path = new_ds_path;
 }
 
+
 void Config_params::set_ds_name(std::string const new_ds_name){
     this->ds_name = new_ds_name;
 }
+
 
 void Config_params::set_file_names_for_save_flann(){
     if(get_nn_number_of_classes() == 2){
@@ -649,7 +640,9 @@ void Config_params::print_summary(const summary& summary_in,
 
 }
 
-void Config_params::set_best_parameters(measures preferred_measure){    //default measure is set to Gmean in the header file
+
+//default measure is set to Gmean in the header file
+void Config_params::set_best_parameters(measures preferred_measure){
     double max_measure_=0;
     int max_index_ =0;
     for(unsigned int i=0; i < this->all_summary.size(); i++){
@@ -670,6 +663,31 @@ void Config_params::set_best_parameters(measures preferred_measure){    //defaul
 
 }
 
+
+void Config_params::reportFinalModelInVCycle() const{
+    int curr_summ_idx = (get_main_num_kf_iter() * get_main_current_exp_id())
+                      + get_main_current_kf_id();
+
+    printf("CP_RFMIVC,csi:%d,exp:%d,iter:%d,level:%d,AC:%.2f,SN:%.2f,"
+           "SP:%.2f,PPV:%.2f,NPV:%.2f,F1:%.2f,GM:%.2f"
+           ",C:%.2f,G:%.4f\n",
+           curr_summ_idx,
+           this->get_main_current_exp_id(),
+           this->get_main_current_kf_id(),
+           this->all_summary[curr_summ_idx].selected_level,
+           this->all_summary[curr_summ_idx].perf.at(Acc),
+           this->all_summary[curr_summ_idx].perf.at(Sens),
+           this->all_summary[curr_summ_idx].perf.at(Spec),
+           this->all_summary[curr_summ_idx].perf.at(PPV),
+           this->all_summary[curr_summ_idx].perf.at(NPV),
+           this->all_summary[curr_summ_idx].perf.at(F1),
+           this->all_summary[curr_summ_idx].perf.at(Gmean),
+           this->all_summary[curr_summ_idx].C,
+           this->all_summary[curr_summ_idx].gamma );
+}
+
+
+
 void Config_params::print_final_results() const{
     printf("           >   >   >   >   >   >         Final Results         <   <   <   <   <   < \n");
     double sum_acc=0;
@@ -681,11 +699,15 @@ void Config_params::print_final_results() const{
     double sum_f1=0;
 
     for(unsigned int i=0; i< this->all_summary.size(); i++){
-        printf("[CP][PFR],it:%d, BestL:%d, AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f",
+        printf("[CP][PFR],it:%d, BestL:%d, AC:%.2f, SN:%.2f, "\
+               "SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f",
                i, this->all_summary[i].selected_level,
-               this->all_summary[i].perf.at(Acc), this->all_summary[i].perf.at(Sens),
-               this->all_summary[i].perf.at(Spec), this->all_summary[i].perf.at(PPV),
-               this->all_summary[i].perf.at(NPV), this->all_summary[i].perf.at(F1),
+               this->all_summary[i].perf.at(Acc),
+               this->all_summary[i].perf.at(Sens),
+               this->all_summary[i].perf.at(Spec),
+               this->all_summary[i].perf.at(PPV),
+               this->all_summary[i].perf.at(NPV),
+               this->all_summary[i].perf.at(F1),
                this->all_summary[i].perf.at(Gmean));
     #if verbose
         if(this->all_summary[i].C && this->all_summary[i].gamma)

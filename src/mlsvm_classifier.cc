@@ -115,6 +115,7 @@ int main(int argc, char **argv)
             #endif // end of save_test_file
             #endif //dbl_exp_train_data
 
+            Config_params::getInstance()->reportFinalModelInVCycle();
             }   // end of for loop for "Whole cross validation"
         }   // end of for loop for "Repeat the experiment"
         //destory the remaining objects (free the memory)
