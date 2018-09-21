@@ -7,10 +7,7 @@
 #include "common_funcs.h"
 #include "loader.h"     //only for testing the SNGM experiment Sep 21, 2016
 
-<<<<<<< HEAD
-=======
 using std::cout; using std::endl;
->>>>>>> dc822038c24160e01c0784cfaeec52ef9acfeafd
 
 struct BetterGmean
 {
@@ -421,12 +418,6 @@ std::vector<ud_point> ModelSelection::ud_param_generator(int stage, bool inh_par
 
 
 
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> dc822038c24160e01c0784cfaeec52ef9acfeafd
 //======================================================================
 int ModelSelection::select_best_model(std::vector<summary> v_summary, int level, int stage){
 
@@ -704,15 +695,9 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
     int best_of_all =  select_best_model(v_summary,level,2);
 
 #if dbl_MS_UDSepVal >= 1
-<<<<<<< HEAD
-    paramsInst->print_summary(v_summary[best_of_all],"[MS][UDSepVal] Validation Data", level, -1, stage);
-    #if dbl_MS_UDSepVal >= 3
-    printf("[MS][UDSepVal] best of both stage of UD is: (iter :%d)\n", best_of_all);
-=======
     paramsInst->print_summary(v_summary[best_of_all],"[MS][UDSV]", level, -1, stage);
     #if dbl_MS_UDSepVal >= 3
         printf("[MS][UDSepVal] best of both stage of UD is: (iter :%d)\n", best_of_all);
->>>>>>> dc822038c24160e01c0784cfaeec52ef9acfeafd
     #endif
 #endif
     t_stage2.stop_timer("[MS][UDSepVal] stage 2 at level", std::to_string(level) );
@@ -746,16 +731,9 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
     refinement_results.validation_data_summary = v_summary[best_of_all];
     refinement_results.test_data_summary = final_summary;
     refinement_results.level = level;
-<<<<<<< HEAD
-    v_ref_results.push_back(refinement_results);           //collect the final best model at each level
-//    paramsInst->print_ref_result(v_ref_results);
-//    exit(1);
-    #if dbl_MS_UDSepVal >= 3
-=======
     //collect the final best model at each level
     v_ref_results.push_back(refinement_results);
     #if dbl_MS_UDSepVal >= 3   // This is a test on test-data rather than validation-data
->>>>>>> dc822038c24160e01c0784cfaeec52ef9acfeafd
         final_summary.iter = -1;       //not print the iteration is summary
         paramsInst->print_summary(final_summary,"[MS][UDSepVal] final TD ", level);
     #endif
