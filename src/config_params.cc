@@ -141,7 +141,8 @@ void Config_params::print_zscore_params(){
                  "\ntmp_path: "             << get_tmp_path()          << endl;
 }
 
-void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[], program_parts caller_func){
+void Config_params::read_params(std::string XML_FILE_PATH,
+                                int argc, char * argv[], program_parts caller_func){
 
     PetscBool       flg; //@ 040417-2130
     PetscInt        temp;
@@ -229,7 +230,6 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
 }
 
 
-
 void Config_params::read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]){
 
     /// Set debug parameters
@@ -305,12 +305,9 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     /// read the parameters from input arguments ()
     /// Notice the values are saved in options_ not the specific parameters in this class
     /// Hence, use the get method to retreive the override values from input arguments
-    parser_.add_option("--nn_n")
-            .dest("nn_number_of_neighbors")  .set_default(nn_number_of_neighbors) ;
-    parser_.add_option("--nn_d")
-            .dest("nn_distance_type")  .set_default(nn_distance_type);
-    parser_.add_option("-s")
-            .dest("cpp_srand_seed")  .set_default(cpp_srand_seed);
+    parser_.add_option("--nn_n")                             .dest("nn_number_of_neighbors")  .set_default(nn_number_of_neighbors) ;
+    parser_.add_option("--nn_d")                             .dest("nn_distance_type")  .set_default(nn_distance_type);
+    parser_.add_option("-s")                                 .dest("cpp_srand_seed")  .set_default(cpp_srand_seed);
     parser_.add_option("-x")                                 .dest("main_num_repeat_exp")  .set_default(main_num_repeat_exp);
     parser_.add_option("-k")                                 .dest("main_num_kf_iter")  .set_default(main_num_kf_iter);
     parser_.add_option("--ml_s")                             .dest("multi_level_status")  .set_default(multi_level_status);
@@ -550,6 +547,24 @@ void Config_params::set_inputs_file_names(){
     test_ds_f_name      = get_tmp_path() +"kfold_test_data_"+get_exp_info();
 }
 
+
+/*
+ * for the case that there is no k-fold and the test data is provided
+ * for mlsvmSepTestClassifier
+ * Added 083018
+ */
+void Config_params::set_fixed_file_names(){
+    std::cout << "Config_params::set_fixed_file_names is called" << std::endl;
+    p_indices_f_name    = get_ds_path() + get_ds_name() + "_min_norm_data_indices.dat";
+    p_dist_f_name       = get_ds_path() + get_ds_name() + "_min_norm_data_dists.dat";
+    n_indices_f_name    = get_ds_path() + get_ds_name() + "_maj_norm_data_indices.dat";
+    n_dist_f_name       = get_ds_path() + get_ds_name() + "_maj_norm_data_dists.dat";
+
+    p_norm_data_f_name  = get_ds_path() + get_ds_name() + "_min_norm_data.dat";
+    n_norm_data_f_name  = get_ds_path() + get_ds_name() + "_maj_norm_data.dat";
+
+    test_ds_f_name      = get_ds_path() + get_test_name() + "_label_data_test.dat";
+}
 
 std::string Config_params::get_tmp_path() const {
     std::string tmp_str (options_["tmp_path"]);   //http://www.cplusplus.com/reference/string/string/rfind/

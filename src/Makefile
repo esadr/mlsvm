@@ -12,6 +12,9 @@ LIBFLANN= /usr/local/lib/libflann_cpp_s.a
 MLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlsvm_classifier.cc
 MLSVM_OBJS = $(MLSVM_SRCS:.cc=.o)
 
+MlsvmSepTest_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlsvmClassifierSepTest.cc
+MlsvmSepTest_OBJS = $(MlsvmSepTest_SRCS:.cc=.o)
+
 SLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm.cc config_params.cc model_selection.cc solver.cc loader.cc ds_node.cc ds_graph.cc main_sl.cc
 SLSVM_OBJS = $(SLSVM_SRCS:.cc=.o)
 
@@ -78,6 +81,10 @@ main_libs_inst:  etimer.o common_funcs.o OptionParser.o k_fold.o svm.o config_pa
 mlsvm_classifier: $(MLSVM_OBJS) chkopts
 	-${CLINKER} $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_classifier
 	${RM} mlsvm_classifier.o 
+	
+mlsvmSepTestClassifier: $(MlsvmSepTest_OBJS) chkopts
+	-${CLINKER} $(MlsvmSepTest_OBJS)  ${PETSC_MAT_LIB} -o mlsvmSepTestClassifier
+	${RM} mlsvmSepTestClassifier.o 
 	
 main_sl: $(SLSVM_OBJS) chkopts			# single level (no multi level which means no v-cycle)
 	-${CLINKER} $(SLSVM_OBJS)  ${PETSC_MAT_LIB} -o slsvm 

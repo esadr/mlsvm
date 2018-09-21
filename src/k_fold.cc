@@ -4,7 +4,7 @@
 #include <cmath>
 #include "config_logs.h"
 #include "etimer.h"
-
+#include <cassert>
 //#include "model_selection.h"
 
 
@@ -40,7 +40,7 @@ void k_fold::read_in_data(std::string input_train_data, std::string input_train_
         std::cout << "[k_fold] data size is:<<"<< data_size <<
                      " label size is:"<< label_size << std::endl;
         PetscPrintf(PETSC_COMM_WORLD,"[KF][read_in_data] the data and label size are not match, Exit!\n");
-        exit(1);
+        //exit(1);
     }
 }
 
@@ -49,7 +49,7 @@ void k_fold::read_in_divided_data(Mat& m_min_data, Mat& m_maj_data){
     ETimer t_all;
 
     std::string prefix = Config_params::getInstance()->get_ds_path() + "/" + Config_params::getInstance()->get_ds_name();
-//    std::cout << "[k_fold] prefix: " << prefix << std::endl;
+    // std::cout << "[k_fold] prefix: " << prefix << std::endl;
     std::string min_full_data {prefix + "_min_norm_data.dat"}; // add the dataset name
     std::string maj_full_data {prefix + "_maj_norm_data.dat"};
 #if dbl_KF_rdd >= 1
@@ -1315,10 +1315,63 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
 }
 
 
+/*
+ * Date : Aug 2018
+ * Purpose: work with separated test data
+ * Skip the cross validation
+ *
+ * Note:
+ * 1- The full_NN with large number of neighbors still needs to be filtered
+ *      apparently, if I pass the a empty set of test indices, all the
+ *      points are returned with first desired number of neighbors using
+ *      filter_NN function.
+ *
+ * 2- WA matrices should be created.
+ * 3- make sure the test file is exist
+ *
+ */
+void k_fold::prepare_data_using_separate_testdata(
+        Mat& m_min_full_data, Mat& m_min_full_NN_indices,
+        Mat& m_min_full_NN_dists, Mat& m_min_WA, Vec& v_min_vol,
+        Mat& m_maj_full_data, Mat& m_maj_full_NN_indices,
+        Mat& m_maj_full_NN_dists,Mat& m_maj_WA,Vec& v_maj_vol){
 
-void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unordered_set<PetscInt>& uset_test_indices,
-                       PetscInt * arr_train_indices, PetscInt& train_size, std::vector<PetscInt>& v_full_idx_to_train_idx,
-                       Mat& m_filtered_NN_indices, Mat& m_filtered_NN_dists, const std::string& info,bool debug_status){
+    PetscInt    size_min_full_data;
+    MatGetSize(m_min_full_data, &size_min_full_data, NULL); //get the size of minority class
+
+    PetscInt    size_maj_full_data;
+    MatGetSize(m_maj_full_data, &size_maj_full_data, NULL); //get the size of majority class
+
+    /* purposely didn't add any test point to the below sets
+     *      to get all the data as a training data since the test is exist
+     */
+    std::unordered_set<PetscInt> uset_min_test_idx;
+    std::unordered_set<PetscInt> uset_maj_test_idx;
+
+    // - - - - -  Filter the first k neareset neighbors from all neighbors- - - - -
+    Mat m_min_filtered_indices, m_min_filtered_dists;
+    Mat m_maj_filtered_indices, m_maj_filtered_dists;
+    extractk_NN(m_min_full_NN_indices, m_min_full_NN_dists,
+              m_min_filtered_indices, m_min_filtered_dists,"minority");
+
+    extractk_NN(m_maj_full_NN_indices,m_maj_full_NN_dists,
+              m_maj_filtered_indices, m_maj_filtered_dists,"majority");
+
+    Loader ld;
+    ld.create_WA_matrix(m_min_filtered_indices,m_min_filtered_dists,m_min_WA,"minority");
+    ld.create_WA_matrix(m_maj_filtered_indices,m_maj_filtered_dists,m_maj_WA,"majority");
+
+    v_min_vol = ld.init_volume(1,size_min_full_data);
+    v_maj_vol = ld.init_volume(1,size_maj_full_data);
+}
+
+
+void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists,
+           std::unordered_set<PetscInt>& uset_test_indices,
+           PetscInt * arr_train_indices, PetscInt& train_size,
+           std::vector<PetscInt>& v_full_idx_to_train_idx,
+           Mat& m_filtered_NN_indices, Mat& m_filtered_NN_dists,
+           const std::string& info,bool debug_status){
     ETimer t_all;
     int count_index, count_col_id = 0;
     const int required_num_NN = Config_params::getInstance()->get_nn_number_of_neighbors();
@@ -1327,11 +1380,14 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
     PetscInt num_row_debug=0, num_col_debug=0;
     std::cout << "[KF][FilterNN] class:" << info << std::endl;
     MatGetSize(m_full_NN_indices,&num_row_debug,&num_col_debug);
-    printf("[KF][FilterNN] number of rows in full NN indices matrix: %d, num_col_debug: %d \n",num_row_debug,num_col_debug);  //$$debug
+    printf("[KF][FilterNN] number of rows in full NN indices matrix:");
+    printf("%d, num_col_debug: %d \n",num_row_debug,num_col_debug);
     MatGetSize(m_full_NN_dists,&num_row_debug,&num_col_debug);
-    printf("[KF][FilterNN] number of rows in full NN dists matrix: %d, num_col_debug: %d \n",num_row_debug,num_col_debug);  //$$debug
-    printf("[KF][FilterNN] train_size: %d, required_num_NN:%d \n",train_size,required_num_NN);  //$$debug
-    printf("[KF][FilterNN] arr_train_indices[1]: %d\n",arr_train_indices[1]);  //$$debug
+    printf("[KF][FilterNN] number of rows in full NN dists matrix: ");
+    printf("%d, num_col_debug: %d \n",num_row_debug,num_col_debug);
+    printf("[KF][FilterNN] train_size: %d, required_num_NN:%d \n",
+           train_size,required_num_NN);
+    printf("[KF][FilterNN] arr_train_indices[1]: %d\n",arr_train_indices[1]);
 #endif
 
     PetscInt i=0, idx_ncols, dis_ncols;
@@ -1340,16 +1396,19 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
     //WARNING: the indices are changed as the data is divided to train and test,
     //the indices in the m_full_NN_indices are not valid and needs to be mapped
     //MatCreate row: train_size, col: required_num_NN  ,nnz: required_num_NN
-    MatCreateSeqAIJ(PETSC_COMM_SELF,train_size , required_num_NN , required_num_NN, PETSC_NULL, &m_filtered_NN_indices);
-    MatCreateSeqAIJ(PETSC_COMM_SELF,train_size , required_num_NN , required_num_NN, PETSC_NULL, &m_filtered_NN_dists);
+    MatCreateSeqAIJ(PETSC_COMM_SELF, train_size, required_num_NN ,
+                    required_num_NN, PETSC_NULL, &m_filtered_NN_indices);
+    MatCreateSeqAIJ(PETSC_COMM_SELF, train_size, required_num_NN ,
+                    required_num_NN, PETSC_NULL, &m_filtered_NN_dists);
 
 //    std::cout << "[KF][FilterNN] filtering"<< std::endl;
     for(i=0; i< train_size; i++){
-        MatGetRow(m_full_NN_indices,arr_train_indices[i], &idx_ncols,&idx_cols,&idx_vals);
-        MatGetRow(m_full_NN_dists,arr_train_indices[i], &dis_ncols,&dis_cols,&dis_vals);
+        MatGetRow(m_full_NN_indices,arr_train_indices[i],
+                  &idx_ncols,&idx_cols,&idx_vals);
+        MatGetRow(m_full_NN_dists,arr_train_indices[i],
+                  &dis_ncols,&dis_cols,&dis_vals);
         count_index = 0;
         count_col_id =0;
-
 
 //        full row --> filtered row
 //        int full_row_index= arr_train_indices[i];
@@ -1425,9 +1484,87 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unorde
 }
 
 
+void k_fold::extractk_NN(Mat& m_full_NN_indices,
+            Mat& m_full_NN_dists,
+            Mat& m_filtered_NN_indices,
+            Mat& m_filtered_NN_dists,
+            const std::string& info){
+    ETimer t_all;
+    int count_index = 0;
+    const int required_num_NN = Config_params::getInstance()->get_nn_number_of_neighbors();
+
+    PetscInt num_row=0;
+    std::cout << "[KF][extractk_NN] class:" << info << std::endl;
+    MatGetSize(m_full_NN_indices,&num_row, NULL);
+//    printf("[KF][FilterNN] number of rows in full NN indices matrix:");
+//    printf("%d, num_col_debug: %d \n",num_row_debug,num_col_debug);
+//    num_row = 5; // debug_should_remove comment 082918_1024
+
+    PetscInt i=0, idx_ncols, dis_ncols;
+    const PetscInt    *idx_cols, *dis_cols;
+    const PetscScalar *idx_vals, *dis_vals;
+    //WARNING: the indices are changed as the data is divided to train and test,
+    //the indices in the m_full_NN_indices are not valid and needs to be mapped
+    //MatCreate row: train_size, col: required_num_NN  ,nnz: required_num_NN
+    MatCreateSeqAIJ(PETSC_COMM_SELF, num_row, required_num_NN ,
+                    required_num_NN, PETSC_NULL, &m_filtered_NN_indices);
+    MatCreateSeqAIJ(PETSC_COMM_SELF, num_row, required_num_NN ,
+                    required_num_NN, PETSC_NULL, &m_filtered_NN_dists);
+
+
+    for(i=0; i< num_row; i++){
+        MatGetRow(m_full_NN_indices, i,
+                  &idx_ncols,&idx_cols,&idx_vals);
+        MatGetRow(m_full_NN_dists, i,
+                  &dis_ncols,&dis_cols,&dis_vals);
+        count_index = 0;
+        int dis_idx = 0;
+        for(int index_col=0; index_col < idx_ncols ; index_col++){
+            if(i != idx_vals[index_col]) {   //not a loop to itself
+                MatSetValue(m_filtered_NN_indices, i,
+                            count_index, idx_vals[index_col], INSERT_VALUES);
+
+                // debug_should_remove comment 082918_1024
+//                std::cout << "count_index: "<< count_index
+//                          << ", dis_idx: "<< dis_idx
+//                          << ", dist_val:(" << dis_cols[index_col] << ","
+//                          << dis_vals[count_index] <<") \n";
+
+                MatSetValue(m_filtered_NN_dists, i,
+                            count_index, dis_vals[count_index], INSERT_VALUES);
+                count_index++;
+                //stop adding more NN for this row(data point)
+                if(count_index == (required_num_NN )) break;
+            }
+
+        }
+
+        MatRestoreRow(m_full_NN_dists, i,
+                      &dis_ncols,&dis_cols,&dis_vals);
+        MatRestoreRow(m_full_NN_indices, i,
+                      &idx_ncols,&idx_cols,&idx_vals);
+    }
+    MatAssemblyBegin(m_filtered_NN_indices, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_filtered_NN_indices, MAT_FINAL_ASSEMBLY);
+
+    MatAssemblyBegin(m_filtered_NN_dists, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(m_filtered_NN_dists, MAT_FINAL_ASSEMBLY);
+#if dbl_KF_EK >= 7
+    printf("[KF][extractk_NN] Matrix of filtered NN indices:\n");
+    MatView(m_filtered_NN_indices,PETSC_VIEWER_STDOUT_WORLD);
+    printf("[KF][extractk_NN] Matrix of filtered NN dists:\n");
+    MatView(m_filtered_NN_dists,PETSC_VIEWER_STDOUT_WORLD);
+#endif
+    t_all.stop_timer("[KF][extractk_NN] extracting k-NN for the class of",info);
+}
+
+
 
 void k_fold::free_resources(){
     MatDestroy(&this->m_min_data_);
     MatDestroy(&this->m_maj_data_);
 
 }
+
+
+

@@ -159,6 +159,7 @@ public:
 
 //    void set_inputs(std::string const ds_name, std::string const ds_version );
     void set_inputs_file_names();
+    void set_fixed_file_names();
     void set_file_names_for_save_flann();
 
     void set_ds_path(std::string const new_ds_path);
@@ -175,6 +176,7 @@ public:
 
     const std::string &get_ds_path()    const { return options_["ds_path"];}
     const std::string &get_ds_name()    const { return options_["ds_name"];}
+    const std::string &get_test_name()    const { return options_["test_data_name"];}
     std::string get_tmp_path()   const ;
     const std::string &get_exp_info()   const { return options_["exp_info"];}
 
