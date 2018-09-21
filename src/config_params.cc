@@ -305,9 +305,12 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     /// read the parameters from input arguments ()
     /// Notice the values are saved in options_ not the specific parameters in this class
     /// Hence, use the get method to retreive the override values from input arguments
-    parser_.add_option("--nn_n")                             .dest("nn_number_of_neighbors")  .set_default(nn_number_of_neighbors) ;
-    parser_.add_option("--nn_d")                             .dest("nn_distance_type")  .set_default(nn_distance_type);
-    parser_.add_option("-s")                                 .dest("cpp_srand_seed")  .set_default(cpp_srand_seed);
+    parser_.add_option("--nn_n")
+            .dest("nn_number_of_neighbors")  .set_default(nn_number_of_neighbors) ;
+    parser_.add_option("--nn_d")
+            .dest("nn_distance_type")  .set_default(nn_distance_type);
+    parser_.add_option("-s")
+            .dest("cpp_srand_seed")  .set_default(cpp_srand_seed);
     parser_.add_option("-x")                                 .dest("main_num_repeat_exp")  .set_default(main_num_repeat_exp);
     parser_.add_option("-k")                                 .dest("main_num_kf_iter")  .set_default(main_num_kf_iter);
     parser_.add_option("--ml_s")                             .dest("multi_level_status")  .set_default(multi_level_status);
