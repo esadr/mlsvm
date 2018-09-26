@@ -2,7 +2,7 @@
 #include "config_logs.h"
 #include <algorithm>    /* random_shuffle*/
 #include <cmath>
-
+#include <cassert>
 #include <memory>   /* shared_ptr*/
 //#include <stdexcept>
 
@@ -35,7 +35,8 @@ void CommonFuncs::exp_vector(Vec& A, std::string file_path, std::string file_nam
 void CommonFuncs::exp_vector(Vec& A, std::string file_path, std::string file_name, std::string sender_func){
 #if debug_export == 1
     PetscViewer     viewer;
-    std::string     full_file = (file_path == "")? file_name : file_path +"/" +file_name;   //if the file_path is empty, don't add /
+    //if the file_path is empty, don't add /
+    std::string     full_file = (file_path == "")? file_name : file_path +"/" +file_name;
     PetscViewerBinaryOpen(PETSC_COMM_WORLD,full_file.c_str(),FILE_MODE_WRITE,&viewer);
     VecView(A,viewer);  // petsc binary format
 
@@ -147,12 +148,17 @@ void CommonFuncs::set_weight_type(int new_weight_type, double aux_param){
 
 double CommonFuncs::convert_distance_to_weight(double distance){
     switch (weight_type) {
-    case 1:                 //Flann default distance (square Euclidean distance)
-//        printf("[LD][CD] raw distance:%g, calculated distance:%g \n",distance, 1 / (sqrt(distance) + 0.00001 ));
+    //Flann default distance (square Euclidean distance)
+    case 1:
+//        printf("[LD][CD] raw distance:%g, calculated distance:%g \n",distance,
+//        1 / (sqrt(distance) + 0.00001 ));
         return ( 1 / (sqrt(distance) + 0.00001 ) );    //
     case 2:                 // Gaussian distance)
         return ( exp((-1) * distance * weight_gamma)  );
     }
+    std::cout << "[CF][CD2W] weight_type :"
+              << this->weight_type << std::endl;
+    assert(0 && "the weight type is not in list of defined scenarios!");
 }
 
 
@@ -330,7 +336,8 @@ Mat CommonFuncs::sample_data(Mat& m_org_data, float sample_size_fraction, std::s
     // Random generator without duplicates
     PetscInt i, num_row_org_data;
     MatGetSize(m_org_data, &num_row_org_data, NULL);
-//    std::cout << "[CF][SampleData] number of rows in original data are: " << num_row_org_data << std::endl; //$$debug
+//    std::cout << "[CF][SampleData] number of rows in original data are: "
+//      << num_row_org_data << std::endl; //$$debug
     std::vector<PetscInt> shuffled_indices_;
     shuffled_indices_.reserve(num_row_org_data);
 
@@ -445,3 +452,51 @@ void CommonFuncs::get_unique_random_id(int start_range, int end_range, int numbe
 //    std::cout << std::endl;
 }
 
+
+/*
+ * Add a label vector to the first column of data matrix
+ * Purpose: separate test data needs to have the labels in the first column.
+ */
+void CommonFuncs::addLabel2Data(Mat& m_data, Vec& v_label, Mat& m_label_data){
+    PetscInt num_row=0, num_col=0, i, ncols;
+    const PetscInt    *cols;
+    const PetscScalar *vals;
+
+    MatGetSize(m_data, &num_row, &num_col);
+
+#if dbl_KF_al2d >= 1
+    printf("[KF][al2d] num_row: %d, num_col:%d\n",num_row,num_col);
+#endif
+    assert(num_col < 10000 && "The number of columns suggest a sparse matrix which is not supported now!");
+
+    //+1 is for label
+    MatCreateSeqAIJ(PETSC_COMM_SELF, num_row , num_col + 1,
+                    (num_col + 1), PETSC_NULL, &m_label_data);
+
+    // get an array of all labels
+    PetscScalar     *arr_lbl;
+    VecGetArray(v_label,&arr_lbl);
+
+    for(i =0; i < num_row ; i++){
+        //Insert lable
+        MatSetValue(m_label_data, i, 0, arr_lbl[i],INSERT_VALUES);
+        MatGetRow(m_data,i,&ncols,&cols,&vals);
+        for(int j=0; j < ncols ; j++){
+            //+1 shifts the columns 1 to the right
+            MatSetValue(m_label_data,i,cols[j]+1, vals[j],INSERT_VALUES) ;
+        }
+        MatRestoreRow(m_data,i,&ncols,&cols,&vals);
+    }
+    VecRestoreArray(v_label,&arr_lbl);
+
+#if dbl_KF_al2d > 7
+    PetscViewer     viewer;
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD,"addLabel2Data.dat",
+                          FILE_MODE_WRITE,&viewer);
+    MatView(m_label_data,viewer);
+    PetscViewerDestroy(&viewer);
+
+    printf("[KF][al2d] m_label_data Matrix:\n");
+    MatView(m_label_data,PETSC_VIEWER_STDOUT_WORLD);
+#endif
+}
