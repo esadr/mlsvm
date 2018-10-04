@@ -93,7 +93,7 @@ done
 echo "*** Everything is finished successfully ***" >> $log_file
 
 pushd $TMPDIR/data/
-result_path=~/es/results/v1.1.0susySepTest/
+result_path=~/es/results/v1.1.1susySepTest/
 
 echo "*** Copy the final results to $result_path ***" >> $log_file
 for i in `ls | grep result`; do echo $i && cp $i $result_path ; done
