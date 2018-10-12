@@ -756,14 +756,32 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
     }else{
         cout << "WARNING: Test data is not evaluated!" << endl;
         cout << "Models are saved for future analysis" << endl;
+
+        /*
+         *        - - - This is experimental setup - - -
+         *   The path to models should be unique and meaningful
+         *   The models are saved in folder with experiment_unique id
+         */
+
         #if export_SVM_models == 1       //export the model (we save a model at a time)
-            //save the models in a local folder
-            //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
-            //append the model to summary file after each export
-            //make sure to close and open the summary file at each level to prevent losing models in the case of crash or error
-            std::string output_file = "./svm_models/" + paramsInst->get_ds_name()+
-                    "_exp_" + std::to_string(paramsInst->get_main_current_exp_id()) +
-                    "_kf_" + std::to_string(paramsInst->get_main_current_kf_id()) +
+           /* save the models in a local folder created by dataset name + exp_info name
+            * use level id, index 0 for a single model
+            *    (for multiple models, increament the id)
+            *
+            * Make sure to close and open the summary file at each level to prevent
+            *   losing models in the case of crash or error
+            */
+            std::string models_directory = paramsInst->get_ds_path() + "/" +
+                                        paramsInst->get_exp_info() ;
+            // check if the directory is not exist, create it
+//            cout << "models_directory: " << models_directory << endl;
+            CommonFuncs cf;
+            cf.createDirectory(models_directory);
+
+            std::string output_file =
+                    models_directory +"/" + paramsInst->get_ds_name()+
+//                    "_exp_" + std::to_string(paramsInst->get_main_current_exp_id()) +
+//                    "_kf_" + std::to_string(paramsInst->get_main_current_kf_id()) +
                     "_level_" + std::to_string(paramsInst->get_main_current_level_id()) +
                     ".svmmodel";
             svm_save_model(output_file.c_str(), best_model);

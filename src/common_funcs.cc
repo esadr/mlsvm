@@ -5,6 +5,8 @@
 #include <cassert>
 #include <memory>   /* shared_ptr*/
 //#include <stdexcept>
+#include <sys/types.h> // required for stat.h
+#include <sys/stat.h> // https://stackoverflow.com/a/35109823
 
 using std::cout; using std::endl;
 
@@ -501,4 +503,26 @@ void CommonFuncs::addLabel2Data(Mat& m_data, Vec& v_label, Mat& m_label_data){
     printf("[KF][al2d] m_label_data Matrix:\n");
     MatView(m_label_data,PETSC_VIEWER_STDOUT_WORLD);
 #endif
+}
+
+bool CommonFuncs::checkDirectoryExistance(std::string directory){
+    struct stat st;
+//    cout << "stat: " << (stat(directory.c_str(), &st)) << endl;
+    if(stat(directory.c_str(), &st) == 0)
+        return 1;
+    else
+        return 0;
+}
+
+bool CommonFuncs::createDirectory(std::string directory_full_path){
+
+    if (checkDirectoryExistance(directory_full_path)){
+        return 1; //already exist
+    }else{
+        mode_t nMode = 0733; // UNIX style permissions
+        int nError = 0;
+        std::string cmd = "mkdir -p " + directory_full_path;
+        system(cmd.c_str());
+        cout << "[CF][CD] " << directory_full_path << " is created" << endl;
+    }
 }
