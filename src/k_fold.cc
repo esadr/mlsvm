@@ -7,6 +7,7 @@
 #include <cassert>
 //#include "model_selection.h"
 
+using std::cout; using std::endl;
 
 /*
  * read the input data from file and load it into m_in_data_ matrix
@@ -14,17 +15,18 @@
  * the ds_path and ds_name are read from config_params
  * the _data.dat, _label.dat are used to postfix to the ds_name for data and label files
  */
-void k_fold::read_in_data(std::string input_train_data, std::string input_train_label){
+void k_fold::read_in_data(std::string input_train_data,
+                          std::string input_train_label){
     Loader ld;
     PetscInt data_size=0, label_size=0;
 
     if(input_train_data.empty())
-        input_train_data = Config_params::getInstance()->get_ds_path()+ "/" +
-                        Config_params::getInstance()->get_ds_name()+ "_zsc_data.dat";
+        input_train_data = paramsInst->get_ds_path()+ "/" +
+                        paramsInst->get_ds_name()+ "_zsc_data.dat";
 
     if(input_train_label.empty())
-        input_train_label = Config_params::getInstance()->get_ds_path()+ "/" +
-                        Config_params::getInstance()->get_ds_name()+ "_label.dat";
+        input_train_label = paramsInst->get_ds_path()+ "/" +
+                        paramsInst->get_ds_name()+ "_label.dat";
 
 
     this->m_in_data_ = ld.read_input_matrix(input_train_data);
@@ -34,13 +36,13 @@ void k_fold::read_in_data(std::string input_train_data, std::string input_train_
     MatGetSize(this->m_in_data_, &data_size, NULL);
     VecGetSize(this->v_in_label_, &label_size);
     //check the size of data and label
+
     if(data_size == label_size)
         this->num_data_points_ = data_size;
     else{
-        std::cout << "[k_fold] data size is:<<"<< data_size <<
-                     " label size is:"<< label_size << std::endl;
-        PetscPrintf(PETSC_COMM_WORLD,"[KF][read_in_data] the data and label size are not match, Exit!\n");
-        //exit(1);
+        cout << "[KF] data size is:<<"<< data_size <<
+                     " label size is:"<< label_size << endl;
+        throw "[KF][read_in_data] the data and label size are not match";
     }
 }
 
@@ -48,13 +50,15 @@ void k_fold::read_in_data(std::string input_train_data, std::string input_train_
 void k_fold::read_in_divided_data(Mat& m_min_data, Mat& m_maj_data){
     ETimer t_all;
 
-    std::string prefix = Config_params::getInstance()->get_ds_path() + "/" + Config_params::getInstance()->get_ds_name();
-    // std::cout << "[k_fold] prefix: " << prefix << std::endl;
-    std::string min_full_data {prefix + "_min_norm_data.dat"}; // add the dataset name
+    std::string prefix = paramsInst->get_ds_path() + "/" +
+                         paramsInst->get_ds_name();
+    // cout << "[KF] prefix: " << prefix << endl;
+    // add the dataset name
+    std::string min_full_data {prefix + "_min_norm_data.dat"};
     std::string maj_full_data {prefix + "_maj_norm_data.dat"};
 #if dbl_KF_rdd >= 1
-    std::cout << "[k_fold] min_full_data:<<"<< min_full_data << std::endl;
-    std::cout << "[k_fold] maj_full_data:<<"<< maj_full_data << std::endl;
+    cout << "[KF] min_full_data:<<"<< min_full_data << endl;
+    cout << "[KF] maj_full_data:<<"<< maj_full_data << endl;
 #endif
 
     Loader ld;
@@ -62,31 +66,31 @@ void k_fold::read_in_divided_data(Mat& m_min_data, Mat& m_maj_data){
     m_maj_data = ld.read_input_matrix(maj_full_data);
     MatGetSize(m_min_data, &this->num_min_points, NULL);
     MatGetSize(m_maj_data, &this->num_maj_points, NULL);
-    t_all.stop_timer("[k_fold] read_in_divided_data");
+    t_all.stop_timer("[KF] read_in_divided_data");
 }
 
 
 void k_fold::read_in_full_NN(Mat& m_min_NN_indices,Mat& m_min_NN_dists,Mat& m_maj_NN_indices,Mat& m_maj_NN_dists){
     ETimer t_all;
 
-    std::string prefix = Config_params::getInstance()->get_ds_path() + "/" + Config_params::getInstance()->get_ds_name();
-//    std::cout << "[k_fold][Read_Full_NN] prefix: " << prefix << std::endl;
+    std::string prefix = paramsInst->get_ds_path() + "/" + paramsInst->get_ds_name();
+//    cout << "[KF][Read_Full_NN] prefix: " << prefix << endl;
     std::string min_NN_indices {prefix + "_min_norm_data_indices.dat"};
     std::string min_NN_dists {prefix + "_min_norm_data_dists.dat"};
     std::string maj_NN_indices {prefix + "_maj_norm_data_indices.dat"};
     std::string maj_NN_dists {prefix + "_maj_norm_data_dists.dat"};
 #if dbl_KF_rfn >= 1
-    std::cout << "[k_fold] min_NN_indices:<<"<< min_NN_indices << std::endl;
-    std::cout << "[k_fold] min_NN_dists:<<"<< min_NN_dists << std::endl;
-    std::cout << "[k_fold] maj_NN_indices:<<"<< maj_NN_indices << std::endl;
-    std::cout << "[k_fold] maj_NN_dists:<<"<< maj_NN_dists << std::endl;
+    cout << "[KF] min_NN_indices:<<"<< min_NN_indices << endl;
+    cout << "[KF] min_NN_dists:<<"<< min_NN_dists << endl;
+    cout << "[KF] maj_NN_indices:<<"<< maj_NN_indices << endl;
+    cout << "[KF] maj_NN_dists:<<"<< maj_NN_dists << endl;
 #endif
     Loader ld;
     m_min_NN_indices = ld.read_input_matrix(min_NN_indices);
     m_min_NN_dists = ld.read_input_matrix(min_NN_dists);
     m_maj_NN_indices = ld.read_input_matrix(maj_NN_indices);
     m_maj_NN_dists = ld.read_input_matrix(maj_NN_dists);
-    t_all.stop_timer("[k_fold] read_in_full_NN");
+    t_all.stop_timer("[KF] read_in_full_NN");
 }
 
 
@@ -120,7 +124,7 @@ void k_fold::divide_data(bool export_file){
         }
     }
     if(maj_cnt_ < (min_cnt_ * 0.9)){
-        PetscPrintf(PETSC_COMM_WORLD, "[k_fold][divide_data] labels are wrong the majority size is %d which is less than minority size :%d\n",
+        PetscPrintf(PETSC_COMM_WORLD, "[KF][divide_data] labels are wrong the majority size is %d which is less than minority size :%d\n",
                     maj_cnt_,min_cnt_);     //logic of coarsening
         exit(1);
     }
@@ -160,8 +164,8 @@ void k_fold::divide_data(bool export_file){
     VecDestroy(&this->v_in_label_);     // not required anymore, they already are in different classes
 
     if(export_file){ //for save_flann we export the divided data into files, the X_norm_data_f_name is different
-        write_output(Config_params::getInstance()->get_p_norm_data_f_name(), m_min_data_);
-        write_output(Config_params::getInstance()->get_n_norm_data_f_name(), m_maj_data_);
+        write_output(paramsInst->get_p_norm_data_f_name(), m_min_data_);
+        write_output(paramsInst->get_n_norm_data_f_name(), m_maj_data_);
     }
 
 }
@@ -228,21 +232,21 @@ void k_fold::shuffle_data(std::string preferred_srand,bool debug_status){
 //        this->min_shuffled_indices_.push_back(min_iter);
 //    }
 //#if dbl_kf_shuffle_data >= 5
-//    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][shuffle_data] after initialize vector min\n");
+//    PetscPrintf(PETSC_COMM_WORLD, "[KF][shuffle_data] after initialize vector min\n");
 //    for(unsigned int i=0; i < this->min_shuffled_indices_.size(); i++){
 //        PetscPrintf(PETSC_COMM_WORLD, "%d,", this->min_shuffled_indices_[i]);
 //    }
 //    PetscPrintf(PETSC_COMM_WORLD, "\n");
 //#endif
     if(preferred_srand.empty())
-        preferred_srand = Config_params::getInstance()->get_cpp_srand_seed();
+        preferred_srand = paramsInst->get_cpp_srand_seed();
 
     srand(std::stoll(preferred_srand));
     std::random_shuffle( this->min_shuffled_indices_.begin(), this->min_shuffled_indices_.end() ); //shuffle all nodes
 
 //#if dbl_kf_shuffle_data >= 3
     if(debug_status){
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][shuffle_data] shuffled indices for min\n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][shuffle_data] shuffled indices for min\n");
     for(unsigned int i=0; i < this->min_shuffled_indices_.size(); i++){
 //        PetscPrintf(PETSC_COMM_WORLD, "%d,", this->min_shuffled_indices_[i]);
         PetscPrintf(PETSC_COMM_WORLD, "%d\n", this->min_shuffled_indices_[i]);
@@ -259,7 +263,7 @@ void k_fold::shuffle_data(std::string preferred_srand,bool debug_status){
 //        this->maj_shuffled_indices_.push_back(maj_iter);
 //    }
 //#if dbl_kf_shuffle_data >= 5
-//    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][shuffle_data] after initialize vector maj\n");
+//    PetscPrintf(PETSC_COMM_WORLD, "[KF][shuffle_data] after initialize vector maj\n");
 //    for(unsigned int i=0; i < this->maj_shuffled_indices_.size(); i++){
 //        PetscPrintf(PETSC_COMM_WORLD, "%d,", this->maj_shuffled_indices_[i]);
 //    }
@@ -267,19 +271,19 @@ void k_fold::shuffle_data(std::string preferred_srand,bool debug_status){
 //#endif
 
     if(preferred_srand.empty())
-        preferred_srand = Config_params::getInstance()->get_cpp_srand_seed();
+        preferred_srand = paramsInst->get_cpp_srand_seed();
 
     srand(std::stoll(preferred_srand));
     std::random_shuffle( this->maj_shuffled_indices_.begin(), this->maj_shuffled_indices_.end() ); //shuffle all nodes
 
 #if dbl_kf_shuffle_data >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][shuffle_data] shuffled indices for maj\n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][shuffle_data] shuffled indices for maj\n");
     for(unsigned int i=0; i < this->maj_shuffled_indices_.size(); i++){
         PetscPrintf(PETSC_COMM_WORLD, "%d,", this->maj_shuffled_indices_[i]);
     }
     PetscPrintf(PETSC_COMM_WORLD, "\n");
 #endif
-    t_all.stop_timer("[k_fold] shuffle_data");
+    t_all.stop_timer("[KF] shuffle_data");
 }
 
 
@@ -317,8 +321,8 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
     PetscMalloc1(ceil(this->num_maj_points / total_iterations) + 1, &ind_maj_test);
 
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] memory for arrays are allocatted \n");
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] number of points in min:%d, in maj:%d \n",this->num_min_points, this->num_maj_points);
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] memory for arrays are allocatted \n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] number of points in min:%d, in maj:%d \n",this->num_min_points, this->num_maj_points);
 #endif
     /// = = = = =  Prepare indices = = = = =
     // - - - - - A (TEST - Train)  - - - - - -
@@ -333,7 +337,7 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
         maj_test_end    = maj_subset_size ;
         maj_train_size  = this->num_maj_points - maj_subset_size;
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] condition: A (TEST - Train)\n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] condition: A (TEST - Train)\n");
 //    PetscPrintf(PETSC_COMM_WORLD, "min_subset_size:%d,min_test_end:%d,min_train_size:%d\n",min_subset_size,min_test_end,min_train_size);
 //    PetscPrintf(PETSC_COMM_WORLD, "maj_subset_size:%d,maj_test_end:%d,maj_train_size:%d\n",maj_subset_size,maj_test_end,maj_train_size);
 #endif
@@ -381,7 +385,7 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
         maj_test_end    = this->num_maj_points;
         maj_train_size  = this->num_maj_points - maj_subset_size;
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] condition: B (Train - TEST) \n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] condition: B (Train - TEST) \n");
 #endif
 
         // - - - - - Min Train - - - - -
@@ -411,7 +415,7 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
         }
     }
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] condition: C (Train_part 1 - TEST - Train_part 2)\n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] condition: C (Train_part 1 - TEST - Train_part 2)\n");
 #endif
     // - - - - - - C (Train_part 1 - TEST - Train_part 2) - - - - - -
     if(!(current_iteration == 0 || current_iteration == (total_iterations - 1))){
@@ -469,14 +473,14 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
         }
     }
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] parts are set in the vectors \n");
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] Before sorting the arrays\n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] parts are set in the vectors \n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] Before sorting the arrays\n");
     int max_debug=0, max_loc=0;
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] indices in ind_min_train are:");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] indices in ind_min_train are:");
     for(int i=0; i< min_train_size; i++){
         PetscPrintf(PETSC_COMM_WORLD, "%d,", ind_min_train[i]);
     }
-    PetscPrintf(PETSC_COMM_WORLD, "\n[k_fold][cross_validation] indices in ind_min_test are:");
+    PetscPrintf(PETSC_COMM_WORLD, "\n[KF][cross_validation] indices in ind_min_test are:");
     for(int i=0; i< min_subset_size; i++){
         PetscPrintf(PETSC_COMM_WORLD, "%d,", ind_min_test[i]);
     }
@@ -490,11 +494,11 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
     
     max_debug =0;
     max_loc = 0;
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] indices in ind_maj_train are:");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] indices in ind_maj_train are:");
     for(int i=0; i< maj_train_size; i++){
         PetscPrintf(PETSC_COMM_WORLD, "%d,", ind_maj_train[i]);
     }
-    PetscPrintf(PETSC_COMM_WORLD, "\n[k_fold][cross_validation] indices in ind_maj_test are:");
+    PetscPrintf(PETSC_COMM_WORLD, "\n[KF][cross_validation] indices in ind_maj_test are:");
     for(int i=0; i< maj_subset_size; i++){
         PetscPrintf(PETSC_COMM_WORLD, "%d,", ind_maj_test[i]);
     }
@@ -514,9 +518,9 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
     std::sort(ind_maj_test, (ind_maj_test + maj_subset_size));
 
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] parts are sorted \n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] parts are sorted \n");
     max_debug=0, max_loc=0;
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] indices in ind_min_train are:");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] indices in ind_min_train are:");
     for(int i=0; i< min_train_size; i++){
         PetscPrintf(PETSC_COMM_WORLD, "%d,", ind_min_train[i]);
     }
@@ -530,7 +534,7 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
     
     max_debug =0;
     max_loc = 0;
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] indices in ind_maj_train are:");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] indices in ind_maj_train are:");
     for(int i=0; i< maj_train_size; i++){
         PetscPrintf(PETSC_COMM_WORLD, "%d,", ind_maj_train[i]);
     }
@@ -552,23 +556,23 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
     ISCreateGeneral(PETSC_COMM_SELF,maj_subset_size,ind_maj_test,PETSC_COPY_VALUES,&is_maj_test_);
     
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] ISs are created \n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] ISs are created \n");
 //    PetscInt num_row_debug =0 ;
     
 //    MatGetSize(this->m_min_data_, &num_row_debug, NULL);
 //    if(num_row_debug == 0){
-//        PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] {debug} empty this->m_min_data_ matrix \n");
+//        PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] {debug} empty this->m_min_data_ matrix \n");
 //    }else{
-//        PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] {debug} max number of rows in this->m_min_data_ matrix is:%d, ", num_row_debug);
+//        PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] {debug} max number of rows in this->m_min_data_ matrix is:%d, ", num_row_debug);
 //        PetscPrintf(PETSC_COMM_WORLD, "last min_train_curr:%d, min_test_curr:%d, ", min_train_curr,min_test_curr);
 //        PetscPrintf(PETSC_COMM_WORLD, "ind_min_train[min_train_curr-1]:%d, ind_min_test[min_test_curr-1]:%d\n", ind_min_train[min_train_curr-1],ind_min_test[min_test_curr-1]);
 //    }
     
 //    MatGetSize(this->m_maj_data_, &num_row_debug, NULL);
 //    if(num_row_debug == 0){
-//        PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] {debug} empty this->m_maj_data_ matrix \n");
+//        PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] {debug} empty this->m_maj_data_ matrix \n");
 //    }else{
-//        PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] {debug} max number of rows in this->m_maj_data_ matrix is:%d, ", num_row_debug);
+//        PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] {debug} max number of rows in this->m_maj_data_ matrix is:%d, ", num_row_debug);
 //        PetscPrintf(PETSC_COMM_WORLD, "last maj_train_curr:%d, maj_test_curr:%d, ", maj_train_curr, maj_test_curr);
 //        PetscPrintf(PETSC_COMM_WORLD, "ind_maj_train[maj_train_curr-1]:%d, ind_maj_test[maj_test_curr-1]:%d\n", ind_maj_train[maj_train_curr-1],ind_maj_test[maj_test_curr-1]);
 //    }
@@ -580,7 +584,7 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
     PetscFree(ind_maj_test);
 
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] arrays are freed \n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] arrays are freed \n");
     
     
 #endif
@@ -591,7 +595,7 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
     MatGetSubMatrix(this->m_maj_data_,is_maj_test_, NULL,MAT_INITIAL_MATRIX,&m_maj_test_data);
 
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] sub matrices are created \n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] sub matrices are created \n");
 #endif
 
     ISDestroy(&is_min_train_);
@@ -608,17 +612,17 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
     combine_two_classes_in_one(m_test_data, m_min_test_data, m_maj_test_data );
 
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] test data is combined \n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] test data is combined \n");
 #endif
 
     if(p_data_fname.empty())
-        p_data_fname = Config_params::getInstance()->get_p_norm_data_f_name();
+        p_data_fname = paramsInst->get_p_norm_data_f_name();
 
     if(n_data_fname.empty())
-        n_data_fname = Config_params::getInstance()->get_n_norm_data_f_name();
+        n_data_fname = paramsInst->get_n_norm_data_f_name();
 
     if(test_data_fname.empty())
-        test_data_fname = Config_params::getInstance()->get_test_ds_f_name();
+        test_data_fname = paramsInst->get_test_ds_f_name();
 
 
     write_output(p_data_fname, m_min_train_data);
@@ -630,7 +634,7 @@ void k_fold::cross_validation(int current_iteration,int total_iterations,
     MatDestroy(&m_test_data);           //added 012617
    
 #if dbl_kf_cross_validation >= 3
-    PetscPrintf(PETSC_COMM_WORLD, "[k_fold][cross_validation] write all files successfully. \n");
+    PetscPrintf(PETSC_COMM_WORLD, "[KF][cross_validation] write all files successfully. \n");
 #endif 
 }
 
@@ -686,7 +690,7 @@ void k_fold::cross_validation_class(int curr_iter,int total_iter, Mat& m_full_da
     PetscMalloc1(ceil(size_full_data / total_iter) + 1, &arr_idx_test);
 
 #if dbl_KF_CVC >= 3
-    std::cout << "[KF][CV-C] class: " << info << std::endl;
+    cout << "[KF][CV-C] class: " << info << endl;
     PetscPrintf(PETSC_COMM_WORLD, "[KF][CV-C] memory for arrays are allocatted \n");
     PetscPrintf(PETSC_COMM_WORLD, "[KF][CV-C] number of points in are %d \n",size_full_data);
 #endif
@@ -700,7 +704,7 @@ void k_fold::cross_validation_class(int curr_iter,int total_iter, Mat& m_full_da
         idx_test_end    = subset_size ;
 #if dbl_KF_CVC >= 3
     PetscPrintf(PETSC_COMM_WORLD, "[KF][CV-C] condition: A (TEST - Train)\n");
-    std::cout << "[KF][CV-C] A idx_test_end: " << idx_test_end << std::endl;
+    cout << "[KF][CV-C] A idx_test_end: " << idx_test_end << endl;
 #endif
 
         // - - - - - Test - - - - -
@@ -819,9 +823,9 @@ void k_fold::cross_validation_class(int curr_iter,int total_iter, Mat& m_full_da
         v_full_idx_to_train_idx[arr_idx_train[i]]=i;
 //        if(info == "minority" && i < 150 && debug_status)
 
-//        std::cout << "[KF][CV-C] i:" <<i << ", arr_idx_train[i]: " << arr_idx_train[i] <<
+//        cout << "[KF][CV-C] i:" <<i << ", arr_idx_train[i]: " << arr_idx_train[i] <<
 //                     ", v_full_idx_to_train_idx[" << arr_idx_train[i]<< "]: "
-//                      << v_full_idx_to_train_idx[arr_idx_train[i]]<< std::endl;
+//                      << v_full_idx_to_train_idx[arr_idx_train[i]]<< endl;
     }
 
 
@@ -881,8 +885,8 @@ void k_fold::cross_validation_class(int curr_iter,int total_iter, Mat& m_full_da
 
 
 void k_fold::prepare_traindata_for_flann(){
-    std::string p_data_fname = Config_params::getInstance()->get_p_norm_data_f_name();
-    std::string n_data_fname = Config_params::getInstance()->get_n_norm_data_f_name();
+    std::string p_data_fname = paramsInst->get_p_norm_data_f_name();
+    std::string n_data_fname = paramsInst->get_n_norm_data_f_name();
 
     write_output(p_data_fname, this->m_min_data_);
     write_output(n_data_fname, this->m_maj_data_);
@@ -943,13 +947,13 @@ void k_fold::cross_validation_simple(Mat& m_data_p, Mat& m_data_n, Vec& v_vol_p,
         // - - - - - Min Test - - - - -
         for(min_iter= 0; min_iter< min_test_end; min_iter++){  //min_test_start should be 0
             ind_min_test[min_iter] = min_iter;
-// 	std::cout << "A test min_iter:" << min_iter << std::endl;
+// 	cout << "A test min_iter:" << min_iter << endl;
         }
         // - - - - - Min Train - - - - -
         for(min_iter= min_test_end; min_iter< num_point_p+1; min_iter++){
             // Notice: Each array should fill from zero index, the values are different 
             ind_min_train[min_iter - min_test_end] = min_iter ;         
-//	std::cout << "A Train min_iter:" << min_iter << std::endl;
+//	cout << "A Train min_iter:" << min_iter << endl;
         }
 
         // - - - - - Maj Test - - - - -
@@ -1128,9 +1132,9 @@ void k_fold::cross_validation_simple(Mat& m_data_p, Mat& m_data_n, Vec& v_vol_p,
      */
 
     /// = = = = =  Combine Test Data = = = = =
-//    printf("[k_fold] [cross validated] min test data before combine_test_data Matrix:\n");     //$$debug
+//    printf("[KF] [cross validated] min test data before combine_test_data Matrix:\n");     //$$debug
 //    MatView(m_min_test_data ,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
-//    printf("[k_fold] [cross validated] maj test data before combine_test_data Matrix:\n");     //$$debug
+//    printf("[KF] [cross validated] maj test data before combine_test_data Matrix:\n");     //$$debug
 //    MatView(m_maj_test_data ,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
 
     combine_two_classes_in_one(m_test_data, m_test_data_p_, m_test_data_n_ );
@@ -1209,7 +1213,7 @@ void k_fold::write_output(std::string f_name, Mat m_Out, std::string desc){    /
 //    PetscPrintf(PETSC_COMM_WORLD,"\nOutput matrix is written to file %s\n\n",f_name);
     PetscViewerDestroy(&viewer_data_);        //destroy the viewer
 #if dbl_KF_WOUT >= 1
-    std::cout << "[KF][WOUT] "<< desc <<" matrix is successfully written to " << f_name << std::endl;
+    cout << "[KF][WOUT] "<< desc <<" matrix is successfully written to " << f_name << endl;
 #endif
 }
 
@@ -1246,10 +1250,10 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
                            m_min_train_data, m_min_test_data, arr_min_idx_train, min_train_size,
                            uset_min_test_idx,v_min_full_idx_train_dix, "minority", this->min_shuffled_indices_,debug_flg_CVC_min);
 #if dbl_exp_train_data ==1      //only for comparison with other solvers, not part of normal process
-    write_output(Config_params::getInstance()->get_p_e_k_train_data_f_name() , m_min_train_data, "minority data");
+    write_output(paramsInst->get_p_e_k_train_data_f_name() , m_min_train_data, "minority data");
 #endif
 #if dbl_KF_PDFI >= 1
-    std::cout << "[KF][PDFI] min, train_size: " << min_train_size << std::endl;
+    cout << "[KF][PDFI] min, train_size: " << min_train_size << endl;
 #endif
 
     // - - - - - cross fold the data for negative class - - - - -
@@ -1265,24 +1269,24 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
                            m_maj_train_data, m_maj_test_data, arr_maj_idx_train, maj_train_size,
                            uset_maj_test_idx,v_maj_full_idx_train_dix, "majority", this->maj_shuffled_indices_);
 #if dbl_exp_train_data ==1      //only for comparison with other solvers, not part of normal process
-    write_output(Config_params::getInstance()->get_n_e_k_train_data_f_name(), m_maj_train_data, "majority data");
+    write_output(paramsInst->get_n_e_k_train_data_f_name(), m_maj_train_data, "majority data");
 #endif
 #if dbl_KF_PDFI >= 1
-    std::cout << "[KF][PDFI] maj, train_size: " << maj_train_size << std::endl;
+    cout << "[KF][PDFI] maj, train_size: " << maj_train_size << endl;
 #endif
 
     // - - - - -  Combine Test Data - - - - -
     Mat m_test_data;
     combine_two_classes_in_one(m_test_data, m_min_test_data, m_maj_test_data );
-    write_output(Config_params::getInstance()->get_test_ds_f_name(), m_test_data, "test data");
+    write_output(paramsInst->get_test_ds_f_name(), m_test_data, "test data");
     MatDestroy(&m_test_data);
 
 
     //for comparison with other methods, I need to export the training data and test data
     //I am not going to clean them in the end of the program, since I need them
     // #comment_on_release_version
-//    write_output(Config_params::getInstance()->get_p_e_k_train_data_f_name(), m_min_train_data);
-//    write_output(Config_params::getInstance()->get_n_e_k_train_data_f_name(), m_maj_train_data);
+//    write_output(paramsInst->get_p_e_k_train_data_f_name(), m_min_train_data);
+//    write_output(paramsInst->get_n_e_k_train_data_f_name(), m_maj_train_data);
 
 
 
@@ -1303,7 +1307,7 @@ void k_fold::prepare_data_for_iteration(int current_iteration,int total_iteratio
     if(debug_status) debug_flg=true;
     ld.create_WA_matrix(m_min_filtered_indices,m_min_filtered_dists,m_min_WA,"minority",debug_flg);
     if(debug_status){
-        std::cout << "[KF][PDFI] debug is on and exit!: " << std::endl;
+        cout << "[KF][PDFI] debug is on and exit!: " << endl;
         exit(1);
     }
 
@@ -1374,11 +1378,11 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists,
            const std::string& info,bool debug_status){
     ETimer t_all;
     int count_index, count_col_id = 0;
-    const int required_num_NN = Config_params::getInstance()->get_nn_number_of_neighbors();
+    const int required_num_NN = paramsInst->get_nn_number_of_neighbors();
 
 #if dbl_KF_FN >= 3
     PetscInt num_row_debug=0, num_col_debug=0;
-    std::cout << "[KF][FilterNN] class:" << info << std::endl;
+    cout << "[KF][FilterNN] class:" << info << endl;
     MatGetSize(m_full_NN_indices,&num_row_debug,&num_col_debug);
     printf("[KF][FilterNN] number of rows in full NN indices matrix:");
     printf("%d, num_col_debug: %d \n",num_row_debug,num_col_debug);
@@ -1401,7 +1405,7 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists,
     MatCreateSeqAIJ(PETSC_COMM_SELF, train_size, required_num_NN ,
                     required_num_NN, PETSC_NULL, &m_filtered_NN_dists);
 
-//    std::cout << "[KF][FilterNN] filtering"<< std::endl;
+//    cout << "[KF][FilterNN] filtering"<< endl;
     for(i=0; i< train_size; i++){
         MatGetRow(m_full_NN_indices,arr_train_indices[i],
                   &idx_ncols,&idx_cols,&idx_vals);
@@ -1413,7 +1417,7 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists,
 //        full row --> filtered row
 //        int full_row_index= arr_train_indices[i];
 #if dbl_KF_FN >= 7
-        std::cout << "full_row_index:"<< arr_train_indices[i] << " ------>  filtered_row_index:" << i <<std::endl;
+        cout << "full_row_index:"<< arr_train_indices[i] << " ------>  filtered_row_index:" << i <<endl;
 #endif
         for(int index_col=0; index_col < idx_ncols ; index_col++){
             if(uset_test_indices.find(idx_vals[index_col]) == uset_test_indices.end()){
@@ -1439,11 +1443,11 @@ void k_fold::filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists,
         //dis:(i,d)        (i,d)
 
 #if dbl_KF_FN >= 7
-                    std::cout << "index:(" << idx_cols[index_col] << "," <<full_NN_idx <<") \t             "<<
+                    cout << "index:(" << idx_cols[index_col] << "," <<full_NN_idx <<") \t             "<<
                                  index_col<< "(" << count_index << "," << filtered_NN_idx <<")\n";
 
                     if(count_col_id < dis_ncols) //the distance zero reduces the size of distance row
-                        std::cout << "dis_idx:"<< dis_idx <<", dist:(" << dis_cols[index_col] << ","
+                        cout << "dis_idx:"<< dis_idx <<", dist:(" << dis_cols[index_col] << ","
                                   << dis_vals[dis_idx] <<") \t "<<
                                  "(" << count_index << "," << dis_vals[dis_idx] <<")\n";
 #endif
@@ -1491,10 +1495,10 @@ void k_fold::extractk_NN(Mat& m_full_NN_indices,
             const std::string& info){
     ETimer t_all;
     int count_index = 0;
-    const int required_num_NN = Config_params::getInstance()->get_nn_number_of_neighbors();
+    const int required_num_NN = paramsInst->get_nn_number_of_neighbors();
 
     PetscInt num_row=0;
-    std::cout << "[KF][extractk_NN] class:" << info << std::endl;
+    cout << "[KF][extractk_NN] class:" << info << endl;
     MatGetSize(m_full_NN_indices,&num_row, NULL);
 //    printf("[KF][FilterNN] number of rows in full NN indices matrix:");
 //    printf("%d, num_col_debug: %d \n",num_row_debug,num_col_debug);
@@ -1525,7 +1529,7 @@ void k_fold::extractk_NN(Mat& m_full_NN_indices,
                             count_index, idx_vals[index_col], INSERT_VALUES);
 
                 // debug_should_remove comment 082918_1024
-//                std::cout << "count_index: "<< count_index
+//                cout << "count_index: "<< count_index
 //                          << ", dis_idx: "<< dis_idx
 //                          << ", dist_val:(" << dis_cols[index_col] << ","
 //                          << dis_vals[count_index] <<") \n";

@@ -511,44 +511,58 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, 
         }
         int best_1st_stage = select_best_model(v_summary,level,1);
     #if dbl_MS_UD >= 3
-        cout <<"[MS][UD] best_1st_stage:"<< best_1st_stage << " nSV+:" << v_summary[best_1st_stage].num_SV_p
-                                                    <<", paramsC:"<< v_summary[best_1st_stage].C << endl;
+        cout <<"[MS][UD] best_1st_stage:"<< best_1st_stage <<
+               " nSV+:" << v_summary[best_1st_stage].num_SV_p <<
+               ", paramsC:"<< v_summary[best_1st_stage].C << endl;
     #endif
         stage = 2 ;
         printf("[MS][UD] ------ stage:%d, level:%d, fold:%d ------ \n", stage, level, fold_id);
         std::vector<ud_point> ud_params_st_2;
-        printf("[MS][UD] 2nd stage model selection center C:%g, G:%g\n",ud_params_st_1[best_1st_stage].C , ud_params_st_1[best_1st_stage].G);
-        ud_params_st_2 = ud_param_generator(stage,true, ud_params_st_1[best_1st_stage].C , ud_params_st_1[best_1st_stage].G);
+        printf("[MS][UD] 2nd stage model selection center C:%g, G:%g\n",
+                                           ud_params_st_1[best_1st_stage].C ,
+                                           ud_params_st_1[best_1st_stage].G);
+        ud_params_st_2 = ud_param_generator(stage,true,
+                                            ud_params_st_1[best_1st_stage].C ,
+                                            ud_params_st_1[best_1st_stage].G);
         for(unsigned int i = 0; i < num_iter_st2 ;i++){
             //skip the center of second stage(duplicate)
-            if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C && ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)
+            if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C &&
+                    ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)
                 continue;
             Solver sv;
             svm_model * curr_svm_model;
-            curr_svm_model = sv.train_model(m_train_data_p, v_train_vol_p, m_train_data_n, v_train_vol_n, 1,
-                                        ud_params_st_2[i].C, ud_params_st_2[i].G);
+            curr_svm_model = sv.train_model(m_train_data_p, v_train_vol_p,
+                                            m_train_data_n, v_train_vol_n, 1,
+                                            ud_params_st_2[i].C,
+                                            ud_params_st_2[i].G);
             sv.test_predict(m_test_data, current_summary, solver_id);
 //            v_solver.push_back(sv);
             sv.free_solver("[MS][UD] ");   //free the solver
             v_summary.push_back(current_summary);
     #if dbl_MS_UD >= 1
-            paramsInst->print_summary(current_summary,"[MS][UD]", level, i, stage,fold_id);
+            paramsInst->print_summary(current_summary,"[MS][UD]", level,
+                                      i, stage,fold_id);
     #endif
             ++solver_id;
         }
         int best_of_all =  select_best_model(v_summary,level,2);
     //    printf("[MS][UD] best of all iter :%d\n", best_of_all);
-        v_summary_folds.push_back( summary_factory_update_iter(v_summary[best_of_all], fold_id)  );
+        v_summary_folds.push_back( summary_factory_update_iter(
+                                       v_summary[best_of_all], fold_id)  );
     #if dbl_MS_UD >= 1
-        paramsInst->print_summary(v_summary[best_of_all],"[MS][UD] Validation Data", level, -1, stage,fold_id);
+        paramsInst->print_summary(v_summary[best_of_all],
+                                  "[MS][UD] Validation Data",
+                                  level, -1, stage,fold_id);
     #endif
 
     } // end of for loop for fold_id
 
 
-    /* - - - - - start experiment all the best values to find a better selection technique - - - - - */
+    /* - - - - - start experiment all the best values to find
+     *                          a better selection technique - - - - - */
     ETimer t_exp;
-    printf("[MS][UD] expriment all the parameters for training and testing the test data(not validation data)\n");
+    cout << "[MS][UD] expriment all the parameters for training and testing "<<
+            "the test data(not validation data)" << endl;
     Loader test_loader;
     Mat untouched_test_data ;
     untouched_test_data = test_loader.load_norm_data_sep(paramsInst->get_test_ds_f_name() );
@@ -563,7 +577,8 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, 
         paramsInst->print_summary(exp_summary,"[MS][UD]TD [experiment only] ", level);
     }
     MatDestroy(&untouched_test_data);
-    t_exp.stop_timer("[MS][UD][exp] evaluate the performance of all the parameters on the testdata at level", std::to_string(level) );
+    t_exp.stop_timer("[MS][UD][exp] evaluate the performance of all the parameters on the testdata at level",
+                     std::to_string(level) );
     /* - - - - - end   experiment all the best values to find a better selection technique - - - - - */
 
     // - - - - - select best of all folds - - - -
@@ -616,6 +631,7 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
                                     , int level
                                     , solution & udc_sol
                                     , std::vector<ref_results>& v_ref_results){
+
     // - - - -  Load validation data which is the training part of  - - - -
     //          whole data in the beginning of the coarsening
     ETimer t_whole_UD;
@@ -674,77 +690,99 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
 #endif
     std::vector<ud_point> ud_params_st_2;
 
-    ud_params_st_2 = ud_param_generator(stage,true, ud_params_st_1[best_1st_stage].C , ud_params_st_1[best_1st_stage].G);
+    ud_params_st_2 = ud_param_generator(stage,true,
+                                        ud_params_st_1[best_1st_stage].C ,
+                                        ud_params_st_1[best_1st_stage].G);
     for(unsigned int i = 0; i < num_iter_st2 ;i++){
         //skip the center of second stage(duplicate)
-        if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C && ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)
+        if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C &&
+                ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)
             continue;
         Solver sv;
         svm_model * curr_svm_model;
-        curr_svm_model = sv.train_model(m_train_data_p, v_train_vol_p, m_train_data_n, v_train_vol_n, 1,
-                                    ud_params_st_2[i].C, ud_params_st_2[i].G);
+        curr_svm_model = sv.train_model(m_train_data_p, v_train_vol_p,
+                                        m_train_data_n, v_train_vol_n, 1,
+                                        ud_params_st_2[i].C,
+                                        ud_params_st_2[i].G);
         sv.predict_validation_data(m_VD_p, m_VD_n, current_summary, solver_id);
         v_solver.push_back(sv);
 //            sv.free_solver("[MS][UDSepVal] ");   //free the solver
         v_summary.push_back(current_summary);
 #if dbl_MS_UDSepVal >= 3
-        paramsInst->print_summary(current_summary,"[MS][UDSepVal]", level, i, stage);
+        paramsInst->print_summary(current_summary,"[MS][UDSepVal]", level,
+                                  i, stage);
 #endif
         ++solver_id;
     }
     int best_of_all =  select_best_model(v_summary,level,2);
 
 #if dbl_MS_UDSepVal >= 1
-    paramsInst->print_summary(v_summary[best_of_all],"[MS][UDSV]", level, -1, stage);
+    paramsInst->print_summary(v_summary[best_of_all],"[MS][UDSV]", level,
+                              -1, stage);
     #if dbl_MS_UDSepVal >= 3
-        printf("[MS][UDSepVal] best of both stage of UD is: (iter :%d)\n", best_of_all);
+        printf("[MS][UDSepVal] best of both stage of UD is: (iter :%d)\n",
+               best_of_all);
     #endif
 #endif
     t_stage2.stop_timer("[MS][UDSepVal] stage 2 at level", std::to_string(level) );
 
-    // - - - - load the test data from file - - - -
-    Mat m_TD;
-    m_TD = ld.load_norm_data_sep(paramsInst->get_test_ds_f_name() );
-
-    /* - - - - - start experiment all the best values to find a better selection technique - - - - - */
-//    ETimer t_exp;
-//    printf("[MS][UDSepVal] expriment all the solvers of model selection stage on the test data(check the quality of the sort we use)\n");
-//    for(auto it= v_solver.begin(); it!= v_solver.end(); ++it){
-//        it->test_predict(m_TD, current_summary);
-//        paramsInst->print_summary(current_summary,"[MS][UDSepVal]TD [experiment only] ", 4444000+level);
-//    }
-//    t_exp.stop_timer("[MS][UDSepVal][exp] evaluate the performance of all the parameters on the testdata at level", std::to_string(level) );
-    /* - - - - - end   experiment all the best values to find a better selection technique - - - - - */
-
-    // - - - - - prepare solution for finer level - - - -
     ETimer t_prep_sol;
+    // - - - - - prepare solution for finer level - - - -
     PetscInt num_point_p;
     MatGetSize(m_train_data_p, &num_point_p, NULL);
     Solver best_solver = v_solver[best_of_all];
-
     svm_model * best_model = best_solver.get_model() ;
     best_solver.prepare_solution_single_model(best_model , num_point_p, udc_sol);
-    summary final_summary;
-    best_solver.evaluate_testdata(level, final_summary);
-    ref_results refinement_results ;
 
+    ref_results refinement_results ;
     refinement_results.validation_data_summary = v_summary[best_of_all];
-    refinement_results.test_data_summary = final_summary;
     refinement_results.level = level;
+
+
+    if(paramsInst->getTestdataExist()){
+        summary final_summary;
+        Mat m_TD;
+        // - - - - load the test data from file - - - -
+        m_TD = ld.load_norm_data_sep(paramsInst->get_test_ds_f_name() );
+        best_solver.evaluate_testdata(level, final_summary);
+        refinement_results.test_data_summary = final_summary;
+
+        // This is a test on test-data rather than validation-data
+        #if dbl_MS_UDSepVal >= 3
+            final_summary.iter = -1;       //not print the iteration is summary
+            paramsInst->print_summary(final_summary,"[MS][UDSepVal] final TD ", level);
+        #endif
+        MatDestroy(&m_TD);
+    }else{
+        cout << "WARNING: Test data is not evaluated!" << endl;
+        cout << "Models are saved for future analysis" << endl;
+        #if export_SVM_models == 1       //export the model (we save a model at a time)
+            //save the models in a local folder
+            //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
+            //append the model to summary file after each export
+            //make sure to close and open the summary file at each level to prevent losing models in the case of crash or error
+            std::string output_file = "./svm_models/" + paramsInst->get_ds_name()+
+                    "_exp_" + std::to_string(paramsInst->get_main_current_exp_id()) +
+                    "_kf_" + std::to_string(paramsInst->get_main_current_kf_id()) +
+                    "_level_" + std::to_string(paramsInst->get_main_current_level_id()) +
+                    ".svmmodel";
+            svm_save_model(output_file.c_str(), best_model);
+            printf("[MS][UDIBSepVal] model %s is saved\n", output_file.c_str());
+
+        #endif
+    }
     //collect the final best model at each level
     v_ref_results.push_back(refinement_results);
-    #if dbl_MS_UDSepVal >= 3   // This is a test on test-data rather than validation-data
-        final_summary.iter = -1;       //not print the iteration is summary
-        paramsInst->print_summary(final_summary,"[MS][UDSepVal] final TD ", level);
-    #endif
         
     // - - - - - free resources - - - - -
     for(auto it=v_solver.begin(); it!= v_solver.end(); ++it){
         it->free_solver("[MS][UDSepVal] ");   //free all solvers
     }
-    MatDestroy(&m_TD);
-    t_prep_sol.stop_timer("[MS][UDSepVal] Prepare solution, L", std::to_string(level) );
-    t_whole_UD.stop_timer("[MS][UDSepVal] Complete both stages, L",std::to_string(level));
+
+    t_prep_sol.stop_timer("[MS][UDSepVal] Prepare solution, L",
+                          std::to_string(level) );
+    t_whole_UD.stop_timer("[MS][UDSepVal] Complete both stages, L",
+                          std::to_string(level));
 }
 
 

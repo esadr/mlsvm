@@ -59,7 +59,8 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
             << "rf.process_coarsest_level:"
             << std::to_string(paramsInst->get_main_current_level_id()) << endl;
 #endif
-        rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n, level ,sol_coarsest, v_ref_results);
+        rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n,
+                                  level ,sol_coarsest, v_ref_results);
 
 #if dbl_MR_main >= 3
         cout << funcIdx + "DEBUG level id after calling rf.process_coarsest_level:" +

@@ -129,14 +129,14 @@ Mat Loader::load_flann_binary(){
 
     /// ------------- Create the WA matrix ----------------------
     //Create Matrix WA : Weighted Adjancency
-//    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, Config_params::getInstance()->get_pre_init_loader_matrix(),PETSC_NULL, &WA); //depreacted v0.0.45 121117_1200
+//    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, paramsInst->get_pre_init_loader_matrix(),PETSC_NULL, &WA); //depreacted v0.0.45 121117_1200
     PetscInt* nnz = &node_stat_approximate[0];  //https://stackoverflow.com/a/2923290/2674061
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, PETSC_NULL,nnz, &WA);
 
 
     ETimer t_init_WA;
     CommonFuncs cf;
-    cf.set_weight_type(Config_params::getInstance()->get_ld_weight_type(), Config_params::getInstance()->get_ld_weight_param());
+    cf.set_weight_type(paramsInst->get_ld_weight_type(), paramsInst->get_ld_weight_param());
     for(i =0; i <num_row; i++){                         //i would be the row number
         MatGetRow(m_ind_,i,&ncols_ind,&cols_ind,&vals_ind);             //ncols : number if non-zeros in the row
         MatGetRow(m_dis_,i,&ncols_dis,&cols_dis,&vals_dis);
@@ -255,13 +255,14 @@ void Loader::create_WA_matrix(Mat& m_NN_idx,Mat& m_NN_dis,Mat& m_WA,const std::s
 
     /// ------------- Create the WA matrix ----------------------
     //Create Matrix WA : Weighted Adjancency
-//    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, Config_params::getInstance()->get_pre_init_loader_matrix(),PETSC_NULL, &WA); //depreacted v0.0.45 121117_1200
+//    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, paramsInst->get_pre_init_loader_matrix(),PETSC_NULL, &WA); //depreacted v0.0.45 121117_1200
       //https://stackoverflow.com/a/2923290/2674061
     MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,num_row, PETSC_NULL,nnz, &m_WA);
 
     ETimer t_init_WA;
     CommonFuncs cf;
-    cf.set_weight_type(Config_params::getInstance()->get_ld_weight_type(), Config_params::getInstance()->get_ld_weight_param());
+    cf.set_weight_type(paramsInst->get_ld_weight_type(),
+                       paramsInst->get_ld_weight_param());
     for(i =0; i <num_row; i++){                         //i would be the row number
         MatGetRow(m_NN_idx,i,&ncols_ind,&cols_ind,&vals_ind);             //ncols : number if non-zeros in the row
         MatGetRow(m_NN_dis,i,&ncols_dis,&cols_dis,&vals_dis);
