@@ -150,20 +150,26 @@ Mat Preprocessor::normalizeDataZscore_Transposed(Mat& m_raw_data
     }
 
     if (export_mean_std){
+        std::string fn_mean = "./zscore_mean.csv";
+        std::string fn_std = "./zscore_std.csv";
+
         std::fstream fs_mean;
-        fs_mean.open("./zscore_mean.csv", std::fstream::out);
+        fs_mean.open(fn_mean, std::fstream::out);
         for(int i=0; i< v_mean.size(); i++){
             fs_mean << std::to_string(v_mean[i]) << std::endl;
         }
         fs_mean.close();
 
         std::fstream fs_std;
-        fs_mean.open("./zscore_std.csv", std::fstream::out);
+        fs_std.open(fn_std, std::fstream::out);
         for(int i=0; i< v_std.size(); i++){
-            fs_mean << std::to_string(v_std[i]) << std::endl;
+            fs_std << std::to_string(v_std[i]) << std::endl;
         }
         fs_std.close();
+        std::cout << "Both mean and std are exported to below files\n" <<
+                     fn_mean << "\n" << fn_std << std::endl;
     }
+
 
 //Calculate the Z score
 
