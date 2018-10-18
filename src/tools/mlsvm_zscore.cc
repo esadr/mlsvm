@@ -25,7 +25,7 @@ int main(int argc, char **argv){
     std::cout << "MatTranspose is done\n";
 
     Preprocessor pr;
-    m_normalized_T = pr.normalizeDataZscore_Transposed(m_raw_data_T);
+    m_normalized_T = pr.normalizeDataZscore_Transposed(m_raw_data_T, 1);
     MatDestroy(&m_raw_data_T);
     std::cout << "Normalization is done\n";
 
