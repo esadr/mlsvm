@@ -6,7 +6,8 @@
 Config_params* Config_params::instance = NULL;
 
 int main(int argc, char **argv){
-    PetscInitialize(&argc, &argv, NULL, NULL);
+//    PetscInitialize(&argc, &argv, NULL, NULL);
+    PetscInitialize(NULL, NULL, NULL, NULL);
     //read XML parameters
     Config_params::getInstance()->read_params("./params.xml", argc, argv, Config_params::zscore );
     const std::string models_path = "./svm_models/";
