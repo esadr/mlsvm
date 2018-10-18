@@ -17,7 +17,8 @@ private:
 public:
     Mat& readData(const char *);
     Mat normalizeDataZscore(Mat&);
-    Mat normalizeDataZscore_Transposed(Mat& raw_mat);
+    Mat normalizeDataZscore_Transposed(Mat& raw_mat,
+                                       bool export_mean_std=0);
 //    void separateData(Mat&, const char *);
 //    void export_data();
     void getSubMatrixByRange(Mat& in_mat, Mat& subMatrix,
