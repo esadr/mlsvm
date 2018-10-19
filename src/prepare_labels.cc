@@ -22,19 +22,19 @@ int main(int argc, char *argv[])
     PetscBool      flg;
     PetscErrorCode ierr;
 
-    ierr = PetscOptionsGetString(NULL,"-in_file",in_filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
+    ierr = PetscOptionsGetString(NULL,NULL,"-in_file",in_filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
     if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate an input file name with the -in_file option");
 
-    ierr = PetscOptionsGetString(NULL,"-out_file",out_filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
+    ierr = PetscOptionsGetString(NULL,NULL,"-out_file",out_filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
     if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate an output file name with the -out_file option");
 
-    ierr = PetscOptionsGetInt(NULL,"-n",&num_lines,&flg);CHKERRQ(ierr);
+    ierr = PetscOptionsGetInt(NULL,NULL,"-n",&num_lines,&flg);CHKERRQ(ierr);
     if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate number of lines in file with the -n option");
     
-    ierr = PetscOptionsGetInt(NULL,"-m",&minority_label,&flg);CHKERRQ(ierr);
+    ierr = PetscOptionsGetInt(NULL,NULL,"-m",&minority_label,&flg);CHKERRQ(ierr);
     if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate minority_label with the -m option");
     
-    ierr = PetscOptionsGetInt(NULL,"-inverse",&inverse,&flg);CHKERRQ(ierr);
+    ierr = PetscOptionsGetInt(NULL,NULL,"-inverse",&inverse,&flg);CHKERRQ(ierr);
 //     if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate minority_label with the -m option");
     
     
