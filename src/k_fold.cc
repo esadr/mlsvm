@@ -1132,23 +1132,25 @@ void k_fold::cross_validation_simple(Mat& m_data_p, Mat& m_data_n, Vec& v_vol_p,
      */
 
     /// = = = = =  Combine Test Data = = = = =
-//    printf("[KF] [cross validated] min test data before combine_test_data Matrix:\n");     //$$debug
-//    MatView(m_min_test_data ,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
-//    printf("[KF] [cross validated] maj test data before combine_test_data Matrix:\n");     //$$debug
-//    MatView(m_maj_test_data ,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
-
     combine_two_classes_in_one(m_test_data, m_test_data_p_, m_test_data_n_ );
 }
 
 /*
- * I guess I should skip this in future, but for now it is very similar to what I have in the model selection
- * It gets 2 test matrices for both classes and add the labels to the first column of a new matrix
- * which contains both of them
- * Note: the dt_test_p, dt_test_n will destroy in the end of this function because they are not needed anymore
- * changed: 021517-1605 the name of matrices are changed since they are not only used for testdata.
- * Now I use this function for validation data as well
+ * I guess I should skip this in future, but for now it is very similar to
+ *      what I have in the model selection
+ * It gets 2 test matrices for both classes and add the labels to
+ * the first column of a new matrix which contains both of them
+ *
+ * Note: the dt_test_p, dt_test_n will destroy in the end of this function
+ *      because they are not needed anymore
+ * changed: 021517-1605 the name of matrices are changed since
+ *      they are not only used for testdata and now I use this function
+ *      for validation data as well
  */
-void k_fold::combine_two_classes_in_one(Mat& m_output, Mat& m_positive_class, Mat& m_negative_class, bool destroy_input_matrices){
+void k_fold::combine_two_classes_in_one(Mat& m_output,
+                                        Mat& m_positive_class,
+                                        Mat& m_negative_class,
+                                        bool destroy_input_matrices){
     ETimer t_all;
     PetscInt max_num_col_;
     PetscInt num_row_min, num_row_maj, num_row;
@@ -1156,47 +1158,60 @@ void k_fold::combine_two_classes_in_one(Mat& m_output, Mat& m_positive_class, Ma
     const PetscInt    *cols;
     const PetscScalar *vals;
 
-    MatGetSize(m_positive_class, &num_row_min, &max_num_col_);   //set the number of columns
+    // get the number of columns
+    MatGetSize(m_positive_class, &num_row_min, &max_num_col_);
     MatGetSize(m_negative_class, &num_row_maj, NULL);
 
     num_row = num_row_min + num_row_maj;
 #if dbl_KF_CTC >= 1
-    PetscPrintf(PETSC_COMM_WORLD, "[KF][CTC] num_row_min: %d, num_row_maj:%d\n",num_row_min,num_row_maj);     //$$debug
-    PetscPrintf(PETSC_COMM_WORLD, "[KF][CTC] num_row: %d, num_col:%d, nz:%d\n",num_row,max_num_col_ + 1 , max_num_col_ + 1);     //$$debug
+    printf("[KF][CTC] num_row_min: %d, num_row_maj:%d\n",
+           num_row_min,num_row_maj);
+    printf("[KF][CTC] num_row: %d, num_col:%d, nz:%d\n",
+           num_row,max_num_col_ + 1 , max_num_col_ + 1);
 #endif
-    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row ,max_num_col_ + 1 ,(max_num_col_ + 1 ),PETSC_NULL, &m_output); //+1 is for label
+    //+1 is for label
+    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row ,max_num_col_ + 1 ,
+                    (max_num_col_ + 1 ),PETSC_NULL, &m_output);
     for(i =0; i < num_row_min ; i++){
-        MatSetValue(m_output, i, 0, +1,INSERT_VALUES);        //Insert positive lable
+        //Insert positive lable
+        MatSetValue(m_output, i, 0, +1,INSERT_VALUES);
         MatGetRow(m_positive_class,i,&ncols,&cols,&vals);
         for(int j=0; j < ncols ; j++){
-            MatSetValue(m_output,i,cols[j]+1, vals[j],INSERT_VALUES) ;    //+1 shifts the columns 1 to the right
+            //+1 shifts the columns 1 to the right
+            MatSetValue(m_output,i,cols[j]+1, vals[j],INSERT_VALUES) ;
         }
         MatRestoreRow(m_positive_class,i,&ncols,&cols,&vals);
     }
 
     for(i =0; i < num_row_maj ; i++){
-        MatSetValue(m_output, i + num_row_min, 0, -1, INSERT_VALUES);        //Insert negative lable
+        //Insert negative lable
+        MatSetValue(m_output, i + num_row_min, 0, -1, INSERT_VALUES);
         MatGetRow(m_negative_class,i,&ncols,&cols,&vals);
         for(int j=0; j < ncols ; j++){
-            MatSetValue(m_output, i + num_row_min, cols[j]+1, vals[j],INSERT_VALUES) ;    //+1 shifts the columns 1 to the right
+            //+1 shifts the columns 1 to the right
+            MatSetValue(m_output, i + num_row_min, cols[j]+1,
+                        vals[j],INSERT_VALUES) ;
         }
         MatRestoreRow(m_negative_class,i,&ncols,&cols,&vals);
     }
     MatAssemblyBegin(m_output, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_output, MAT_FINAL_ASSEMBLY);
+
+    //release the separated class of test data
     if(destroy_input_matrices){
-        MatDestroy(&m_positive_class);                             //release the separated class of test data
+        MatDestroy(&m_positive_class);
         MatDestroy(&m_negative_class);
     }
 
 #if dbl_KF_CTD > 7
-    PetscViewer     viewer_testdata;
-    PetscViewerBinaryOpen(PETSC_COMM_WORLD,"Coarsest_test_data.dat",FILE_MODE_WRITE,&viewer_testdata);
-    MatView(m_output,viewer_testdata);
-    PetscViewerDestroy(&viewer_testdata);
+    PetscViewer     viewer;
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD,"combine_two_classes_test_data.dat",
+                          FILE_MODE_WRITE,&viewer);
+    MatView(m_output,viewer);
+    PetscViewerDestroy(&viewer);
 
-    printf("[KF][CTC] total output Matrix:\n");                                               //$$debug
-    MatView(m_output ,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
+    printf("[KF][CTC] total output Matrix:\n");
+    MatView(m_output ,PETSC_VIEWER_STDOUT_WORLD);
 #endif
     t_all.stop_timer("[KF][CTC]");
 }
@@ -1207,10 +1222,8 @@ void k_fold::combine_two_classes_in_one(Mat& m_output, Mat& m_positive_class, Ma
 
 void k_fold::write_output(std::string f_name, Mat m_Out, std::string desc){    //write the output to file
     PetscViewer     viewer_data_;
-//    PetscViewerBinaryOpen(PETSC_COMM_WORLD,f_name.c_str(),FILE_MODE_WRITE,&viewer_data_);
     PetscViewerBinaryOpen(PETSC_COMM_WORLD,f_name.c_str(), FILE_MODE_WRITE,&viewer_data_);
     MatView(m_Out,viewer_data_);
-//    PetscPrintf(PETSC_COMM_WORLD,"\nOutput matrix is written to file %s\n\n",f_name);
     PetscViewerDestroy(&viewer_data_);        //destroy the viewer
 #if dbl_KF_WOUT >= 1
     cout << "[KF][WOUT] "<< desc <<" matrix is successfully written to " << f_name << endl;
@@ -1225,30 +1238,38 @@ void k_fold::write_output(std::string f_name, Mat m_Out, std::string desc){    /
 
 /*
  * the input matrices are loaded m_min_full_data,m_maj_full_data
- * the test data is created and save to file and load later, so we destroy the matrix
+ * the test data is created and save to file and load later,
+ *      so we destroy the matrix
  * the full NN indices and dists are read and filtered,
- * the filtered NN is used to create the WA matrices, and the NN data could be removed #memory optimization
- *
+ * the filtered NN is used to create the WA matrices,
+ *      and the NN data could be removed #memory optimization
  */
-void k_fold::prepare_data_for_iteration(int current_iteration,int total_iterations,
-                        Mat& m_min_full_data,Mat& m_min_train_data,Mat& m_min_full_NN_indices,Mat& m_min_full_NN_dists,Mat& m_min_WA,Vec& v_min_vol,
-                        Mat& m_maj_full_data,Mat& m_maj_train_data,Mat& m_maj_full_NN_indices,Mat& m_maj_full_NN_dists,Mat& m_maj_WA,Vec& v_maj_vol,
-                        bool debug_status){
+void k_fold::prepare_data_for_iteration(int current_iteration,
+                        int total_iterations, Mat& m_min_full_data,
+                        Mat& m_min_train_data, Mat& m_min_full_NN_indices,
+                        Mat& m_min_full_NN_dists,Mat& m_min_WA,Vec& v_min_vol,
+                        Mat& m_maj_full_data, Mat& m_maj_train_data,
+                        Mat& m_maj_full_NN_indices, Mat& m_maj_full_NN_dists,
+                        Mat& m_maj_WA,Vec& v_maj_vol, bool debug_status){
     // - - - - - cross fold the data for positive class - - - - -
     Mat m_min_test_data;
     std::unordered_set<PetscInt> uset_min_test_idx;
     PetscInt    size_min_full_data;
-    MatGetSize(m_min_full_data, &size_min_full_data, NULL); //get the size of minority class
+    //get the size of minority class
+    MatGetSize(m_min_full_data, &size_min_full_data, NULL);
     PetscInt * arr_min_idx_train;
-    PetscMalloc1(size_min_full_data, &arr_min_idx_train);   //it should be allocate now, not inside the function https://goo.gl/SbGk0y
+    //it should be allocate now, not inside the function https://goo.gl/SbGk0y
+    PetscMalloc1(size_min_full_data, &arr_min_idx_train);
     PetscInt min_train_size=0;                              //pass by reference
     std::vector<PetscInt> v_min_full_idx_train_dix;
     bool debug_flg_CVC_min=false;
     if(debug_status) debug_flg_CVC_min=true;
 
     cross_validation_class(current_iteration, total_iterations, m_min_full_data,
-                           m_min_train_data, m_min_test_data, arr_min_idx_train, min_train_size,
-                           uset_min_test_idx,v_min_full_idx_train_dix, "minority", this->min_shuffled_indices_,debug_flg_CVC_min);
+                           m_min_train_data, m_min_test_data, arr_min_idx_train,
+                           min_train_size, uset_min_test_idx,
+                           v_min_full_idx_train_dix, "minority",
+                           this->min_shuffled_indices_,debug_flg_CVC_min);
 #if dbl_exp_train_data ==1      //only for comparison with other solvers, not part of normal process
     write_output(paramsInst->get_p_e_k_train_data_f_name() , m_min_train_data, "minority data");
 #endif
