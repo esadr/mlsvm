@@ -7,23 +7,24 @@
 #include "config_params.h"
 #include "common_funcs.h"
 #include <cassert>
+#include "config_logs.h"
 
 Config_params* Config_params::instance = NULL;
 
 int main(int argc, char **argv)
 {
     PetscInitialize(NULL, NULL, NULL, NULL);
+
+#if export_SVM_models == 0
+    assert(0 && "Set export_SVM_models = 1  in config_logs.h and rebuild!");
+#endif
+
     paramsInst->read_params("./params.xml",
                                               argc, argv);  // read parameters
 
     paramsInst->set_master_models_info();
     paramsInst->set_fixed_file_names();
-    paramsInst->setTestdataExist();
-//    int num_repeat_exp_ = paramsInst->getInstance()
-//                                            ->get_main_num_repeat_exp();
-//    int num_kf_iter_ = paramsInst->getInstance()
-//                                            ->get_main_num_kf_iter();
-//    int total_iter_ = num_repeat_exp_ * num_kf_iter_;
+
     ETimer t_all;
 
     // load data files
@@ -43,15 +44,13 @@ int main(int argc, char **argv)
     paramsInst->set_main_current_exp_id(r);
     // new experiment seed is different from the earlier experiments
     paramsInst->update_srand_seed();
-    // creat vector of indices for 1 complete iteration including multiple v-cycle
-//        kf.shuffle_data();
 
-    /// - - - - - - Run a whole cross validation (k-fold)) over the training data - - - - - -
+
     int i=0;
     paramsInst->set_main_current_kf_id(i);
     ETimer t_iteration;
-    Mat m_min_train_data,m_min_WA;
-    Mat m_maj_train_data,m_maj_WA;
+    Mat m_min_train_data, m_min_WA;
+    Mat m_maj_train_data, m_maj_WA;
     Vec v_p_vol, v_n_vol;
     // r is the current experiment, i is the current iteration (k-fold id)
 //    paramsInst->set_current_iter_file_names(r, i);
@@ -94,7 +93,6 @@ int main(int argc, char **argv)
                            m_maj_full_data, m_P_majority, m_maj_WA, v_n_vol,
                            m_VD_p, m_VD_n, 0, v_ref_results);
 
-//    exit(1);
 
     paramsInst->set_timer_end_refinement();
     Refinement rf;
@@ -124,7 +122,7 @@ int main(int argc, char **argv)
     MatDestroy(&m_maj_full_NN_dists);
 
 #if dbl_exp_train_data == 0
-    paramsInst->print_final_results();
+//    paramsInst->print_final_results();
     t_all.stop_timer("[MC] Whole test including all iterations");
 
 #if export_SVM_models == 1

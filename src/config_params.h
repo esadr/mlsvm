@@ -11,15 +11,17 @@
 
 #define paramsInst Config_params::getInstance()
 
+using std::string;
+
 class Config_params{
 private:
     Config_params(){}
     static Config_params* instance;
 
-    optparse::OptionParser parser_ = optparse::OptionParser() .description("Multilevel Machine Learning Library");
+    optparse::OptionParser parser_ = optparse::OptionParser()
+                           .description("Multilevel Machine Learning Library");
 
     optparse::Values options_;
-
 
     PetscInt main_function;
 
@@ -31,18 +33,17 @@ private:
     int     debug_exp_MR;
     int     debug_exp_MR_level;
 
-
-    std::string mlsvm_version;
-    std::string mlclustering_version;
-    std::string p_indices_f_name, p_dist_f_name;
-    std::string n_indices_f_name, n_dist_f_name;
-    std::string p_norm_data_f_name, n_norm_data_f_name;
-    std::string test_ds_f_name, single_norm_data_f_name;
-    std::string p_e_k_train_data_f_name, n_e_k_train_data_f_name;
+    string mlsvm_version;
+    string mlclustering_version;
+    string p_indices_f_name, p_dist_f_name;
+    string n_indices_f_name, n_dist_f_name;
+    string p_norm_data_f_name, n_norm_data_f_name;
+    string test_ds_f_name, single_norm_data_f_name;
+    string p_e_k_train_data_f_name, n_e_k_train_data_f_name;
 
     /// Descriptions are moved to param.xml
     //======= C++ parameters ========
-    std::string cpp_srand_seed;
+    string cpp_srand_seed;
     int level;
     //======= main ========
     int         main_num_repeat_exp;
@@ -51,21 +52,22 @@ private:
     int         main_current_kf_id;         //for export models
     int         main_current_level_id;      //for export models
     int         multi_level_status;
-    std::string exp_info;
+    string exp_info;
 
     //======= NN ========
     int         nn_number_of_classes;
     int         nn_number_of_neighbors;
     int         nn_distance_type;
 
-    std::string nn_path;
-    std::string nn_data_fname1;
-    std::string nn_data_fname2;
-    std::string nn_tmp_path;
+    string nn_path;
+    string nn_data_fname1;
+    string nn_data_fname2;
+    string nn_tmp_path;
     //======= Loader ========
-    std::string ds_path;
-    std::string ds_name;
-    std::string tmp_path;
+    string ds_path;
+    string ds_name;
+    string test_data_name;     // add 083018
+    string tmp_path;
     int         pre_init_loader_matrix;
     bool        inverse_weight;
     int         ld_weight_type;
@@ -78,9 +80,12 @@ private:
     int         cs_max_coarse_level;    // Control parameter to stop
     int         cs_use_real_points;
     double      cs_weak_edges_ft;       // filter threshold for weak edges
-    bool        cs_boundary_points_status;  //0 means normal scenario, 1 means add boundary points
-    double      cs_boundary_points_threshold;       // min entropy for a fine point to be considered as boundary point between 0 and 1
-    int         cs_boundary_points_max_num;    // max number of fractions is going to add to each row of P matrix
+    //0 means normal scenario, 1 means add boundary points
+    bool        cs_boundary_points_status;
+    // min entropy for a fine point to be considered as boundary point (0 - 1)
+    double      cs_boundary_points_threshold;
+    // max number of fractions is going to add to each row of P matrix
+    int         cs_boundary_points_max_num;
     //======= Model selection ========
     int     ms_status;
     int     ms_limit;
@@ -93,6 +98,7 @@ private:
     int     ms_print_untouch_reuslts;
     double  ms_bs_gm_threshold;
     int     ms_save_final_model;
+    bool    ms_testdata_existance_flag = 0; // default: doesn't exist
     //======= SVM ========
     int     svm_type;
     int     kernel_type;
@@ -133,10 +139,17 @@ private:
     void check_input_distance_parameters();
 //    void check_input_prediction_parameters();
 
-    void read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]);
-    void read_classification_prediction_parameters(pugi::xml_node& root,int argc, char * argv[]);
-    void read_convert_files_parameters(pugi::xml_node& root,int argc, char * argv[]);
-    void read_clustering_parameters(pugi::xml_node& root,int argc, char * argv[]);
+    void read_classification_training_parameters(
+            pugi::xml_node& root,int argc, char * argv[]);
+
+    void read_classification_prediction_parameters(
+            pugi::xml_node& root,int argc, char * argv[]);
+
+    void read_convert_files_parameters(
+            pugi::xml_node& root,int argc, char * argv[]);
+
+    void read_clustering_parameters(
+            pugi::xml_node& root,int argc, char * argv[]);
 
     //======= Timers ========
     std::clock_t t_start_coarsening;
@@ -145,7 +158,9 @@ private:
 
 
 public:
-    enum program_parts {main, convert_files, zscore, flann, svm, prediction, clustring} ;
+    enum program_parts {main, convert_files, zscore, flann, svm,
+                        prediction, clustring} ;
+
     static Config_params* getInstance();
     int  get_main_function() const { return main_function;  }
 
@@ -157,48 +172,50 @@ public:
     void print_flann_params();
     void print_zscore_params();
 
-//    void set_inputs(std::string const ds_name, std::string const ds_version );
+//    void set_inputs(string const ds_name, string const ds_version );
     void set_inputs_file_names();
     void set_fixed_file_names();
     void set_file_names_for_save_flann();
 
-    void set_ds_path(std::string const new_ds_path);
-    void set_ds_name(std::string const new_ds_name);
-    void debug_only_set_p_norm_data_path_file_name(std::string const path_file_name);
-    void debug_only_set_n_norm_data_path_file_name(std::string const path_file_name);
+    void set_ds_path(string const new_ds_path);
+    void set_ds_name(string const new_ds_name);
+    void debug_only_set_p_norm_data_path_file_name(string const path_file_name);
+    void debug_only_set_n_norm_data_path_file_name(string const path_file_name);
 
     void init_to_default();
-    void read_params(std::string XML_FILE_PATH,int argc, char * argv[], program_parts caller_func=main);
+    void read_params(string XML_FILE_PATH,int argc, char * argv[],
+                     program_parts caller_func=main);
 
 
     void update_srand_seed();
-    void debug_only_set_srand_seed(std::string new_seed);
+    void debug_only_set_srand_seed(string new_seed);
 
-    const std::string &get_ds_path()    const { return options_["ds_path"];}
-    const std::string &get_ds_name()    const { return options_["ds_name"];}
-    const std::string &get_test_name()    const { return options_["test_data_name"];}
-    std::string get_tmp_path()   const ;
-    const std::string &get_exp_info()   const { return options_["exp_info"];}
+    const string &get_ds_path()    const { return options_["ds_path"];}
+    const string &get_ds_name()    const { return options_["ds_name"];}
+    const string &get_test_name()  const { return options_["test_data_name"];}
+    string get_tmp_path()   const ;
+    const string &get_exp_info()   const { return options_["exp_info"];}
 
-    const std::string &get_p_indices_f_name()           const {return p_indices_f_name;}
-    const std::string &get_p_dist_f_name()              const {return p_dist_f_name;}
-    const std::string &get_n_indices_f_name()           const {return n_indices_f_name;}
-    const std::string &get_n_dist_f_name()              const {return n_dist_f_name;}
-    const std::string &get_p_norm_data_f_name()         const {return p_norm_data_f_name;}
-    const std::string &get_n_norm_data_f_name()         const {return n_norm_data_f_name;}
-    const std::string &get_single_norm_data_f_name()    const {return single_norm_data_f_name;}
-    const std::string &get_p_e_k_train_data_f_name()    const {return p_e_k_train_data_f_name;}
-    const std::string &get_n_e_k_train_data_f_name()    const {return n_e_k_train_data_f_name;}
+    const string &get_p_indices_f_name()           const {return p_indices_f_name;}
+    const string &get_p_dist_f_name()              const {return p_dist_f_name;}
+    const string &get_n_indices_f_name()           const {return n_indices_f_name;}
+    const string &get_n_dist_f_name()              const {return n_dist_f_name;}
+    const string &get_p_norm_data_f_name()         const {return p_norm_data_f_name;}
+    const string &get_n_norm_data_f_name()         const {return n_norm_data_f_name;}
+    const string &get_single_norm_data_f_name()    const {return single_norm_data_f_name;}
+    const string &get_p_e_k_train_data_f_name()    const {return p_e_k_train_data_f_name;}
+    const string &get_n_e_k_train_data_f_name()    const {return n_e_k_train_data_f_name;}
 
-    void set_test_ds_f_name(std::string new_f_name) { test_ds_f_name = new_f_name;}
-    void set_p_e_k_train_data_f_name(std::string new_f_name) { p_e_k_train_data_f_name = new_f_name;}
-    void set_n_e_k_train_data_f_name(std::string new_f_name) { n_e_k_train_data_f_name = new_f_name;}
-    std::string get_test_ds_f_name() const {return test_ds_f_name;}
+    void set_test_ds_f_name(string new_f_name) { test_ds_f_name = new_f_name;}
+    void set_p_e_k_train_data_f_name(string new_f_name) { p_e_k_train_data_f_name = new_f_name;}
+    void set_n_e_k_train_data_f_name(string new_f_name) { n_e_k_train_data_f_name = new_f_name;}
+    string get_test_ds_f_name() const {return test_ds_f_name;}
 
     void add_final_summary(summary current_summary, int selected_level);
     int  get_best_level() const;  //in current k-fold
 
-    void print_summary(const summary& summary_in, std::string caller_method, int level=-1, int iter=-1, int stage=-1, int fold=-1) const;
+    void print_summary(const summary& summary_in, string caller_method, int level=-1, int iter=-1, int stage=-1, int fold=-1) const;
+
     void set_best_parameters(measures preferred_measure=Gmean);
     bool get_best_params_status() const{ return this->best_params_are_set; }
     double get_best_C() const{ return this->best_C; }
@@ -218,12 +235,12 @@ public:
     int   get_nn_number_of_classes()    const { return stoi(options_["nn_number_of_classes"]);}
     int   get_nn_number_of_neighbors()  const { return stoi(options_["nn_number_of_neighbors"]);}
     int   get_nn_distance_type()        const { return stoi(options_["nn_distance_type"]);}
-    std::string get_nn_path()           const { return options_["nn_path"];}
-    std::string get_nn_data_fname1()    const { return options_["nn_data_fname1"];}
-    std::string get_nn_data_fname2()    const { return options_["nn_data_fname2"];}
-    std::string get_nn_tmp_path()       const { return options_["nn_tmp_path"];}
+    string get_nn_path()           const { return options_["nn_path"];}
+    string get_nn_data_fname1()    const { return options_["nn_data_fname1"];}
+    string get_nn_data_fname2()    const { return options_["nn_data_fname2"];}
+    string get_nn_tmp_path()       const { return options_["nn_tmp_path"];}
     // Main
-    std::string get_cpp_srand_seed()        const { return options_["cpp_srand_seed"];}
+    string get_cpp_srand_seed()        const { return options_["cpp_srand_seed"];}
     int    get_main_num_repeat_exp()        const { return stoi(options_["main_num_repeat_exp"]);}
     int    get_main_num_kf_iter()           const { return stoi(options_["main_num_kf_iter"]);}
     int    get_multi_level_status()         const { return stoi(options_["multi_level_status"]); }    
@@ -264,7 +281,8 @@ public:
 
     double  get_ms_bs_gm_threshold()    const { return ms_bs_gm_threshold; }
     int     get_ms_best_selection()     const { return stoi(options_["ms_best_selection"]); }
-
+    bool    setTestdataExist()          { ms_testdata_existance_flag = 1; }
+    bool    getTestdataExist() const    { return ms_testdata_existance_flag; }
     // SVM
     int     get_svm_svm_type()      const { return svm_type; }
     int     get_svm_kernel_type()   const { return stoi(options_["kernel_type"]); }

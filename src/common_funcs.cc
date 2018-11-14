@@ -5,6 +5,10 @@
 #include <cassert>
 #include <memory>   /* shared_ptr*/
 //#include <stdexcept>
+#include <sys/types.h> // required for stat.h
+#include <sys/stat.h> // https://stackoverflow.com/a/35109823
+
+using std::cout; using std::endl;
 
 /*
  * Export matrix to a file
@@ -21,10 +25,10 @@ void CommonFuncs::exp_matrix(Mat& A, std::string file_path, std::string file_nam
     MatView(A,viewer);  // petsc binary format
 
     PetscViewerDestroy(&viewer);        //destroy the viewer
-    std::cout<< "[CF][exp_matrix] {"<< sender_func <<"} Matrix exported to file: "<< full_file << std::endl;
+    cout<< "[CF][exp_matrix] {"<< sender_func <<"} Matrix exported to file: "<< full_file << endl;
 #endif
 #if debug_export == 0
-    std::cout<< "The export functionality is disabled in the config_log.h. You can modify and recompile the code in case you need it." << std::endl;
+    cout<< "The export functionality is disabled in the config_log.h. You can modify and recompile the code in case you need it." << endl;
 #endif
 }
 
@@ -41,10 +45,10 @@ void CommonFuncs::exp_vector(Vec& A, std::string file_path, std::string file_nam
     VecView(A,viewer);  // petsc binary format
 
     PetscViewerDestroy(&viewer);        //destroy the viewer
-    std::cout<< "[CF][exp_vector] {"<< sender_func <<"} Vector exported to file: "<< full_file << std::endl;
+    cout<< "[CF][exp_vector] {"<< sender_func <<"} Vector exported to file: "<< full_file << endl;
 #endif
 #if debug_export == 0
-    std::cout<< "The export functionality is disabled in the config_log.h. You can modify and recompile the code in case you need it." << std::endl;
+    cout<< "The export functionality is disabled in the config_log.h. You can modify and recompile the code in case you need it." << endl;
 #endif
 }
 
@@ -156,8 +160,8 @@ double CommonFuncs::convert_distance_to_weight(double distance){
     case 2:                 // Gaussian distance)
         return ( exp((-1) * distance * weight_gamma)  );
     }
-    std::cout << "[CF][CD2W] weight_type :"
-              << this->weight_type << std::endl;
+    cout << "[CF][CD2W] weight_type :"
+              << this->weight_type << endl;
     assert(0 && "the weight type is not in list of defined scenarios!");
 }
 
@@ -177,10 +181,10 @@ PetscScalar CommonFuncs::vec_vec_dot_product(const PetscInt ncols_A, const Petsc
 
     for(it_A=0; it_A < ncols_A; it_A++){
         // for v_B, the value in the corresponding index to vector A is needed
-//        std::cout << "[CF][V.V] vals_A[it_A]:" << vals_A[it_A] << ", v_B[cols_A[it_A]]:" << v_B[cols_A[it_A]] << std::endl;
+//        cout << "[CF][V.V] vals_A[it_A]:" << vals_A[it_A] << ", v_B[cols_A[it_A]]:" << v_B[cols_A[it_A]] << endl;
         result += vals_A[it_A] * v_B[ cols_A[it_A] ];
     }
-//    std::cout << "[CF][V.V] result:" << result << std::endl;
+//    cout << "[CF][V.V] result:" << result << endl;
     return result;
 }
 
@@ -193,7 +197,7 @@ T CommonFuncs::sum_vector(const std::vector<T>& vec_In){
     for(unsigned i=0; i < vec_In.size(); ++i){
         total += vec_In[i];
     }
-    std::cout << "total:" << total << std::endl;
+    cout << "total:" << total << endl;
     return total;
 }
 
@@ -268,7 +272,7 @@ T CommonFuncs::sum_array(T *arrayIn, unsigned int array_size){
     for(unsigned i=0; i < array_size; ++i){
         total += arrayIn[i];
     }
-    std::cout << "sum array:" << total << std::endl;
+    cout << "sum array:" << total << endl;
     return total;
 }
 
@@ -336,8 +340,8 @@ Mat CommonFuncs::sample_data(Mat& m_org_data, float sample_size_fraction, std::s
     // Random generator without duplicates
     PetscInt i, num_row_org_data;
     MatGetSize(m_org_data, &num_row_org_data, NULL);
-//    std::cout << "[CF][SampleData] number of rows in original data are: "
-//      << num_row_org_data << std::endl; //$$debug
+//    cout << "[CF][SampleData] number of rows in original data are: "
+//      << num_row_org_data << endl; //$$debug
     std::vector<PetscInt> shuffled_indices_;
     shuffled_indices_.reserve(num_row_org_data);
 
@@ -348,18 +352,18 @@ Mat CommonFuncs::sample_data(Mat& m_org_data, float sample_size_fraction, std::s
 
     srand(std::stoll(preferred_srand));
     std::random_shuffle( shuffled_indices_.begin(), shuffled_indices_.end() ); //shuffle all nodes
-//    std::cout << "[CF][SampleData] indices are shuffled" << std::endl; //$$debug
+//    cout << "[CF][SampleData] indices are shuffled" << endl; //$$debug
 
     PetscInt num_row_sampled_data = ceil(num_row_org_data * sample_size_fraction);
-//    std::cout << "[CF][SampleData] sample_size_fraction:" << sample_size_fraction << std::endl; //$$debug
-//    std::cout << "[CF][SampleData] num_row_sampled_data:" << num_row_sampled_data << std::endl; //$$debug
+//    cout << "[CF][SampleData] sample_size_fraction:" << sample_size_fraction << endl; //$$debug
+//    cout << "[CF][SampleData] num_row_sampled_data:" << num_row_sampled_data << endl; //$$debug
     IS              is_sampled_;
     PetscInt        * ind_sampled_;
     PetscMalloc1(num_row_sampled_data, &ind_sampled_);
     for(i=0; i < num_row_sampled_data; i++){
         ind_sampled_[i] = shuffled_indices_[i];
     }
-//    std::cout << "[CF][SampleData] sample indices are selected" << std::endl; //$$debug
+//    cout << "[CF][SampleData] sample indices are selected" << endl; //$$debug
 
     // ind_sample should sort
     std::sort(ind_sampled_, ind_sampled_ + num_row_sampled_data);   //this is critical for MatGetSubMatrix method
@@ -369,9 +373,9 @@ Mat CommonFuncs::sample_data(Mat& m_org_data, float sample_size_fraction, std::s
     MatGetSubMatrix(m_org_data,is_sampled_, NULL,MAT_INITIAL_MATRIX,&m_sampled_data);
     PetscInt check_num_row_sampled_data;
     MatGetSize(m_sampled_data, &check_num_row_sampled_data, NULL);
-//    std::cout << "[CF][SampleData] number of rows in sampled data are: " << check_num_row_sampled_data << std::endl; //$$debug
+//    cout << "[CF][SampleData] number of rows in sampled data are: " << check_num_row_sampled_data << endl; //$$debug
 
-//    std::cout << "[CF][SampleData] submatrix is created" << std::endl; //$$debug
+//    cout << "[CF][SampleData] submatrix is created" << endl; //$$debug
     ISDestroy(&is_sampled_);
 
 //    printf("[CF][SampleData] sample matrix:\n");                   //$$debug
@@ -389,7 +393,7 @@ std::string CommonFuncs::run_ext_command(const std::string ext_cmd){
     std::shared_ptr<FILE> pipe(popen(ext_cmd.c_str(), "r"), pclose);
     if (!pipe) throw std::runtime_error("[CF][run_ext_command] popen() failed! Command:" + ext_cmd );
     while (!feof(pipe.get())) {
-        std::cout << "while inside run_ext_command!\n";
+        cout << "while inside run_ext_command!\n";
         if (fgets(buffer, 128, pipe.get()) != NULL)
             result += buffer;
     }
@@ -404,7 +408,7 @@ std::string CommonFuncs::run_ext_command_single_output(const std::string ext_cmd
     std::shared_ptr<FILE> pipe(popen(ext_cmd.c_str(), "r"), pclose);
     if (!pipe) throw std::runtime_error("[CF][run_ext_command] popen() failed! Command:" + ext_cmd );
     while (!feof(pipe.get())) {
-//        std::cout << "while inside run_ext_command!\n";
+//        cout << "while inside run_ext_command!\n";
         if (fgets(buffer, 128, pipe.get()) != NULL)
             result += buffer;
     }
@@ -427,7 +431,7 @@ std::string CommonFuncs::run_ext_command_single_output(const std::string ext_cmd
 void CommonFuncs::get_unique_random_id(int start_range, int end_range, int number_random_id, std::string preferred_srand, std::vector<int>& v_rand_idx){
     /// - - - - check valid request - - - -
     if(number_random_id > (end_range - start_range + 1)){
-        std::cout << "Error: [CF][GURI] out of range request for random indices, Exit!"<< std::endl;
+        cout << "Error: [CF][GURI] out of range request for random indices, Exit!"<< endl;
         exit(1);
     }
     /// - - - - create full vector - - - -
@@ -435,21 +439,21 @@ void CommonFuncs::get_unique_random_id(int start_range, int end_range, int numbe
     v_full_idx.reserve(end_range - start_range );
     for(int i=start_range; i< end_range; i++){
         v_full_idx.push_back(i);
-//        std::cout << i << ",";
+//        cout << i << ",";
     }
-//    std::cout << std::endl;
+//    cout << endl;
     ///  - - - - shuffle it - - - -
-//    std::cout << "\nrandome seed:" << preferred_srand << std::endl;
+//    cout << "\nrandome seed:" << preferred_srand << endl;
     srand(std::stoll(preferred_srand));
     std::random_shuffle(v_full_idx.begin(), v_full_idx.end() ); //shuffle all
     /// - - - - select specific number of them - - - -
     v_rand_idx.reserve(number_random_id);
-//    std::cout << "\nin randome vector:\n";
+//    cout << "\nin randome vector:\n";
     for(int i=0; i< number_random_id; i++){
         v_rand_idx.push_back(v_full_idx[i]);
-//        std::cout << "index:" << i << ",";
+//        cout << "index:" << i << ",";
     }
-//    std::cout << std::endl;
+//    cout << endl;
 }
 
 
@@ -499,4 +503,26 @@ void CommonFuncs::addLabel2Data(Mat& m_data, Vec& v_label, Mat& m_label_data){
     printf("[KF][al2d] m_label_data Matrix:\n");
     MatView(m_label_data,PETSC_VIEWER_STDOUT_WORLD);
 #endif
+}
+
+bool CommonFuncs::checkDirectoryExistance(std::string directory){
+    struct stat st;
+//    cout << "stat: " << (stat(directory.c_str(), &st)) << endl;
+    if(stat(directory.c_str(), &st) == 0)
+        return 1;
+    else
+        return 0;
+}
+
+bool CommonFuncs::createDirectory(std::string directory_full_path){
+
+    if (checkDirectoryExistance(directory_full_path)){
+        return 1; //already exist
+    }else{
+        mode_t nMode = 0733; // UNIX style permissions
+        int nError = 0;
+        std::string cmd = "mkdir -p " + directory_full_path;
+        system(cmd.c_str());
+        cout << "[CF][CD] " << directory_full_path << " is created" << endl;
+    }
 }

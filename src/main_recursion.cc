@@ -1,11 +1,10 @@
+#include <thread>
+#include <cassert>
 #include "main_recursion.h"
 #include <vector>
 #include "config_logs.h"
 #include "config_params.h"
 #include "etimer.h"
-
-#include <thread>
-#include <cassert>
 
 
 using std::cout; using std::endl;
@@ -59,7 +58,8 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
             << "rf.process_coarsest_level:"
             << std::to_string(paramsInst->get_main_current_level_id()) << endl;
 #endif
-        rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n, level ,sol_coarsest, v_ref_results);
+        rf.process_coarsest_level(p_data, p_vol, n_data, n_vol, m_VD_p, m_VD_n,
+                                  level ,sol_coarsest, v_ref_results);
 
 #if dbl_MR_main >= 3
         cout << funcIdx + "DEBUG level id after calling rf.process_coarsest_level:" +
@@ -104,35 +104,29 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
             cout << funcIdx + "+ + + + + + + + Positive class + + + + + + + + "
                  << endl;
 #endif
-            m_P_p = p_coarser.calc_P(p_WA, p_vol, v_p_seeds_indices, ref_info_p); //m_P_p measn P matrix for positive label (minority class)
-//            t_coarse.stop_timer(funcIdx + "{1} from start of both class calc_p minority, level:",std::to_string(level));
-
+            //m_P_p measn P matrix for positive label (minority class)
+            m_P_p = p_coarser.calc_P(p_WA, p_vol, v_p_seeds_indices, ref_info_p);
             p_data_c = p_coarser.calc_aggregate_data(m_P_p, p_data,p_vol, v_p_seeds_indices);
-//            t_coarse.stop_timer(funcIdx + "{2} from start of both class calc Agg Data minority, level:",std::to_string(level));
-
             p_WA_c = p_coarser.calc_WA_c(m_P_p, p_WA);
-//            t_coarse.stop_timer(funcIdx + "{2} from start of both class calc Agg Data minority, level:",std::to_string(level));
-
             p_coarser.calc_stat_nnz(p_WA,0, level, "minority");
-//            p_coarser.calc_stat_nnz(p_WA_c);
-
-            p_coarser.calc_real_weight(p_WA_c, p_data_c);       //recalculate the weights in adjacency matrix from the data
+            //recalculate the weights in adjacency matrix from the data
+            p_coarser.calc_real_weight(p_WA_c, p_data_c);
             p_coarser.filter_weak_edges(p_WA_c, filter_threshold, level);
-
-
             p_vol_c = p_coarser.calc_coarse_volumes(m_P_p, p_vol);
-//            t_coarse.stop_timer(funcIdx + "{3} from start of both class calc Agg Vol minority, level:",std::to_string(level));
         }else{
             if(level == 1){ // if the minority class don't need any coarsening
-                cout << "\n\nNo coarsening for minority class since its size is less than the threshold!" << endl;
-                m_P_p = p_coarser.calc_P_without_shrinking(p_WA, p_vol, v_p_seeds_indices, ref_info_p);
+                cout << "\n\nNo coarsening for minority class" <<
+                        " since its size is less than the threshold!" << endl;
+                m_P_p = p_coarser.calc_P_without_shrinking(p_WA, p_vol,
+                                                           v_p_seeds_indices, ref_info_p);
             }else{
                 // - - - - don't coarse the minority class anymore - - - -
                 cout << funcIdx + "The minority class is not coarsen anymore" << endl;
                 // duplicate the P matrix of finer level since I don't need to calculate it
 
                 MatDuplicate(m_P_p_f, MAT_COPY_VALUES, &m_P_p);
-                m_P_p = p_coarser.calc_P(p_WA, p_vol, v_p_seeds_indices, ref_info_p); //m_P_p measn P matrix for positive label (minority class)
+                m_P_p = p_coarser.calc_P(p_WA, p_vol,
+                                         v_p_seeds_indices, ref_info_p);
             }
 
             MatDuplicate(p_WA, MAT_COPY_VALUES, &p_WA_c);
@@ -143,31 +137,26 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
 #if dbl_MR_main >= 1
         printf("\n[MR][main] - - - - - - - - Negative class - - - - - - - -\n");
 #endif
-        m_P_n = n_coarser.calc_P(n_WA, n_vol, v_n_seeds_indices, ref_info_n); // same for majority class
-//        t_coarse.stop_timer(funcIdx + "{4} from start of both class calc_p majority",std::to_string(level));
-
-        n_data_c = n_coarser.calc_aggregate_data(m_P_n, n_data, n_vol, v_n_seeds_indices);
-//        t_coarse.stop_timer(funcIdx + "{5} from start of both class calc Agg Data majority",std::to_string(level));
-
+        m_P_n = n_coarser.calc_P(n_WA, n_vol, v_n_seeds_indices, ref_info_n);
+        n_data_c = n_coarser.calc_aggregate_data(m_P_n, n_data, n_vol,
+                                                 v_n_seeds_indices);
         n_WA_c = n_coarser.calc_WA_c(m_P_n, n_WA);
-//        t_coarse.stop_timer(funcIdx + "{6} from start of both class calc Agg Vol majority",std::to_string(level));
-
         p_coarser.calc_stat_nnz(n_WA,0, level, "majority");
-//        p_coarser.calc_stat_nnz(n_WA_c);
-
-        n_coarser.calc_real_weight(n_WA_c, n_data_c);       //recalculate the weights in adjacency matrix from the data
+        //recalculate the weights in adjacency matrix from the data
+        n_coarser.calc_real_weight(n_WA_c, n_data_c);
         n_coarser.filter_weak_edges(n_WA_c, filter_threshold,level);
-
-
         n_vol_c = n_coarser.calc_coarse_volumes(m_P_n, n_vol);
-//        t_coarse.stop_timer(funcIdx + "{7} from start of both class calc Agg Vol majority",std::to_string(level));
-
-        t_coarse.stop_timer("[MR] total coarsening for both class at level",std::to_string(level));
-
+        t_coarse.stop_timer("[MR] total coarsening for both class at level",
+                            std::to_string(level));
 
         solution sol_coarser ;
-        sol_coarser = main(p_data_c, m_P_p, p_WA_c, p_vol_c, n_data_c, m_P_n, n_WA_c, n_vol_c, m_VD_p, m_VD_n, level, v_ref_results); // recursive call
-        if(sol_coarser.C == -1 ){       // the coarsening didn't converge after maximum number of levels, so we skip this v-cycle completely
+        // recursive call
+        sol_coarser = main(p_data_c, m_P_p, p_WA_c, p_vol_c, n_data_c, m_P_n,
+                           n_WA_c, n_vol_c, m_VD_p, m_VD_n, level,
+                           v_ref_results);
+        // the coarsening didn't converge after maximum number of levels
+        //  , so we skip this v-cycle completely
+        if(sol_coarser.C == -1 ){
             //free the memory
             MatDestroy(&p_data);
             MatDestroy(&n_data);
@@ -209,14 +198,13 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
 #endif
         solution sol_refine;
         Refinement rf;
-
         sol_refine = rf.main(p_data, m_P_p, p_vol, p_WA
                              , n_data, m_P_n, n_vol, n_WA
                              , m_VD_p, m_VD_n
                              , sol_coarser, level
                              , v_ref_results);
 
-        MatDestroy(&p_data); 
+        MatDestroy(&p_data);
         MatDestroy(&n_data);
         MatDestroy(&p_data_c);
         MatDestroy(&n_data_c);

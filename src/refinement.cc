@@ -29,9 +29,11 @@ struct selected_agg
 solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
                           , Mat& m_data_n, Mat& m_P_n, Vec& v_vol_n, Mat&m_WA_n
                           , Mat& m_VD_p, Mat& m_VD_n
-                          , solution& sol_coarser,int level
+                          , solution& sol_coarser, int level
                           , std::vector<ref_results>& v_ref_results){
+
     paramsInst->set_main_current_level_id(level);
+#if dbl_RF_exp_data_ml == 0 /// - - -  normal case  - - -
 #if dbl_RF_main >=5
     PetscInt num_row_p_data =0, num_row_n_data =0;
     MatGetSize(m_data_p,&num_row_p_data,NULL);
@@ -138,7 +140,8 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
 
         k_fold kf;
         Mat m_VD_both;
-        kf.combine_two_classes_in_one(m_VD_both, m_VD_p, m_VD_n,false);  //false make sure that the input matrices won't be destroyed inside the function
+        // false: don't destroy the input matrices inside the function
+        kf.combine_two_classes_in_one(m_VD_both, m_VD_p, m_VD_n,false);
         num_VD_both = num_VD_p + num_VD_n;
 
 
@@ -407,6 +410,34 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
     ISDestroy(&IS_neigh_p);
     ISDestroy(&IS_neigh_n);
     return sol_refine;
+
+#else   // dbl_RF_exp_data_ml /// - - -  debug/experimental cases  - - -
+    k_fold kf;
+    Mat m_train_data_label;
+    // false: don't destroy the input matrices inside the function
+    // the data files are destroyed in the MainRecursion class
+    kf.combine_two_classes_in_one(m_train_data_label, m_data_p, m_data_n,
+                                  false);
+    std::string out_prefix = paramsInst->get_exp_info() +
+            "_exp:" + std::to_string(paramsInst->get_main_current_exp_id()) +
+            "_kf:" + std::to_string(paramsInst->get_main_current_kf_id()) +
+            "_level:"+std::to_string(paramsInst->get_main_current_level_id());
+    std::string out_train_label_fname = out_prefix + "_traindata_label.dat";
+    std::string out_min_vol_fname = out_prefix + "_min_vol.dat";
+    std::string out_maj_vol_fname = out_prefix + "_maj_vol.dat";
+
+    CommonFuncs cf;
+    cf.exp_matrix(m_train_data_label, "./debug/", out_train_label_fname,
+                  "[RF][main]");
+    cf.exp_vector(v_vol_p, "./debug/", out_min_vol_fname, "[RF][main]");
+    cf.exp_vector(v_vol_n, "./debug/", out_maj_vol_fname, "[RF][main]");
+    cout << "DEBUG refinement, no classification!" << endl;
+    if (level < 3){
+        cout << "[RF][PCL] There is a problem of double free for the 1st level"<<
+		", exit manually" << endl;
+        exit(1);
+    }
+#endif
 }
 
 
@@ -627,56 +658,98 @@ void Refinement::find_SV_neighbors(Mat& m_data, Mat& m_P, std::vector<int>& seed
 
 
 
-void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, Mat& m_VD_p, Mat& m_VD_n, int level,
-                                        solution& sol_coarsest, std::vector<ref_results>& v_ref_results){
+void Refinement::process_coarsest_level(Mat& m_data_p, Vec& v_vol_p,
+                                        Mat& m_data_n, Vec& v_vol_n,
+                                        Mat& m_VD_p, Mat& m_VD_n, int level,
+                                        solution& sol_coarsest,
+                                        std::vector<ref_results>& v_ref_results){
+
+#if dbl_RF_exp_data_ml == 0 /// - - -  normal case  - - -
     PetscInt check_num_row_VD;
     MatGetSize(m_VD_p, &check_num_row_VD, NULL );
-    if(!check_num_row_VD){
-        cout << "[RF][PCL] empty validation data for minority class, Exit!" << endl;
-        exit(1);
-    }
-
+    assert (check_num_row_VD && "[RF][PCL] minority validation data is empty");
     MatGetSize(m_VD_n, &check_num_row_VD, NULL );
-    if(!check_num_row_VD){
-        cout << "[RF][PCL] empty validation data for majority class, Exit!" << endl;
-        exit(1);
-    }
-
+    assert (check_num_row_VD && "[RF][PCL] majority validation data is empty");
     // - - - - for long runs - - - -
     bool l_inh_param=false;
     double local_param_c=1;
     double local_param_gamma=1;
-    if(paramsInst->get_best_params_status()){     // use the best parameters from past trainings
+    // use the best parameters from past trainings
+    if(paramsInst->get_best_params_status()){
         l_inh_param = true;
         local_param_c = paramsInst->get_best_C();
         local_param_gamma = paramsInst->get_best_gamma();
     }
-                                            // - - - - - load the validation data - - - - -
+                  /// - - - - - load the validation data - - - - -
     if(paramsInst->get_ms_status()){      // - - - - model selection - - - -
-
-//        cout << "\n\n refinement ----  Iteration "<<
-//                     paramsInst->get_main_current_kf_id() <<
-//                     ", level: " << paramsInst->get_main_current_level_id() << endl;
-
         // call model selection method
         ModelSelection ms_coarsest;
-        ms_coarsest.uniform_design_separate_validation(m_data_p, v_vol_p, m_data_n, v_vol_n, l_inh_param, local_param_c, local_param_gamma,
-                                                       m_VD_p, m_VD_n, level, sol_coarsest,v_ref_results);
-//        cout << "[RF][PCL] nSV+:" << sol_coarsest.p_index.size() << endl;     //$$debug
+        ms_coarsest.uniform_design_separate_validation(m_data_p, v_vol_p,
+                                                       m_data_n, v_vol_n,
+                                                       l_inh_param,
+                                                       local_param_c,
+                                                       local_param_gamma,
+                                                       m_VD_p, m_VD_n,
+                                                       level, sol_coarsest,
+                                                       v_ref_results);
 
-    }else{                                          // - - - - No model selection (call solver directly) - - - -
+    }else{        /// - - - - No model selection (call solver directly) - - - -
 
         Solver sv_coarsest;
         struct svm_model *coarsest_model;
-        coarsest_model = sv_coarsest.train_model(m_data_p, v_vol_p, m_data_n, v_vol_n, l_inh_param, local_param_c, local_param_gamma);
+        coarsest_model = sv_coarsest.train_model(m_data_p, v_vol_p,
+                                                 m_data_n, v_vol_n,
+                                                 l_inh_param,
+                                                 local_param_c,
+                                                 local_param_gamma);
 
         PetscInt num_row_p;
         MatGetSize(m_data_p, &num_row_p, NULL);
         prepare_single_solution(&coarsest_model, num_row_p, sol_coarsest);
-        cout << "[RF][PCL] the process_coarsest_level without model selection is incomplete, EXIT!" << endl;
-        exit(1);
-        sv_coarsest.free_solver("[RF][PCL]");        // Notice, the sv_coarsest is only availabel in this scope, and not accessible outside the else clause
+        // Notice, the sv_coarsest is only availabel in this scope,
+        //  and not accessible outside the else clause
+        sv_coarsest.free_solver("[RF][PCL]");
+        cout << "the process_coarsest_level without " <<
+                "model selection is incomplete" << endl ;
+        throw "[RF][PCL] NOT DEVELOPED!";
+
     }
+
+#else   // dbl_RF_exp_data_ml /// - - -  debug/experimental cases  - - -
+    k_fold kf;
+    Mat m_train_data_label, m_validation_data_label;
+    // false: don't destroy the input matrices inside the function
+    // the data files are destroyed in the MainRecursion class
+    kf.combine_two_classes_in_one(m_train_data_label, m_data_p, m_data_n,
+                                  false);
+    kf.combine_two_classes_in_one(m_validation_data_label, m_VD_p, m_VD_n,
+                                  false);
+    std::string out_prefix = paramsInst->get_exp_info() +
+            "_exp:" + std::to_string(paramsInst->get_main_current_exp_id()) +
+            "_kf:" + std::to_string(paramsInst->get_main_current_kf_id()) +
+            "_level:"+std::to_string(paramsInst->get_main_current_level_id());
+
+    std::string out_train_label_fname = out_prefix + "_traindata_label.dat";
+    std::string out_validation_label_fname = out_prefix + "_validationdata_label.dat";
+    std::string out_min_vol_fname = out_prefix + "_min_vol.dat";
+    std::string out_maj_vol_fname = out_prefix + "_maj_vol.dat";
+
+    CommonFuncs cf;
+    cf.exp_matrix(m_train_data_label, "./debug/", out_train_label_fname,
+                  "[RF][main]");
+    cf.exp_matrix(m_validation_data_label, "./debug/",
+                  out_validation_label_fname, "[RF][main]");
+    cf.exp_vector(v_vol_p, "./debug/", out_min_vol_fname, "[RF][main]");
+    cf.exp_vector(v_vol_n, "./debug/", out_maj_vol_fname, "[RF][main]");
+    cout << "DEBUG refinement, no classification!" << endl;
+    if (level < 4){
+        cout << "[RF][PCL] There is a problem of double free for the 1st level"<<
+		", exit manually" << endl;
+        exit(1);
+    }
+	
+#endif
+
 }
 
 

@@ -99,6 +99,17 @@ public:
      */
     void addLabel2Data(Mat& m_data, Vec& v_label, Mat& m_label_data);
 
+    /*
+     * check if a directory exist, return True and otherwise return False
+     * https://www.unix.com/programming/24159-how-check-if-directory-file-exist-using-c-c.html#neo-top
+     */
+    bool checkDirectoryExistance(std::string directory);
+
+    /*
+     * create a requested directory in case it is not exist
+     *
+     */
+    bool createDirectory(std::string directory_full_path);
 
 private:
     int weight_type=0;
@@ -106,31 +117,3 @@ private:
 };
 
 #endif //COMMON_FUNCS_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

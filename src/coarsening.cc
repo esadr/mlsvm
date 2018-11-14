@@ -200,7 +200,7 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices,
                 sigma_V_ += vals[j];                        //for all nodes in V (including the C)
             }
         }
-        if ( (sigma_C_/sigma_V_) <= Config_params::getInstance()->get_coarse_q() ){          //condition for moving a node from F to C
+        if ( (sigma_C_/sigma_V_) <= paramsInst->get_coarse_q() ){          //condition for moving a node from F to C
             vertexs.getNode(it->node_index).setSeed(1);  //add the node to C
 #if dbl_CO_calcP >=9
             printf("#new seed:%lu\n",vertexs.getNode(it->node_index).getIndex());
@@ -215,7 +215,7 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices,
     t_update_C.stop_timer(funcIdx+"Add points from F to C");
 #endif
 
-    if (num_row < Config_params::getInstance()->get_coarse_threshold() ){       //when the data doesn't need coarsening anymore, move all nodes to C
+    if (num_row < paramsInst->get_coarse_threshold() ){       //when the data doesn't need coarsening anymore, move all nodes to C
         printf("[CO][calc_p]\t\t *** Notice *** \nnumber of seeds are equal to number of fine points due to small size of this class!!!\n");
         for (auto it = F_nodes_.begin(); it != F_nodes_.end(); ++it) {                      //go through all F_nodes
             vertexs.getNode(it->node_index).setSeed(1);         //set all nodes to seed
@@ -242,17 +242,17 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices,
 
     double sigma_w_ik=0 , sigma_filter_p=0;
     int max_fraction=0;          // find the maximum number of fraction for each node in P table (Bug #1)
-//    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, Config_params::getInstance()->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
-    float threshold=Config_params::getInstance()->get_cs_boundary_points_threshold();    //Experiment boundary points (Jan 9, 2017);
-    size_t ultimate_estimated_fractions=Config_params::getInstance()->get_cs_boundary_points_max_num();    //Experiment boundary points (Jan 9, 2017)
+//    MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, paramsInst->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
+    float threshold=paramsInst->get_cs_boundary_points_threshold();    //Experiment boundary points (Jan 9, 2017);
+    size_t ultimate_estimated_fractions=paramsInst->get_cs_boundary_points_max_num();    //Experiment boundary points (Jan 9, 2017)
 //    cout << funcIdx+" DEBUG boundary points t:" << threshold << ", max fractions:" << ultimate_estimated_fractions << endl;
     
 //#if boundary_points == 0    //Experiment boundary points (Jan 9, 2017)
-    bool is_boundary_points_active = Config_params::getInstance()->get_cs_boundary_points_status();
+    bool is_boundary_points_active = paramsInst->get_cs_boundary_points_status();
 //    cout << funcIdx+" DEBUG boundary points status:" << is_boundary_points_active << endl;
     if(! is_boundary_points_active){
-        MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, Config_params::getInstance()->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
-//        cout << funcIdx+" DEBUG P matrix is created with fixed number of fractions (no boundary) nnz:" << Config_params::getInstance()->get_coarse_r() << endl;
+        MatCreateSeqAIJ(PETSC_COMM_SELF,num_row,this->num_coarse_points, paramsInst->get_coarse_r() ,PETSC_NULL, &P);// try to reserve space for only number of final non zero entries for each fine node (e.g. 4)
+//        cout << funcIdx+" DEBUG P matrix is created with fixed number of fractions (no boundary) nnz:" << paramsInst->get_coarse_r() << endl;
 //#else       //boundary_points == 1 , 20 is constant as the maximum number of estimated fractions for a fine point
     }else{
         MatCreateSeqAIJ(PETSC_COMM_SELF,num_row, this->num_coarse_points, ultimate_estimated_fractions, PETSC_NULL, &P);
@@ -265,7 +265,7 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices,
 #endif
 #if dbl_CO_calcP >= 3
     printf("[CO][calc_p]{Create the P matrix} MatCreateSeqAIJ num_row:%d num_coarse_points:%d nnz(coarse_r):%d\n",
-           num_row,this->num_coarse_points,Config_params::getInstance()->get_coarse_r());
+           num_row,this->num_coarse_points,paramsInst->get_coarse_r());
 #endif
     for(i =0; i <num_row; ++i){                             //All nodes in V (i == node id )
         if(debug) cout << i << ", ";
@@ -298,8 +298,8 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices,
 //             #if boundary_points == 0    //Experiment boundary points (Jan 9, 2017)
              if(! is_boundary_points_active){
         // Find the max number of fractions
-                if( Config_params::getInstance()->get_coarse_r() <   (filter_nodes_p.end() - filter_nodes_p.begin())    ){
-                    max_fraction = Config_params::getInstance()->get_coarse_r();
+                if( paramsInst->get_coarse_r() <   (filter_nodes_p.end() - filter_nodes_p.begin())    ){
+                    max_fraction = paramsInst->get_coarse_r();
                 }
                 else{
                     max_fraction = (filter_nodes_p.end() - filter_nodes_p.begin());
@@ -333,8 +333,8 @@ Mat Coarsening::calc_P(Mat& WA, Vec& vol,std::vector<NodeId>& v_seeds_indices,
 //                    if(debug) cout << funcIdx+" fine row: " << i << " max_fraction:" << max_fraction << endl;
 
                 }else{  // Find the max number of fractions
-                    if( Config_params::getInstance()->get_coarse_r() <  (filter_nodes_p.end() - filter_nodes_p.begin()) ){
-                        max_fraction = Config_params::getInstance()->get_coarse_r();
+                    if( paramsInst->get_coarse_r() <  (filter_nodes_p.end() - filter_nodes_p.begin()) ){
+                        max_fraction = paramsInst->get_coarse_r();
                     }
                     else{
                         max_fraction = (filter_nodes_p.end() - filter_nodes_p.begin());
@@ -458,7 +458,7 @@ Mat Coarsening::calc_P_without_shrinking(Mat& WA, Vec& vol,std::vector<NodeId>& 
 //==================== Calculate Aggregate data matrix====================
 Mat Coarsening::calc_aggregate_data(Mat& P, Mat& data, Vec& v_vol, std::vector<NodeId>& v_seed_index) {
     ETimer t_calc_agg_data;
-    if(Config_params::getInstance()->get_cs_use_real_points()){
+    if(paramsInst->get_cs_use_real_points()){
         cout << "[CO][CAD] Use Real points" << endl;
         Mat m_dt_c;
         IS              is_seed_;
@@ -914,19 +914,6 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 Mat Coarsening::calc_real_weight(Mat& m_WA_c, Mat& m_data_c) {
     ETimer t_crw;
     PetscInt num_row,i,k, ncols_WA_c, ncols_dtc_i, ncols_dtc_k;
@@ -935,6 +922,8 @@ Mat Coarsening::calc_real_weight(Mat& m_WA_c, Mat& m_data_c) {
     MatDuplicate(m_WA_c,MAT_DO_NOT_COPY_VALUES, &m_tmp_WA); //create an empty matrix with same non zero structure
 
     CommonFuncs cf;
+    cf.set_weight_type(paramsInst->get_ld_weight_type(),
+                       paramsInst->get_ld_weight_param()); //added 083018
 
     const PetscInt    *cols_WA_c, *cols_dtc_i, *cols_dtc_k;
     const PetscScalar *vals_WA_c, *vals_dtc_i, *vals_dtc_k;

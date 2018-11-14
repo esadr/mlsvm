@@ -5,6 +5,7 @@
 //#include <time.h>
 //#include <ctime>
 #include <chrono>
+#include <cassert>
 
 //#define verbose false   // correct line to release
 #define verbose true  // debug mnist dataset 091418
@@ -45,6 +46,7 @@ void Config_params::print_classification_training_params(){
                  "\nld_weight_type: "           << get_ld_weight_type()           <<
                  "\nld_weight_param: "           << get_ld_weight_param()         <<
                  endl;
+    assert (get_ld_weight_type() < 7 && "weight type is not right");
 
     cout << "--- Coarsening Paramters ---" <<
                  "\ncoarse_Eta: "           << get_coarse_Eta()           <<
@@ -188,7 +190,8 @@ void Config_params::read_params(std::string XML_FILE_PATH,
         switch(main_function){
         case 0:     // classification
             read_classification_training_parameters(root, argc, argv);
-            set_inputs_file_names();
+            // 083018 commented here and moved to mlsvm_classifier.cc
+//            set_inputs_file_names();
             print_classification_training_params();
             break;
 
@@ -314,6 +317,7 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     parser_.add_option("-u", "--exp_info")                   .dest("exp_info")  .set_default(exp_info);
     parser_.add_option("--ds_p")                             .dest("ds_path")  .set_default(ds_path);
     parser_.add_option("-f", "--ds_f", "--file")             .dest("ds_name")  .set_default(ds_name);
+    parser_.add_option("--test_data")                        .dest("test_data_name")  .set_default(test_data_name);
     parser_.add_option("--tmp_p")                            .dest("tmp_path")  .set_default(tmp_path);
     parser_.add_option("--cs_pi")                            .dest("pre_init_loader_matrix")  .set_default(pre_init_loader_matrix);
 //    parser_.add_option("--iw", "--inverse_weight")           .dest("inverse_weight")  .set_default(inverse_weight);
@@ -554,7 +558,8 @@ void Config_params::set_inputs_file_names(){
  * Added 083018
  */
 void Config_params::set_fixed_file_names(){
-    std::cout << "Config_params::set_fixed_file_names is called" << std::endl;
+
+    cout << "Config_params::set_fixed_file_names is called" << endl;
     p_indices_f_name    = get_ds_path() + get_ds_name() + "_min_norm_data_indices.dat";
     p_dist_f_name       = get_ds_path() + get_ds_name() + "_min_norm_data_dists.dat";
     n_indices_f_name    = get_ds_path() + get_ds_name() + "_maj_norm_data_indices.dat";
@@ -567,7 +572,9 @@ void Config_params::set_fixed_file_names(){
 }
 
 std::string Config_params::get_tmp_path() const {
-    std::string tmp_str (options_["tmp_path"]);   //http://www.cplusplus.com/reference/string/string/rfind/
+
+    //http://www.cplusplus.com/reference/string/string/rfind/
+    std::string tmp_str (options_["tmp_path"]);
     std::string key ("/");
 
     std::size_t found = tmp_str.rfind(key);
@@ -577,32 +584,48 @@ std::string Config_params::get_tmp_path() const {
         return tmp_str + "/";
 }
 
-void Config_params::debug_only_set_p_norm_data_path_file_name(std::string const path_file_name){
+
+void Config_params::debug_only_set_p_norm_data_path_file_name(
+                                std::string const path_file_name){
+
     p_norm_data_f_name  = path_file_name;
 }
-void Config_params::debug_only_set_n_norm_data_path_file_name(std::string const path_file_name){
+
+
+void Config_params::debug_only_set_n_norm_data_path_file_name(
+                                std::string const path_file_name){
+
     n_norm_data_f_name  = path_file_name;
 }
 
 
 void Config_params::update_srand_seed(){
-//    cpp_srand_seed =  std::to_string(std::chrono::system_clock::now().time_since_epoch() /std::chrono::milliseconds(1));
+
+//    cpp_srand_seed =  std::to_string(std::chrono::system_clock::now().time_since_epoch()
+//                          /std::chrono::milliseconds(1));
     std::string last_srand_seed = get_cpp_srand_seed();
     options_["cpp_srand_seed"] = std::to_string(atoll(last_srand_seed.c_str()) + 1)  ;
 //    cout << "[CP][USS] new srand seed is: " << get_cpp_srand_seed() << endl;
 }
 
+
 void Config_params::debug_only_set_srand_seed(std::string new_seed){
+
     cpp_srand_seed =  new_seed;
-    cout << "\n\n * * * (Only for debug - It shouldn't be used in the real runs) New srand seed is:" << cpp_srand_seed <<" * * * \n"<< endl;
+    cout << "\n\n * * * (Only for debug "<<
+            "- It shouldn't be used in the real runs) New srand seed is:" <<
+            cpp_srand_seed <<" * * * \n"<< endl;
 }
+
 
 void Config_params::add_final_summary(summary current_summary
                                       , int selected_level){
+
     current_summary.selected_level = selected_level;
     this->all_summary.push_back(current_summary);
 //    cout << "[CP] summary added to all_summary" << endl;
 }
+
 
 int  Config_params::get_best_level() const{
     int curr_id = get_main_current_exp_id() * get_main_num_kf_iter()
