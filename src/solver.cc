@@ -23,8 +23,10 @@ void Solver::free_solver(std::string caller_name){
 
 
 
-svm_model * Solver::train_model(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n,
-                                bool inherit_params, double param_c, double param_gamma){
+svm_model * Solver::train_model(Mat& m_data_p, Vec& v_vol_p
+                                , Mat& m_data_n, Vec& v_vol_n
+                                , bool inherit_params, double param_c
+                                , double param_gamma){
 
     ETimer t_sv_tm;
     // - - - - - get dimensions - - - - -
@@ -42,7 +44,7 @@ svm_model * Solver::train_model(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec&
 
     int error_cnt=0;
 
-    const char *error_msg = NULL;                                  //check parameters
+    const char *error_msg = NULL;            //check parameters
     do{
         error_msg = svm_check_parameter(&prob,&param);
         if(error_msg){
@@ -55,14 +57,15 @@ svm_model * Solver::train_model(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec&
             }
         }
         if(error_cnt > 3) exit(1);
-    }while(error_msg);                                                       // now prob and param are loaded and checked
+    }while(error_msg);            // now prob and param are loaded and checked
 //    std::cout << "[SV][TM] after read parameters:"<< "\n";
 
     read_problem(m_data_p, v_vol_p, m_data_n,v_vol_n);
 
 #if weight_instance == 0    // without instance weight support
-    if(Config_params::getInstance()->get_ms_svm_id()==2){                   //Weighted SVM
-        alloc_memory_for_weights(param, 0);     // 0 means don't free old memory and it makes sense because this is the first time
+    if(paramsInst->get_ms_svm_id()==2){                   //Weighted SVM
+        // 0 means don't free old memory and it makes sense because this is the first time
+        alloc_memory_for_weights(param, 0);
 //        set_weights_num_points(param, p_num_row_, n_num_row_);
         set_weights_sum_volume(param, v_vol_p, v_vol_n);
     }else{
@@ -118,7 +121,7 @@ svm_model * Solver::train_model_index_base(Mat& m_data_p, Vec& v_vol_p, Mat& m_d
     read_problem_index_base(m_data_p, m_data_n, v_p_index, v_n_index, iter_p_end, iter_n_end,v_vol_p, v_vol_n );
 
 #if weight_instance == 0    // without instance weight support
-    if(Config_params::getInstance()->get_ms_svm_id()==2){                   //Weighted SVM
+    if(paramsInst->get_ms_svm_id()==2){                   //Weighted SVM
         alloc_memory_for_weights(param, 0);     // 0 means don't free old memory and it makes sense because this is the first time
         set_weights_sum_volume_index_base(param, v_vol_p, v_vol_n, v_p_index, v_n_index, iter_p_end, iter_n_end);
     }else{
@@ -171,7 +174,7 @@ void Solver::stand_alone_train_without_instance_weight(Mat& m_data_p, Mat& m_dat
 //    exit(1);
     read_problem_without_instance_weight(m_data_p, m_data_n);
 
-    if(Config_params::getInstance()->get_ms_svm_id()==2){                   //Weighted SVM
+    if(paramsInst->get_ms_svm_id()==2){                   //Weighted SVM
         alloc_memory_for_weights(param, 0);     // 0 means don't free old memory and it makes sense because this is the first time
         set_weights_num_points(param, p_num_row_, n_num_row_);
 //        param.weight[0]=  0.0102041;
@@ -276,7 +279,7 @@ void Solver::PD_train_model_index_base(Mat& m_data, std::vector<int>& v_target_l
 //    read_problem(m_p_data,m_n_data);
 
 
-    if(Config_params::getInstance()->get_ms_svm_id()==2){                   //Weighted SVM
+    if(paramsInst->get_ms_svm_id()==2){                   //Weighted SVM
         alloc_memory_for_weights(param, 0);     // 0 means don't free old memory and it makes sense because this is the first time
         PD_set_weights_sum_num_point_IB(param, v_target_lbl, arr_train_index, num_nnz_train);
     }else{
@@ -291,7 +294,7 @@ void Solver::PD_train_model_index_base(Mat& m_data, std::vector<int>& v_target_l
 #if dbl_SV_PDTMIB >= 1
     std::cout << "[SV][PDTMIB] param C:"<< local_model->param.C <<", gamma:" << local_model->param.gamma
               <<", e:" << local_model->param.eps ;
-    if(Config_params::getInstance()->get_ms_svm_id()==2)                   //Weighted SVM
+    if(paramsInst->get_ms_svm_id()==2)                   //Weighted SVM
         std::cout << ", w1:" << local_model->param.weight[0]
                       <<", w-1:" << local_model->param.weight[1] ;
     std::cout << std::endl;
@@ -331,10 +334,10 @@ void Solver::partial_solver(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n
     PetscInt p_num_row_ = v_p_index.size();
     PetscInt n_num_row_ = v_n_index.size();
     // - - - - - - - set weights only for Weighted SVM - - - - - - - -
-    if(Config_params::getInstance()->get_ms_svm_id()==2){
+    if(paramsInst->get_ms_svm_id()==2){
         alloc_memory_for_weights(param, 0);     // 0 means don't free old memory and it makes sense because this is the first time
 
-        if(Config_params::getInstance()->get_rf_weight_vol()){      //based on volume
+        if(paramsInst->get_rf_weight_vol()){      //based on volume
             //calc sum of volumes       //TODO
             set_weights_sum_volume_index_base(param, v_vol_p, v_vol_n, v_p_index, v_n_index, v_p_index.size(), v_n_index.size());
         }else{                                                      //based on number of points
@@ -381,7 +384,7 @@ void Solver::partial_solver(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n
 #endif
 //        t_solution.stop_timer("[SV][PS] prepare the partial solution (except finest level) at level:",std::to_string(level));
     }else{
-        if(Config_params::getInstance()->get_ms_save_final_model()){
+        if(paramsInst->get_ms_save_final_model()){
             printf("[SV][PS] at the finest level the partial models needs to be saved!!! Exit \n");
 //             exit(1);
             //            svm_save_model("./final_model.svm",model);
@@ -411,7 +414,7 @@ void Solver::partial_solver(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n
 //    MatGetSize(data_n,&size_total_n_,&num_col_n_);
 
 //    // training part is rest of validation
-//    double train_part_percentage =  1 - Config_params::getInstance()->get_ms_validation_part();
+//    double train_part_percentage =  1 - paramsInst->get_ms_validation_part();
 //    size_train_p_ = floor(size_total_p_ * train_part_percentage) ;
 //    size_train_n_ = floor(size_total_n_ * train_part_percentage) ;
 
@@ -434,7 +437,7 @@ void Solver::partial_solver(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n
 //        vec_p_indices.push_back(i_p);
 //    }
 
-//    srand(std::stoll(Config_params::getInstance()->get_cpp_srand_seed()));
+//    srand(std::stoll(paramsInst->get_cpp_srand_seed()));
 //    std::random_shuffle ( vec_p_indices.begin(), vec_p_indices.end() ); //shuffle all nodes
 
 //    for (int i =0;i != size_train_p_ ; i++){        // only pick the train size number of them
@@ -457,7 +460,7 @@ void Solver::partial_solver(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n
 //    vec_n_indices.reserve(size_total_n_);
 //    for (int i_n=0; i_n <size_total_n_; ++i_n)
 //        vec_n_indices.push_back(i_n);
-//    srand(std::stoll(Config_params::getInstance()->get_cpp_srand_seed()));
+//    srand(std::stoll(paramsInst->get_cpp_srand_seed()));
 //    std::random_shuffle ( vec_n_indices.begin(), vec_n_indices.end() );
 
 
@@ -1329,29 +1332,29 @@ void Solver::alloc_memory_for_weights(svm_parameter& in_param, bool free_first){
 
 //======================================================================
 void Solver::read_parameters(){
-    param.svm_type = Config_params::getInstance()->get_svm_svm_type();
-    param.kernel_type = Config_params::getInstance()->get_svm_kernel_type();
-    param.degree = Config_params::getInstance()->get_svm_degree();
-    param.gamma = Config_params::getInstance()->get_svm_gamma();
-//    param.coef0 = Config_params::getInstance()->get_svm_coef0();
-//    param.nu = Config_params::getInstance()->get_svm_nu();
-    param.cache_size = Config_params::getInstance()->get_svm_cache_size();
-    param.C = Config_params::getInstance()->get_svm_C();
-    param.eps = Config_params::getInstance()->get_svm_eps();
-//    param.p = Config_params::getInstance()->get_svm_p();
-    param.shrinking = Config_params::getInstance()->get_svm_shrinking();
-    param.probability = Config_params::getInstance()->get_svm_probability();
-    param.nr_weight = Config_params::getInstance()->get_svm_nr_weight();
+    param.svm_type = paramsInst->get_svm_svm_type();
+    param.kernel_type = paramsInst->get_svm_kernel_type();
+    param.degree = paramsInst->get_svm_degree();
+    param.gamma = paramsInst->get_svm_gamma();
+//    param.coef0 = paramsInst->get_svm_coef0();
+//    param.nu = paramsInst->get_svm_nu();
+    param.cache_size = paramsInst->get_svm_cache_size();
+    param.C = paramsInst->get_svm_C();
+    param.eps = paramsInst->get_svm_eps();
+//    param.p = paramsInst->get_svm_p();
+    param.shrinking = paramsInst->get_svm_shrinking();
+    param.probability = paramsInst->get_svm_probability();
+    param.nr_weight = paramsInst->get_svm_nr_weight();
     param.weight_label = NULL;
     param.weight = NULL;
 }
 
 void Solver::print_parameters(){
     PetscPrintf(PETSC_COMM_WORLD,"[SV][Print_Parameter] config params are: svm_type:%d\nkernel_type:%d\ndegree:%d\ngamma:%g\ncache_size(MB):%g\nC:%g\neps:%g\n",
-                Config_params::getInstance()->get_svm_svm_type(), Config_params::getInstance()->get_svm_kernel_type(),
-                Config_params::getInstance()->get_svm_degree(), Config_params::getInstance()->get_svm_gamma(),
-                Config_params::getInstance()->get_svm_cache_size(), Config_params::getInstance()->get_svm_C(),
-                Config_params::getInstance()->get_svm_eps());
+                paramsInst->get_svm_svm_type(), paramsInst->get_svm_kernel_type(),
+                paramsInst->get_svm_degree(), paramsInst->get_svm_gamma(),
+                paramsInst->get_svm_cache_size(), paramsInst->get_svm_C(),
+                paramsInst->get_svm_eps());
     PetscPrintf(PETSC_COMM_WORLD,"[SV][Print_Parameter] local params which are set and checked are: svm_type:%d\nkernel_type:%d\ndegree:%d\ngamma:%g\ncache_size(MB):%g\nC:%g\neps:%g\n",
                 param.svm_type, param.kernel_type,param.degree, param.gamma, param.cache_size, param.C, param.eps);
 }
@@ -1368,16 +1371,16 @@ void Solver::print_parameters(){
 void Solver::evaluate_testdata(int level, summary& final_summary){
     Loader test_loader;
     Mat untouched_test_data ;
-    untouched_test_data = test_loader.load_norm_data_sep(Config_params::getInstance()->get_test_ds_f_name() );
-//    std::cout << "[SV][ETD]"  << Config_params::getInstance()->get_test_ds_f_name()  << std::endl;
+    untouched_test_data = test_loader.load_norm_data_sep(paramsInst->get_test_ds_f_name() );
+//    std::cout << "[SV][ETD]"  << paramsInst->get_test_ds_f_name()  << std::endl;
     test_predict(untouched_test_data, final_summary);
 
     MatDestroy(&untouched_test_data);
 
-    Config_params::getInstance()->print_summary(final_summary,"[SV][ETD]",level,-2);
+    paramsInst->print_summary(final_summary,"[SV][ETD]",level,-2);
 
 //    if(level == 1){
-//        Config_params::getInstance()->add_final_summary(final_summary);
+//        paramsInst->add_final_summary(final_summary);
 //    }
 }
 
@@ -1387,16 +1390,16 @@ void Solver::evaluate_testdata(int level, summary& final_summary){
 void Solver::evaluate_testdata(Mat& untouched_test_data, int level, summary& final_summary){
 //    Loader test_loader;
 //    Mat untouched_test_data ;
-//    untouched_test_data = test_loader.load_norm_data_sep(Config_params::getInstance()->get_test_ds_f_name() );
-//    std::cout << "[SV][ETD]"  << Config_params::getInstance()->get_test_ds_f_name()  << std::endl;
+//    untouched_test_data = test_loader.load_norm_data_sep(paramsInst->get_test_ds_f_name() );
+//    std::cout << "[SV][ETD]"  << paramsInst->get_test_ds_f_name()  << std::endl;
     test_predict(untouched_test_data, final_summary);
 
 //    MatDestroy(&untouched_test_data);
 
-    Config_params::getInstance()->print_summary(final_summary,"[SV][ETD]",level,-2);
+    paramsInst->print_summary(final_summary,"[SV][ETD]",level,-2);
 
 //    if(level == 1){
-//        Config_params::getInstance()->add_final_summary(final_summary);
+//        paramsInst->add_final_summary(final_summary);
 //    }
 }
 
@@ -1515,7 +1518,7 @@ void Solver::test_predict(Mat& test_data, summary& result_summary, int iteration
     if(iteration != -1)             //later it is needed to select the best model
         result_summary.iter = iteration;
 #if dbl_SV_test_predict >= 1    // 1 default
-    Config_params::getInstance()->print_summary(result_summary,"[SV][TP]");
+    paramsInst->print_summary(result_summary,"[SV][TP]");
 #endif
 //    std::cout <<"[SV][TP] {4} \n" ; exit(1);
 //end of loop for each test point
@@ -1538,7 +1541,9 @@ void Solver::test_predict(Mat& test_data, summary& result_summary, int iteration
 
 
 
-void Solver::predict_validation_data(Mat& m_VD_p,Mat& m_VD_n, summary& result_summary, int iteration){
+void Solver::predict_validation_data(Mat& m_VD_p,Mat& m_VD_n
+                                     , summary& result_summary
+                                     , int iteration, bool verbose){
 #if dbl_SV_predict_VD >= 7
     printf("[SV][Predict_VD] m_VD_p Matrix:\n");                              //$$debug
     MatView(m_VD_p,PETSC_VIEWER_STDOUT_WORLD);                                //$$debug
@@ -1626,8 +1631,11 @@ void Solver::predict_validation_data(Mat& m_VD_p,Mat& m_VD_n, summary& result_su
     result_summary.num_SV_n = local_model->nSV[1];
     if(iteration != -1)             //later it is needed to select the best model
         result_summary.iter = iteration;
+
+    if(verbose)
+        paramsInst->print_summary(result_summary,"[SV][PVD]");
 #if dbl_SV_predict_VD >= 1    // 1 default
-    Config_params::getInstance()->print_summary(result_summary,"[SV][TP]");
+    paramsInst->print_summary(result_summary,"[SV][TP]");
 #endif
 #if dbl_SV_predict_VD_rpt_time >= 1    // 0 default
     t_predict_VD.stop_timer("predict VD");
@@ -1757,7 +1765,7 @@ void Solver::test_predict_index_base(Mat& m_data_p, Mat& m_data_n,
     if(iteration != -1)             //later it is needed to select the best model
         result_summary.iter = iteration;
 #if dbl_SV_TPIB >= 1
-    Config_params::getInstance()->print_summary(result_summary, "[SV][TPIB]");
+    paramsInst->print_summary(result_summary, "[SV][TPIB]");
 #endif
 //    return results_;
 }
@@ -1870,7 +1878,7 @@ void Solver::test_predict_index_base_separate_validation(Mat& m_data_p, Mat& m_d
     if(iteration != -1)             //later it is needed to select the best model
         result_summary.iter = iteration;
 #if dbl_SV_TPIB >= 1
-    Config_params::getInstance()->print_summary(result_summary, "[SV][TPIB]");
+    paramsInst->print_summary(result_summary, "[SV][TPIB]");
 #endif
 //    return results_;
 }
@@ -2105,7 +2113,7 @@ void Solver::PD_test_predict_index_base(Mat& m_data, std::vector<PetscInt> v_tar
     if(iteration != -1)             //later it is needed to select the best model
         result_summary.iter = iteration;
 #if dbl_SV_PDTPIB >= 1
-    Config_params::getInstance()->print_summary(result_summary, "[SV][PD_TP_IB]");
+    paramsInst->print_summary(result_summary, "[SV][PD_TP_IB]");
 #endif
 }
 
@@ -2215,12 +2223,12 @@ void Solver::prepare_solution_single_model(svm_model * model_, int num_point_p, 
     //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
     //append the model to summary file after each export
     //make sure to close and open the summary file at each level to prevent losing models in the case of crash or error
-    std::string output_file = "./svm_models/" + Config_params::getInstance()->get_ds_name()+
-            "_exp_" + std::to_string(Config_params::getInstance()->get_main_current_exp_id()) +
-            "_kf_" + std::to_string(Config_params::getInstance()->get_main_current_kf_id()) +
-            "_level_" + std::to_string(Config_params::getInstance()->get_main_current_level_id()) + ".svmmodel";
+    std::string output_file = "./svm_models/" + paramsInst->get_ds_name()+
+            "_exp_" + std::to_string(paramsInst->get_main_current_exp_id()) +
+            "_kf_" + std::to_string(paramsInst->get_main_current_kf_id()) +
+            "_level_" + std::to_string(paramsInst->get_main_current_level_id()) + ".svmmodel";
     svm_save_model(output_file.c_str(), local_model);
-    Config_params::getInstance()->update_levels_models_info(Config_params::getInstance()->get_main_current_level_id(), 1);
+    paramsInst->update_levels_models_info(paramsInst->get_main_current_level_id(), 1);
 //    printf("[SV][PSSM] model %s is saved\n", output_file.c_str());
 #endif
 

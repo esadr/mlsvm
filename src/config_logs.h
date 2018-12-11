@@ -49,9 +49,6 @@
 #define dbl_MR_main                 1           // 1 Default 3 level info //release 0
 #define debug_level_main_rec        0           // 0 Default
 #define dbl_MR_refinement           1           // 1 Default
-
-
-
 #define dbl_MR_calc_performance     0           // 0 Default
 //---- Refinement ----
 #define dbl_RF_main                 1           // 1 Default
@@ -59,8 +56,10 @@
 #define dbl_RF_main_with_partition  0           // 1 Default, 3 report steps        //release 0
 #define dbl_RF_main_no_partition    0           // 1 Default                        //release 0
 #define dbl_RF_FSN                  0           // 1 Default find_SV_neighbors      //release 0
-#define dbl_RF_ABM                  0           // 0 Default, 3 report different levels results after sort, 5 report before and after sort
-
+#define dbl_RF_ABM                  0           // 0 Default, 3 report different levels results after sort,
+                                                //            5 report before and after sort
+#define dbl_RF_exp_data_ml          0           // 0 Default, 1 export the validation data once at coarsest level
+                                                //              at each level, export the train data matrix
 //---- Partitioning ----
 #define dbl_PR_get_parts            5           // 0 Default (Metis), 1 #parts, 5 report the metis response, 7 print parts
 #define dbl_PR_SEW                  0           // 0 Default, 9 prints the adjwgt
@@ -75,7 +74,7 @@
 #define dbl_PR_CPM                  0           // 0 Default    //calc_performance_measure  5 prints final predicted label
 //---- Model Selection ----
 #define dbl_MS_UD                   1           // 1 Default
-#define dbl_MS_UDSepVal             0           // 1 Default    //release 0
+#define dbl_MS_UDSepVal             1           // 1 Default   print the best validation results //release 0
 #define dbl_MS_UDIB                 1           // 1 Default
 #define dbl_MS_combine_test_data    0
 #define dbl_MS_ud_param_generator   0           // 0 Default, 3 shows new parameters
@@ -115,7 +114,7 @@
 
 
 #define dbl_SV_PDTPIB               0           // 0 Default    1 prints the details
-#define export_SVM_models           0           // 0 Default    1 Save the SVM models in svm_models folder
+#define export_SVM_models           1           // 0 Default    1 Save the SVM models in svm_models folder
 #define save_test_files             0           // 0 Default removes the test file, 	1 keeps them
 #define dbl_exp_train_data          0           // 0 Default, 1 only export the data for comparison with other solvers
 #define timer_complexity_analysis   0           // 0 Default, 1 only for reporting the detail of time for coarsening and refinement

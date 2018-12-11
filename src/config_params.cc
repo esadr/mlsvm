@@ -5,9 +5,12 @@
 //#include <time.h>
 //#include <ctime>
 #include <chrono>
+#include <cassert>
 
+//#define verbose false   // correct line to release
+#define verbose true  // debug mnist dataset 091418
 
-#define verbose false
+using std::cout; using std::endl;
 
 Config_params* Config_params::getInstance() {
     if ( !instance ) instance = new Config_params;
@@ -16,35 +19,36 @@ Config_params* Config_params::getInstance() {
 
 void Config_params::print_classification_training_params(){
 
-    std::cout << "mlsvm_version:" << mlsvm_version << std::endl;
-    std::cout << "============= dataset info =============" <<
+    cout << "mlsvm_version:" << mlsvm_version << endl;
+    cout << "============= dataset info =============" <<
                  "\nds_path: "              << get_ds_path()          <<
                  "\nds_name: "              << get_ds_name()          <<
                  "\ntmp_path: "             << get_tmp_path()          <<
-                 std::endl;
+                 endl;
 
-    std::cout << "\ncpp_srand_seed: " <<get_cpp_srand_seed()<< std::endl;
+    cout << "\ncpp_srand_seed: " <<get_cpp_srand_seed()<< endl;
 ///*
-    std::cout << "--- Main file Paramters ---"      <<
+    cout << "--- Main file Paramters ---"      <<
                  "\nmain_num_repeat_exp: "          << get_main_num_repeat_exp()        <<
                  "\nmain_num_kf_iter: "             << get_main_num_kf_iter()           <<
                  "\nexp_info: "                     << get_exp_info()                   <<
 
                  "\nML_status: "                    << get_multi_level_status()         <<
-                 std::endl;
+                 endl;
 
-    std::cout << "--- NN Paramters ---"     <<
+    cout << "--- NN Paramters ---"     <<
                  "\nnn_number: "            << get_nn_number_of_neighbors()     <<
-                 "\nnn_distance_type:"      << get_nn_distance_type()           << std::endl;
+                 "\nnn_distance_type:"      << get_nn_distance_type()           << endl;
 
-    std::cout << "--- Loader Paramters ---"     <<
+    cout << "--- Loader Paramters ---"     <<
                  "\npre_init_loader_matrix: "   << get_pre_init_loader_matrix()   <<
                  "\ninverse_weight: "           << get_inverse_weight()           <<
                  "\nld_weight_type: "           << get_ld_weight_type()           <<
                  "\nld_weight_param: "           << get_ld_weight_param()         <<
-                 std::endl;
+                 endl;
+    assert (get_ld_weight_type() < 7 && "weight type is not right");
 
-    std::cout << "--- Coarsening Paramters ---" <<
+    cout << "--- Coarsening Paramters ---" <<
                  "\ncoarse_Eta: "           << get_coarse_Eta()           <<
                  "\ncoarse_threshold: "     << get_coarse_threshold()     <<
                  "\ncoarse_q: "             << get_coarse_q()             <<
@@ -55,9 +59,9 @@ void Config_params::print_classification_training_params(){
 //                 "\ncs_boundary_points_status: "     << get_cs_boundary_points_status()     <<
 //                 "\ncs_boundary_points_threshold: "  << get_cs_boundary_points_threshold()  <<
 //                 "\ncs_boundary_points_max_num: "    << get_cs_boundary_points_max_num()    <<
-                 std::endl;
+                 endl;
 
-    std::cout << "--- ModelSelection Paramters ---" <<
+    cout << "--- ModelSelection Paramters ---" <<
                  "\nms_status: "                   << get_ms_status()                     <<
                  "\nms_limit: "                    << get_ms_limit()                      <<
                  "\nms_first_stage: "              << get_ms_first_stage()                <<
@@ -66,10 +70,10 @@ void Config_params::print_classification_training_params(){
                  "\nms_VD_sample_size_fraction: "  << get_ms_VD_sample_size_fraction()    <<
                  "\nms_svm_id: "                   << get_ms_svm_id()                     <<
                  "\nms_bs_gm_threshold: "          << get_ms_bs_gm_threshold()            <<
-                 std::endl;
+                 endl;
 //                 "\nms_validation_part: " << get_ms_validation_part()   <<
 
-    std::cout << "--- SVM Paramters ---" <<
+    cout << "--- SVM Paramters ---" <<
                  "\nsvm_type: "         << get_svm_svm_type()       <<
                  "\nkernel_type: "      << get_svm_kernel_type()    <<
                  "\ndegree: "           << degree                   <<
@@ -82,64 +86,65 @@ void Config_params::print_classification_training_params(){
                  "\np: "                << p                        <<
                  "\nshrinking: "        << get_svm_shrinking()      <<
                  "\nprobability: "      << get_svm_probability()    <<
-                 std::endl;
+                 endl;
 
 
-    std::cout << "--- Refinement Paramters ---" <<
+    cout << "--- Refinement Paramters ---" <<
                  "\nadd_fraction: "             << get_rf_add_fraction()                <<
                  "\nrf_add_distant_point_status(2nd): "   << get_rf_add_distant_point_status()      <<
                  "\nrf_weight_vol: "            << get_rf_weight_vol()                  <<
                  "\npr_start_partitioning: "    << get_pr_start_partitioning()          <<
-                 std::endl;
+                 endl;
 
-    std::cout << "--- Partitioning Paramters ---" <<
+    cout << "--- Partitioning Paramters ---" <<
                  "\npr_partition_max_size: "      << get_pr_partition_max_size()        <<
                  "\npr_maj_voting_id: "           << get_pr_maj_voting_id()             <<
-                 std::endl;
+                 endl;
 //    */
 }
 
 void Config_params::print_classification_prediction_params(){
-    std::cout << "mlsvm_version:"           << mlsvm_version           <<
+    cout << "mlsvm_version:"           << mlsvm_version           <<
                  "\nds_path: "              << get_ds_path()           <<
                  "\nds_name: "              << get_ds_name()           <<
                  "\ntmp_path: "             << get_tmp_path()          <<
                  "\nexperiment_id: "        << get_experiment_id()     <<
                  "\nds_name: "              << get_kfold_id()          <<
-                 "\npr_maj_voting_id: "     << get_pr_maj_voting_id()  << std::endl;
+                 "\npr_maj_voting_id: "     << get_pr_maj_voting_id()  << endl;
 }
 
 void Config_params::print_convert_files_params(){
-    std::cout << "mlsvm_version:"           << mlsvm_version           <<
+    cout << "mlsvm_version:"           << mlsvm_version           <<
                  "\nds_path: "              << get_ds_path()           <<
                  "\nds_name: "              << get_ds_name()           <<
-                 "\ntmp_path: "             << get_tmp_path()          << std::endl;
+                 "\ntmp_path: "             << get_tmp_path()          << endl;
 }
 
 void Config_params::print_flann_params(){
-    std::cout << "--- NN Paramters ---"         <<
+    cout << "--- NN Paramters ---"         <<
                  "\nnn_number_of_classes: "     << get_nn_number_of_classes()   <<
                  "\nnn_number_of_neighbors: "   << get_nn_number_of_neighbors() <<
-                 "\nnn_distance_type: "         << get_nn_distance_type()       << std::endl;
+                 "\nnn_distance_type: "         << get_nn_distance_type()       << endl;
 
     if(get_nn_number_of_classes() == 2){
-        std::cout << "--- Input File names ---"    <<
+        cout << "--- Input File names ---"    <<
                  "\nminority data: "                << get_p_norm_data_f_name() <<
-                 "\nmajority data: "                << get_n_norm_data_f_name() << std::endl;
+                 "\nmajority data: "                << get_n_norm_data_f_name() << endl;
     }else{
-        std::cout << "--- Input File names ---"    <<
-                 "\ndata: "                         << get_single_norm_data_f_name() << std::endl;
+        cout << "--- Input File names ---"    <<
+                 "\ndata: "                         << get_single_norm_data_f_name() << endl;
     }
 }
 
 void Config_params::print_zscore_params(){
-    std::cout << "mlsvm_version:"           << mlsvm_version           <<
+    cout << "mlsvm_version:"           << mlsvm_version           <<
                  "\nds_path: "              << get_ds_path()           <<
                  "\nds_name: "              << get_ds_name()           <<
-                 "\ntmp_path: "             << get_tmp_path()          << std::endl;
+                 "\ntmp_path: "             << get_tmp_path()          << endl;
 }
 
-void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[], program_parts caller_func){
+void Config_params::read_params(std::string XML_FILE_PATH,
+                                int argc, char * argv[], program_parts caller_func){
 
     PetscBool       flg; //@ 040417-2130
     PetscInt        temp;
@@ -162,15 +167,15 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
     }
 
     /// load the file
-    std::cout << "[CP][read_params] param.xml path : "<< XML_FILE_PATH << "\n";
+    cout << "[CP][read_params] param.xml path : "<< XML_FILE_PATH << "\n";
     // Create empty XML document within memory
     pugi::xml_document doc;
     // Load XML file into memory
     pugi::xml_parse_result result = doc.load_file(XML_FILE_PATH.c_str(),
         pugi::parse_default|pugi::parse_declaration);
     if (!result)   {
-        std::cout << "[CP][read_params] Parse error: " << result.description()
-            << ", character pos= " << result.offset << std::endl;
+        cout << "[CP][read_params] Parse error: " << result.description()
+            << ", character pos= " << result.offset << endl;
         exit(1);
     }
     // A valid XML document must have a single root node
@@ -185,7 +190,8 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
         switch(main_function){
         case 0:     // classification
             read_classification_training_parameters(root, argc, argv);
-            set_inputs_file_names();
+            // 083018 commented here and moved to mlsvm_classifier.cc
+//            set_inputs_file_names();
             print_classification_training_params();
             break;
 
@@ -193,14 +199,14 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
             break;
 
         case 2:
-            std::cout << "start reading clustering parameters\n";
+            cout << "start reading clustering parameters\n";
             read_clustering_parameters(root, argc, argv);
             break;
         }
         break;      // end of main functions (classification, regression, clustering)
 
     case zscore:
-        std::cout << "start reading zscore parameters\n";
+        cout << "start reading zscore parameters\n";
         read_zscore_parameters(root, argc, argv);
         //set the output file name
         single_norm_data_f_name  = get_ds_path() + get_ds_name() + "_zsc_data.dat";
@@ -208,7 +214,7 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
         break;
 
     case flann:
-        std::cout << "start reading flann parameters\n";
+        cout << "start reading flann parameters\n";
         read_flann_parameters(root, argc, argv);
         set_file_names_for_save_flann();
         print_flann_params();
@@ -225,7 +231,6 @@ void Config_params::read_params(std::string XML_FILE_PATH,int argc, char * argv[
         break;
     }
 }
-
 
 
 void Config_params::read_classification_training_parameters(pugi::xml_node& root,int argc, char * argv[]){
@@ -312,6 +317,7 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     parser_.add_option("-u", "--exp_info")                   .dest("exp_info")  .set_default(exp_info);
     parser_.add_option("--ds_p")                             .dest("ds_path")  .set_default(ds_path);
     parser_.add_option("-f", "--ds_f", "--file")             .dest("ds_name")  .set_default(ds_name);
+    parser_.add_option("--test_data")                        .dest("test_data_name")  .set_default(test_data_name);
     parser_.add_option("--tmp_p")                            .dest("tmp_path")  .set_default(tmp_path);
     parser_.add_option("--cs_pi")                            .dest("pre_init_loader_matrix")  .set_default(pre_init_loader_matrix);
 //    parser_.add_option("--iw", "--inverse_weight")           .dest("inverse_weight")  .set_default(inverse_weight);
@@ -354,7 +360,7 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     std::vector<std::string> args = parser_.args();
 //    set_inputs_file_names();           // set all the dataset files        //because of exp_info, file name's should set after parsing the argv
     check_input_distance_parameters();
-//    std::cout << "[CP] input parameters are read" << std::endl;
+//    cout << "[CP] input parameters are read" << endl;
 }
 
 
@@ -386,10 +392,10 @@ void Config_params::read_classification_prediction_parameters(pugi::xml_node& ro
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
     if(experiment_id < 0 || kfold_id < 0) {
-        std::cout << "[CP] The experiment id or k-fold_id is invalid or not specified!"<<
-                     "\nPlease check the user guide for more information." << std::endl;
+        cout << "[CP] The experiment id or k-fold_id is invalid or not specified!"<<
+                     "\nPlease check the user guide for more information." << endl;
     }
-    std::cout << "[CP] input prediction parameters are read" << std::endl;
+    cout << "[CP] input prediction parameters are read" << endl;
 }
 
 
@@ -410,7 +416,7 @@ void Config_params::read_convert_files_parameters(pugi::xml_node& root,int argc,
 
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
-    std::cout << "[CP] input convert_files parameters are read" << std::endl;
+    cout << "[CP] input convert_files parameters are read" << endl;
 }
 
 
@@ -479,11 +485,9 @@ void Config_params::read_clustering_parameters(pugi::xml_node& root,int argc, ch
 //    set_inputs_file_names();           // set all the dataset files        //because of exp_info, file name's should set after parsing the argv
 
     check_input_distance_parameters();
-    std::cout << "[CP] input parameters for clustering are read" << std::endl;
+    cout << "[CP] input parameters for clustering are read" << endl;
 
 }
-
-
 
 
 void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * argv[]){ //@ 040317-1842
@@ -504,22 +508,13 @@ void Config_params::read_flann_parameters(pugi::xml_node& root,int argc, char * 
 
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
-    std::cout << "[CP] flann parameters are read" << std::endl;
+    cout << "[CP] flann parameters are read" << endl;
 }
-
-
-
-
-
-
-
-
-
 
 
 void Config_params::check_input_distance_parameters(){
     if(get_nn_distance_type() > 8 || get_nn_distance_type() <1){
-        std::cout << "[CP] supported distance types are from 1 to 8!" << std::endl;
+        cout << "[CP] supported distance types are from 1 to 8!" << endl;
         exit(1);
     }
 }
@@ -529,9 +524,11 @@ void Config_params::set_ds_path(std::string const new_ds_path){
     this->ds_path = new_ds_path;
 }
 
+
 void Config_params::set_ds_name(std::string const new_ds_name){
     this->ds_name = new_ds_name;
 }
+
 
 void Config_params::set_file_names_for_save_flann(){
     if(get_nn_number_of_classes() == 2){
@@ -555,8 +552,29 @@ void Config_params::set_inputs_file_names(){
 }
 
 
+/*
+ * for the case that there is no k-fold and the test data is provided
+ * for mlsvmSepTestClassifier
+ * Added 083018
+ */
+void Config_params::set_fixed_file_names(){
+
+    cout << "Config_params::set_fixed_file_names is called" << endl;
+    p_indices_f_name    = get_ds_path() + get_ds_name() + "_min_norm_data_indices.dat";
+    p_dist_f_name       = get_ds_path() + get_ds_name() + "_min_norm_data_dists.dat";
+    n_indices_f_name    = get_ds_path() + get_ds_name() + "_maj_norm_data_indices.dat";
+    n_dist_f_name       = get_ds_path() + get_ds_name() + "_maj_norm_data_dists.dat";
+
+    p_norm_data_f_name  = get_ds_path() + get_ds_name() + "_min_norm_data.dat";
+    n_norm_data_f_name  = get_ds_path() + get_ds_name() + "_maj_norm_data.dat";
+
+    test_ds_f_name      = get_ds_path() + get_test_name() + "_label_data_test.dat";
+}
+
 std::string Config_params::get_tmp_path() const {
-    std::string tmp_str (options_["tmp_path"]);   //http://www.cplusplus.com/reference/string/string/rfind/
+
+    //http://www.cplusplus.com/reference/string/string/rfind/
+    std::string tmp_str (options_["tmp_path"]);
     std::string key ("/");
 
     std::size_t found = tmp_str.rfind(key);
@@ -566,39 +584,60 @@ std::string Config_params::get_tmp_path() const {
         return tmp_str + "/";
 }
 
-void Config_params::debug_only_set_p_norm_data_path_file_name(std::string const path_file_name){
+
+void Config_params::debug_only_set_p_norm_data_path_file_name(
+                                std::string const path_file_name){
+
     p_norm_data_f_name  = path_file_name;
 }
-void Config_params::debug_only_set_n_norm_data_path_file_name(std::string const path_file_name){
+
+
+void Config_params::debug_only_set_n_norm_data_path_file_name(
+                                std::string const path_file_name){
+
     n_norm_data_f_name  = path_file_name;
 }
 
 
 void Config_params::update_srand_seed(){
-//    cpp_srand_seed =  std::to_string(std::chrono::system_clock::now().time_since_epoch() /std::chrono::milliseconds(1));
+
+//    cpp_srand_seed =  std::to_string(std::chrono::system_clock::now().time_since_epoch()
+//                          /std::chrono::milliseconds(1));
     std::string last_srand_seed = get_cpp_srand_seed();
     options_["cpp_srand_seed"] = std::to_string(atoll(last_srand_seed.c_str()) + 1)  ;
-//    std::cout << "[CP][USS] new srand seed is: " << get_cpp_srand_seed() << std::endl;
+//    cout << "[CP][USS] new srand seed is: " << get_cpp_srand_seed() << endl;
 }
+
 
 void Config_params::debug_only_set_srand_seed(std::string new_seed){
+
     cpp_srand_seed =  new_seed;
-    std::cout << "\n\n * * * (Only for debug - It shouldn't be used in the real runs) New srand seed is:" << cpp_srand_seed <<" * * * \n"<< std::endl;
+    cout << "\n\n * * * (Only for debug "<<
+            "- It shouldn't be used in the real runs) New srand seed is:" <<
+            cpp_srand_seed <<" * * * \n"<< endl;
 }
 
-void Config_params::add_final_summary(summary current_summary, int selected_level){
+
+void Config_params::add_final_summary(summary current_summary
+                                      , int selected_level){
+
     current_summary.selected_level = selected_level;
     this->all_summary.push_back(current_summary);
-//    std::cout << "[CP] summary added to all_summary" << std::endl;
+//    cout << "[CP] summary added to all_summary" << endl;
 }
 
+
 int  Config_params::get_best_level() const{
-    int curr_id = get_main_current_exp_id() * get_main_num_kf_iter() + get_main_current_kf_id();
+    int curr_id = get_main_current_exp_id() * get_main_num_kf_iter()
+            + get_main_current_kf_id();
     return all_summary[curr_id].selected_level;
 }
 
 
-void Config_params::print_summary(const summary& summary_in, std::string caller_method, int level, int iter, int stage, int fold) const{
+void Config_params::print_summary(const summary& summary_in,
+                                  std::string caller_method,
+                                  int level, int iter,
+                                  int stage, int fold) const{
     printf("%s, ",caller_method.c_str());
 
     if(level != -1)
@@ -616,10 +655,14 @@ void Config_params::print_summary(const summary& summary_in, std::string caller_
     if(stage != -1)
         printf("stage:%d, ",stage);
 #if verbose
-    printf("AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.3f, TP:%.0f, TN:%.0f, FP:%.0f, FN:%.0f",
-           summary_in.perf.at(Acc), summary_in.perf.at(Sens), summary_in.perf.at(Spec), summary_in.perf.at(PPV),
-           summary_in.perf.at(NPV), summary_in.perf.at(F1), summary_in.perf.at(Gmean), summary_in.perf.at(TP),
-           summary_in.perf.at(TN), summary_in.perf.at(FP), summary_in.perf.at(FN));
+    printf("AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.3f\n"
+           , summary_in.perf.at(Acc), summary_in.perf.at(Sens)
+           , summary_in.perf.at(Spec), summary_in.perf.at(PPV)
+           , summary_in.perf.at(NPV), summary_in.perf.at(F1)
+           , summary_in.perf.at(Gmean));
+    printf("\t TP:%.0f, TN:%.0f, FP:%.0f, FN:%.0f"
+           , summary_in.perf.at(TP), summary_in.perf.at(TN)
+           , summary_in.perf.at(FP), summary_in.perf.at(FN));
 
     if(summary_in.C && summary_in.gamma)
         printf(", C:%.2f, Gamma:%.4f", summary_in.C, summary_in.gamma);
@@ -629,34 +672,62 @@ void Config_params::print_summary(const summary& summary_in, std::string caller_
 
     printf("\n");
 #else               //release
-    printf("AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.3f\n",
-           summary_in.perf.at(Acc), summary_in.perf.at(Sens), summary_in.perf.at(Spec), summary_in.perf.at(PPV),
-           summary_in.perf.at(NPV), summary_in.perf.at(F1), summary_in.perf.at(Gmean));
-
+    printf("AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.3f\n"
+           , summary_in.perf.at(Acc), summary_in.perf.at(Sens)
+           , summary_in.perf.at(Spec), summary_in.perf.at(PPV)
+           , summary_in.perf.at(NPV), summary_in.perf.at(F1)
+           , summary_in.perf.at(Gmean));
 #endif
 
 }
 
-void Config_params::set_best_parameters(measures preferred_measure){    //default measure is set to Gmean in the header file
+
+//default measure is set to Gmean in the header file
+void Config_params::set_best_parameters(measures preferred_measure){
     double max_measure_=0;
     int max_index_ =0;
     for(unsigned int i=0; i < this->all_summary.size(); i++){
         if(this->all_summary[i].perf[preferred_measure] > max_measure_){
-            std::cout << "[CP][Set_Best_params] result at "<< i << " is " << this->all_summary[i].perf[preferred_measure] << std::endl;
-            std::cout << "[CP][Set_Best_params] C at "<< i << " is " << this->all_summary[i].C << std::endl;
-            std::cout << "[CP][Set_Best_params] gamma at "<< i << " is " << this->all_summary[i].gamma << std::endl;
+            cout << "[CP][Set_Best_params] result at "<< i << " is " << this->all_summary[i].perf[preferred_measure] << endl;
+            cout << "[CP][Set_Best_params] C at "<< i << " is " << this->all_summary[i].C << endl;
+            cout << "[CP][Set_Best_params] gamma at "<< i << " is " << this->all_summary[i].gamma << endl;
             max_measure_ = this->all_summary[i].perf[preferred_measure];
             max_index_ = i;
         }
     }
     this->best_C = this->all_summary[max_index_].C;
     this->best_gamma = this->all_summary[max_index_].gamma;
-    std::cout << "[CP][Set_Best_params] selected C: "<< this->best_C <<
+    cout << "[CP][Set_Best_params] selected C: "<< this->best_C <<
                  ", gamma: " << this->best_gamma << " and size of summary is :"<<
-                 this->all_summary.size() <<std::endl;
+                 this->all_summary.size() <<endl;
     this->best_params_are_set = 1;
 
 }
+
+
+void Config_params::reportFinalModelInVCycle() const{
+    int curr_summ_idx = (get_main_num_kf_iter() * get_main_current_exp_id())
+                      + get_main_current_kf_id();
+
+    printf("CP_RFMIVC,csi:%d,exp:%d,iter:%d,level:%d,AC:%.2f,SN:%.2f,"
+           "SP:%.2f,PPV:%.2f,NPV:%.2f,F1:%.2f,GM:%.2f"
+           ",C:%.2f,G:%.4f\n",
+           curr_summ_idx,
+           this->get_main_current_exp_id(),
+           this->get_main_current_kf_id(),
+           this->all_summary[curr_summ_idx].selected_level,
+           this->all_summary[curr_summ_idx].perf.at(Acc),
+           this->all_summary[curr_summ_idx].perf.at(Sens),
+           this->all_summary[curr_summ_idx].perf.at(Spec),
+           this->all_summary[curr_summ_idx].perf.at(PPV),
+           this->all_summary[curr_summ_idx].perf.at(NPV),
+           this->all_summary[curr_summ_idx].perf.at(F1),
+           this->all_summary[curr_summ_idx].perf.at(Gmean),
+           this->all_summary[curr_summ_idx].C,
+           this->all_summary[curr_summ_idx].gamma );
+}
+
+
 
 void Config_params::print_final_results() const{
     printf("           >   >   >   >   >   >         Final Results         <   <   <   <   <   < \n");
@@ -669,11 +740,15 @@ void Config_params::print_final_results() const{
     double sum_f1=0;
 
     for(unsigned int i=0; i< this->all_summary.size(); i++){
-        printf("[CP][PFR],it:%d, BestL:%d, AC:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f",
+        printf("[CP][PFR],it:%d, BestL:%d, AC:%.2f, SN:%.2f, "\
+               "SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f",
                i, this->all_summary[i].selected_level,
-               this->all_summary[i].perf.at(Acc), this->all_summary[i].perf.at(Sens),
-               this->all_summary[i].perf.at(Spec), this->all_summary[i].perf.at(PPV),
-               this->all_summary[i].perf.at(NPV), this->all_summary[i].perf.at(F1),
+               this->all_summary[i].perf.at(Acc),
+               this->all_summary[i].perf.at(Sens),
+               this->all_summary[i].perf.at(Spec),
+               this->all_summary[i].perf.at(PPV),
+               this->all_summary[i].perf.at(NPV),
+               this->all_summary[i].perf.at(F1),
                this->all_summary[i].perf.at(Gmean));
     #if verbose
         if(this->all_summary[i].C && this->all_summary[i].gamma)
@@ -710,22 +785,22 @@ void Config_params::print_final_results() const{
 
 void Config_params::print_ref_result(const std::vector<ref_results>& v_ref_results) const{
     for(auto it= v_ref_results.begin(); it!=v_ref_results.end(); ++it){
-        std::cout << "[CP][PRefResult] VD GM:" << it->validation_data_summary.perf.at(Gmean) <<
+        cout << "[CP][PRefResult] VD GM:" << it->validation_data_summary.perf.at(Gmean) <<
                      ",TD GM:" << it->test_data_summary.perf.at(Gmean) <<
-                     ", level:" << it->level << std::endl;
+                     ", level:" << it->level << endl;
     }
 }
 
 
 void Config_params::set_master_models_info(){
     int master_size = get_main_num_repeat_exp() * get_main_num_kf_iter();
-//    std::cout << "master size:" << std::to_string(master_size) << std::endl;
+//    cout << "master size:" << std::to_string(master_size) << endl;
     master_models_info.resize(master_size);
-//    std::cout << "master models info's size:" << std::to_string(master_models_info.size()) << std::endl;  //$$debug
+//    cout << "master models info's size:" << std::to_string(master_models_info.size()) << endl;  //$$debug
 }
 
 //void Config_params::check_models_info(){
-//    std::cout << "set models metadata, size of vector:" << std::to_string(tmp_models_info.size()) << std::endl;
+//    cout << "set models metadata, size of vector:" << std::to_string(tmp_models_info.size()) << endl;
 
 //}
 /*
@@ -736,10 +811,10 @@ void Config_params::set_levels_models_info(){
 
 //    levels_models_info.resize(get_main_current_level_id());
 
-//    std::cout << "[CP][SLMI] model info vector from last iteration:" << std::endl;
-//    std::cout << "[CP][SLMI] \tsize:" << levels_models_info.size() <<
+//    cout << "[CP][SLMI] model info vector from last iteration:" << endl;
+//    cout << "[CP][SLMI] \tsize:" << levels_models_info.size() <<
 //                 "\t capacity:" << levels_models_info.capacity() <<
-//                 "\t current_level_id:" << get_main_current_level_id() << std::endl;
+//                 "\t current_level_id:" << get_main_current_level_id() << endl;
 
 
     levels_models_info.clear();                                 // Clear the vector from what is there from last iteration
@@ -749,13 +824,13 @@ void Config_params::set_levels_models_info(){
     }
 
 
-//    std::cout << "[CP][SLMI] updated model info vector :" << std::endl;
-//    std::cout << "[CP][SLMI] \tsize:" << levels_models_info.size() <<
-//                 "\t capacity:" << levels_models_info.capacity() << std::endl;
+//    cout << "[CP][SLMI] updated model info vector :" << endl;
+//    cout << "[CP][SLMI] \tsize:" << levels_models_info.size() <<
+//                 "\t capacity:" << levels_models_info.capacity() << endl;
 //    for(int i=0; i < get_main_current_level_id(); i++){
-//        std::cout << "[CP][SLMI] model info vector "<< i <<":"<< levels_models_info[i] << std::endl;
+//        cout << "[CP][SLMI] model info vector "<< i <<":"<< levels_models_info[i] << endl;
 //    }
-//    std::cout << "[CP][SLMI] model info vector is cleared successfully" << std::endl;
+//    cout << "[CP][SLMI] model info vector is cleared successfully" << endl;
 
 //    master_models_info[curr_id].resize(get_main_current_level_id());
 //    master_models_info.push_back(curr_models);
@@ -765,8 +840,8 @@ void Config_params::set_levels_models_info(){
 void Config_params::update_levels_models_info(int level_id, int num_models){
 
     levels_models_info[level_id] = num_models;
-//    std::cout << "[CP][UMLI] update levels models info, size of vector:" << levels_models_info.size()
-//              << ",level:" << level_id << ", number of models: "<< levels_models_info[level_id]  << std::endl;
+//    cout << "[CP][UMLI] update levels models info, size of vector:" << levels_models_info.size()
+//              << ",level:" << level_id << ", number of models: "<< levels_models_info[level_id]  << endl;
 }
 
 
@@ -774,8 +849,8 @@ void Config_params::update_master_models_info(){
     int curr_id = get_main_current_exp_id() * get_main_num_kf_iter() + get_main_current_kf_id();
     int best_level = get_best_level();
     master_models_info[curr_id] = std::make_pair(best_level, levels_models_info[best_level]);
-//    std::cout << "update master models info, size of vector:" << master_models_info.size()
-//              << ",level:" << best_level << ", number of models: " << levels_models_info[best_level] << std::endl;
+//    cout << "update master models info, size of vector:" << master_models_info.size()
+//              << ",level:" << best_level << ", number of models: " << levels_models_info[best_level] << endl;
 }
 
 void Config_params::export_models_metadata(){
@@ -784,19 +859,19 @@ void Config_params::export_models_metadata(){
     std::ofstream outfile;
     outfile.open (fname_metadata);
     if(outfile.fail()){
-        std::cerr << "[CP][EMM] failed to open the " << fname_metadata << " file" << std::endl;
+        std::cerr << "[CP][EMM] failed to open the " << fname_metadata << " file" << endl;
         return ;
     }
 
-    std::cout << "[CP][EMM] Start exporting the models' summary in " << fname_metadata << " file" << std::endl;
+    cout << "[CP][EMM] Start exporting the models' summary in " << fname_metadata << " file" << endl;
 
-    outfile << "e:" << get_main_num_repeat_exp() << ", k:" << get_main_num_kf_iter() << std::endl;
+    outfile << "e:" << get_main_num_repeat_exp() << ", k:" << get_main_num_kf_iter() << endl;
     for(unsigned int i = 0; i < master_models_info.size(); i++){
-        outfile << "l:"<< master_models_info[i].first << ", n:" << master_models_info[i].second <<std::endl;
+        outfile << "l:"<< master_models_info[i].first << ", n:" << master_models_info[i].second <<endl;
     }
     outfile.close();
 
-    std::cout << "[CP][EMM] The models' summary are exported successfully" <<std::endl;
+    cout << "[CP][EMM] The models' summary are exported successfully" <<endl;
 }
 
 
@@ -811,7 +886,7 @@ void Config_params::read_zscore_parameters(pugi::xml_node& root,int argc, char *
 
     this->options_ = parser_.parse_args(argc, argv);
     std::vector<std::string> args = parser_.args();
-    std::cout << "[CP] z-score parameters are read" << std::endl;
+    cout << "[CP] z-score parameters are read" << endl;
 }
 
 void Config_params::set_current_iter_file_names(int curr_exp, int curr_iter){
@@ -829,7 +904,7 @@ void Config_params::set_current_iter_file_names(int curr_exp, int curr_iter){
 void Config_params::print_coarsening_refinement_times() const{
     double cpu_duration_coarsening = (t_end_coarsening - t_start_coarsening) / (double)CLOCKS_PER_SEC;
     double cpu_duration_refinement = (t_end_refinement - t_end_coarsening) / (double)CLOCKS_PER_SEC;
-    std::cout <<"[CPU Time] (complexity analysis) coarsening takes " << cpu_duration_coarsening
-             << ", refinement takes "<< cpu_duration_refinement <<" seconds " << std::endl;
+    cout <<"[CPU Time] (complexity analysis) coarsening takes " << cpu_duration_coarsening
+             << ", refinement takes "<< cpu_duration_refinement <<" seconds " << endl;
 }
 

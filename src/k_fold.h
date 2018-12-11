@@ -14,27 +14,41 @@ private:
     std::vector<PetscInt> maj_shuffled_indices_;
     PetscInt num_data_points_, num_min_points, num_maj_points;
 
-    void cross_validation_class(int curr_iter,int total_iter, Mat& m_full_data, Mat& m_train_data, Mat& m_test_data,
-                                PetscInt * arr_idx_train, PetscInt& train_size, std::unordered_set<PetscInt>& uset_test_indices,
-                                std::vector<PetscInt>& v_full_idx_to_train_idx, const std::string& info,
-                                const std::vector<PetscInt>& v_shuffled_indices, bool debug_status=false);
+    void cross_validation_class(int curr_iter,int total_iter,
+                Mat& m_full_data, Mat& m_train_data, Mat& m_test_data,
+                PetscInt * arr_idx_train, PetscInt& train_size,
+                std::unordered_set<PetscInt>& uset_test_indices,
+                std::vector<PetscInt>& v_full_idx_to_train_idx,
+                const std::string& info,
+                const std::vector<PetscInt>& v_shuffled_indices,
+                bool debug_status=false);
 
+    void filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists,
+                std::unordered_set<PetscInt>& uset_test_indices,
+                PetscInt * arr_train_indices, PetscInt& train_size,
+                std::vector<PetscInt>& v_full_idx_to_train_idx,
+                Mat& m_filtered_NN_indices, Mat& m_filtered_NN_dists,
+                const std::string& info,bool debug_status=false);
 
+    void extractk_NN(Mat& m_full_NN_indices,
+                Mat& m_full_NN_dists,
+                Mat& m_filtered_NN_indices,
+                Mat& m_filtered_NN_dists,
+                const std::string& info);
 
-
-    void filter_NN(Mat& m_full_NN_indices, Mat& m_full_NN_dists, std::unordered_set<PetscInt>& uset_test_indices,
-                           PetscInt * arr_train_indices, PetscInt& train_size, std::vector<PetscInt>& v_full_idx_to_train_idx,
-                           Mat& m_filtered_NN_indices, Mat& m_filtered_NN_dists, const std::string& info,bool debug_status=false);
 public:
 
 
     /*
-     * I guess I should skip this in future, but for now it is very similar to what I have in the model selection
-     * It gets 2 test matrices for both classes and add the labels to the first column of a new matrix
-     * which contains both of them
-     * Note: the dt_test_p, dt_test_n will destroy in the end of this function because they are not needed anymore
+     * I guess I should skip this in future, but for now it is very similar to
+     *      what I have in the model selection
+     * It gets 2 test matrices for both classes and add the labels to the
+     *      first column of a new matrix which contains both of them
+     * Note: the dt_test_p, dt_test_n will destroy in the end of this function
+     *      because they are not needed anymore
      */
-    void combine_two_classes_in_one(Mat& test_total, Mat& dt_test_p, Mat& dt_test_n, bool destroy_input_matrices=true);
+    void combine_two_classes_in_one(Mat& test_total, Mat& dt_test_p,
+                Mat& dt_test_n, bool destroy_input_matrices=true);
 
 
     /*
@@ -57,7 +71,8 @@ public:
     /*
      * read 2 matrices for each class, totally 4 matrices
      */
-    void read_in_full_NN(Mat& m_min_NN_indices,Mat& m_min_NN_dists,Mat& m_maj_NN_indices,Mat& m_maj_NN_dists);
+    void read_in_full_NN(Mat& m_min_NN_indices,Mat& m_min_NN_dists,
+                         Mat& m_maj_NN_indices,Mat& m_maj_NN_dists);
 
     /*
      * Only devide the input data to 2 separate classes
@@ -90,12 +105,10 @@ public:
      * Combine both test parts with labels as one test matrix
      * Note: iteration should start from ZERO
      */
-//    bool cross_validation(int current_iteration,int total_iterations, Mat& m_min_train_data, Mat& m_maj_train_data, Mat& m_test_data);
-    // refer to reports
     void cross_validation(int current_iteration,int total_iterations,
-                          std::string p_data_fname="",
-                          std::string n_data_fname="",
-                          std::string test_data_fname="");
+                  std::string p_data_fname="",
+                  std::string n_data_fname="",
+                  std::string test_data_fname="");
 
 
 
@@ -113,10 +126,11 @@ public:
      * Combine both test parts with labels as one test matrix
      * Note: iteration should start from ZERO
      */
-    void cross_validation_simple(Mat& m_data_p, Mat& m_data_n, Vec& v_vol_p, Vec& v_vol_n,
-                                 int current_iteration, int total_iterations,
-                                 Mat& m_train_data_p, Mat& m_train_data_n, Mat& m_test_data,
-                                 Vec& v_train_vol_p, Vec& v_train_vol_n);
+    void cross_validation_simple(Mat& m_data_p, Mat& m_data_n,
+                 Vec& v_vol_p, Vec& v_vol_n,
+                 int current_iteration, int total_iterations,
+                 Mat& m_train_data_p, Mat& m_train_data_n, Mat& m_test_data,
+                 Vec& v_train_vol_p, Vec& v_train_vol_n);
 
 
     /*
@@ -127,23 +141,42 @@ public:
      */
 //    void write_output(char f_name[PETSC_MAX_PATH_LEN], Mat m_Out);    //write the output to file
     void write_output(std::string f_name, Mat m_Out, std::string desc="");    //write the output to file
-//    /*
-//     * release the local matrix and vector for input data
-//     */
-//    ~kfold(){
-//        MatDestroy(&m_in_data_);
-//        VecDestroy(&v_in_label_);
-//    }
-
 
     void prepare_data_for_iteration(int current_iteration,int total_iterations,
-                                    Mat& m_min_full_data,Mat& m_min_train_data,Mat& m_min_full_NN_indices,Mat& m_min_full_NN_dists,Mat& m_min_WA,Vec& v_min_vol,
-                                    Mat& m_maj_full_data,Mat& m_maj_train_data,Mat& m_maj_full_NN_indices,Mat& m_maj_full_NN_dists,Mat& m_maj_WA,Vec& v_maj_vol,
-                                    bool debug_status=false);
+            Mat& m_min_full_data,Mat& m_min_train_data,
+            Mat& m_min_full_NN_indices,Mat& m_min_full_NN_dists,
+            Mat& m_min_WA,Vec& v_min_vol, Mat& m_maj_full_data,
+            Mat& m_maj_train_data,Mat& m_maj_full_NN_indices,
+            Mat& m_maj_full_NN_dists,Mat& m_maj_WA,Vec& v_maj_vol,
+            bool debug_status=false);
+
+    /*
+     * Date : Aug 2018
+     * Purpose: work with separated test data
+     * Skip the cross validation
+     *
+     * Note:
+     * 1- The full_NN with large number of neighbors still needs to be filtered
+     *      apparently, if I pass the a empty set of test indices, all the
+     *      points are returned with first desired number of neighbors using
+     *      filter_NN function.
+     *
+     * 2- WA matrices should be created.
+     * 3- make sure the test file is exist
+     *
+     */
+
+    void prepare_data_using_separate_testdata(
+            Mat& m_min_full_data, Mat& m_min_full_NN_indices,
+            Mat& m_min_full_NN_dists, Mat& m_min_WA, Vec& v_min_vol,
+            Mat& m_maj_full_data, Mat& m_maj_full_NN_indices,
+            Mat& m_maj_full_NN_dists,Mat& m_maj_WA,Vec& v_maj_vol);
+
 
     Mat get_m_min_data(){ return m_min_data_ ;}
     Mat get_m_maj_data(){ return m_maj_data_ ;}
     void free_resources();
+
 
 };
 
