@@ -7,7 +7,7 @@ make mlsvm_save_knn
 make mlsvm_csv_petsc
 
 # This is required for FLANN installation path which are different on HPC
-out=`hostname | grep paliametto | wc -l` 
+out=`hostname | grep palmetto | wc -l` 
 if [ $out -eq 1 ] 
 then
   #echo "This is on the Palmetto Cluster"
