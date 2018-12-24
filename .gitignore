@@ -9,4 +9,5 @@ get_mat_info
 get_vec_info
 TAGS
 data_libsvm/*
-datasets/*
+src/datasets/*
+src/datasets/*.dat

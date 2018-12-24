@@ -1,6 +1,9 @@
 '''
 Created on Feb 3, 2016
+Version 2: Dec 16, 2018
+    only remove the last suffix after the right most dot
 Version 1: March 8, 2016
+    The script reads 2 parameters from command line which are path and filename
     The script reads 2 parameters from command line which are path and filename
     It calculates the Flann and save the result, in the same path with similar file names
     Drawback: convert from csr to ndarray and vise versa 
@@ -80,13 +83,12 @@ def run_flann(file_path, file_name, num_NN, dist_type):
     stop = timeit.default_timer()
     print("Convert the ndarray to sparse takes: %.1f seconds" % (stop - start))
 
-
+    last_suffix = file_name.rfind('.')
+    out_fname = file_name[:last_suffix] 
     # save the result
     try:
-        #no_suffix_name = file_name.split(".")[0]
         start = timeit.default_timer()
-        #result_outputfile = file_path+''+ no_suffix_name+'_indices.dat'
-        result_outputfile = file_path+''+ file_name.split('.')[0]+'_indices.dat'
+        result_outputfile = file_path+''+ out_fname+'_indices.dat'
         print('Outputing Data: '+result_outputfile)
         result_file = open(result_outputfile,'w')
         PetscBinaryIO.PetscBinaryIO().writeMatSciPy(result_file, m_result_sparse)
@@ -98,8 +100,7 @@ def run_flann(file_path, file_name, num_NN, dist_type):
 
     try:
         start = timeit.default_timer()
-        #dists_outputfile = file_path+''+ no_suffix_name+'_dists.dat'
-        dists_outputfile = file_path+''+ file_name.split('.')[0] +'_dists.dat'
+        dists_outputfile = file_path+''+ out_fname +'_dists.dat'
         print('Outputing Data: '+dists_outputfile)
         dists_file = open(dists_outputfile,'w')
         PetscBinaryIO.PetscBinaryIO().writeMatSciPy(dists_file, m_dists_sparse)
@@ -139,4 +140,4 @@ if __name__ == '__main__':
 
 
 
-#serial 3
+#serial 4

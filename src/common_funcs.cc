@@ -493,6 +493,10 @@ void CommonFuncs::addLabel2Data(Mat& m_data, Vec& v_label, Mat& m_label_data){
     }
     VecRestoreArray(v_label,&arr_lbl);
 
+        MatAssemblyBegin(m_data,MAT_FINAL_ASSEMBLY);
+        MatAssemblyEnd(m_data,MAT_FINAL_ASSEMBLY);
+
+
 #if dbl_KF_al2d > 7
     PetscViewer     viewer;
     PetscViewerBinaryOpen(PETSC_COMM_WORLD,"addLabel2Data.dat",

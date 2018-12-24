@@ -59,7 +59,7 @@ int main(int argc, char **argv){
         kf.divide_data(true);   //I need the data files, so I export them to files
         Mat m_min_data = kf.get_m_min_data();
         Mat m_maj_data = kf.get_m_maj_data();
-        t_kf.stop_timer("[Main] reading and deviding data in k-fold class");
+        t_kf.stop_timer("[Main] reading and dividing data in k-fold class");
 
         //                                  ----- minority class -----
         Mat m_min_indices, m_min_dists;
