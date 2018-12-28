@@ -46,13 +46,13 @@ export export PETSC_ARCH="arch-linux-pkgs-64idx"
 
 
 
-## - - - set the log file - - -
-#log_file=$log_path"/pipeline_"$fn"_s"$s"_class"$c"_"`/bin/date +%m%d%y_%H%M`".log"
-#echo "logfile:"
-#echo $log_file
-#date > $log_file
-#echo "seed:"$s >> $log_file
-#echo "class id:"$c >> $log_file
+# - - - set the log file - - -
+log_file=$log_path"/pipeline_"$fn"_s"$s"_class"$c"_"`/bin/date +%m%d%y_%H%M`".log"
+echo "logfile:"
+echo $log_file
+date > $log_file
+echo "seed:"$s >> $log_file
+echo "class id:"$c >> $log_file
 ##==============================================================================
 ## - - - shuffle the data - - -
 #get_seeded_random()
@@ -85,28 +85,30 @@ export export PETSC_ARCH="arch-linux-pkgs-64idx"
 #   -f "filt_mult_class_label_s"$s".csv" -l $c -s $s >> $log_file 2>&1
 #
 #./petsc_utility/getSubMatrix -i $dsp/"filt_data.dat" -s $trn -e $tes -p $dsp \
-#   -w $fn"_"s$trn"_e"$tes"_test_zsc_data.dat"
+#   -w $fn"_s"$trn"_e"$tes"_test_zsc_data.dat"
 #./petsc_utility/getSubVector -i $dsp"/mnist_label_s"$s"_c"$c".dat" \
 #  -s $trn -e $tes -p $dsp -w $fn"_"s$trn"_e"$tes"_test_label.dat"
 #
-#exit 1 
 #==============================================================================
 echo "*** merge test label and data to one file ***" >> $log_file
-./petsc_utility/mergeLabel2Data -p $dsp  \
-  -d $fn"_"s$trn"_e"$tes"_test_zsc_data.dat" \
-  -l $fn"_"s$trn"_e"$tes"_test_label.dat"   \
-  -w $fn"_"s$trn"_e"$tes"_label_data_test.dat"
+##./petsc_utility/mergeLabel2Data -p $dsp  \
+##  -d $fn"_"s$trn"_e"$tes"_test_zsc_data.dat" \
+##  -l $fn"_"s$trn"_e"$tes"_test_label.dat"   \
+##  -w $fn"_"s$trn"_e"$tes"_label_data_test.dat"
 
+python ./scripts/mergeLabelData.py -d $dsp  -f $fn"_s"$trn"_e"$tes >> $log_file 2>&1
+
+#exit 1
 #==============================================================================
 echo "*** get the train data ***" >> $log_file
 scale=$(($trn / 10))
 for i in `seq 1 1 10` 
 do  
   size=$((i*$scale)); echo $size
-  ./petsc_utility/getSubMatrix -i $dsp"/filt_data.dat" -s 0 -e $size -p $dsp \
-        ¦ -w $fn"_"$size"_train_zsc_data.dat" >> $log_file 2>&1
+  ./petsc_utility/getSubMatrix -i $dsp"/filt_s"$s"_data.dat" -s 0 -e $size -p $dsp \
+        ¦ -w $fn"_s"$s"_"$size"_train_zsc_data.dat" >> $log_file 2>&1
   ./petsc_utility/getSubVector -i $dsp/"mnist4m_c1_label.dat" -s 0 -e $size -p $dsp \
-        ¦ -w $fn"_"$size"_train_label.dat" >> $log_file 2>&1
+        ¦ -w $fn"_s"$s"_"$size"_train_label.dat" >> $log_file 2>&1
 done  
 #==============================================================================
 echo "*** get the knn ***" >> $log_file
@@ -114,37 +116,29 @@ scale=$(($trn / 10))
 for i in `seq 2 1 10`
 do
   size=$((i*$scale)); echo $size
-  input_params=" --ds_p "$dsp"  --tmp_p "$dsp"  -f"$fn"_"$size"_train"
+  input_params=" --ds_p "$dsp"  --tmp_p "$dsp"  -f"$fn"_s"$s"_"$size"_train"
   echo "input params:"$input_params  >> $log_file 2>&1
   ./mlsvm_save_knn $input_params >> $log_file 2>&1
 done
 #==============================================================================
 echo "*** get the mlsvm ***" >> $log_file
 scale=$(($4 / 10))
-for i in `seq 1 1 1` 
+for i in `seq 7 1 10` 
 do  
   size=$((i*$scale)); echo $size
-  input_params=" --ds_p "$2"  --tmp_p "$2"  -f $3"_"$size"_train  -s "$1
+  input_params=" --ds_p "$dsp"  --tmp_p "$dsp"  -f "$fn"_"$size"_train  -s "$s 
   echo "input params:"$input_params >> $log_file 2>&1
   (time ./mlsvmSepTestClassifier $input_params \
-	  --test_data $3"_"s$4_e$5 \
+	  --test_data $fn"_s"$trn"_e"$tes \
 	  -r 1 \
 	  --cs_we 0.001 \
 	  --mv_id 2 \
-	  -v $6 ) \
-	  >  $2"/results_"$3"$size"_s"$1"_"`/bin/date +%m%d%y_%H%M` 2>&1
+	  -v $v ) \
+	  >  $dsp"/results_"$fn"_"$size"_s"$s"_c"$c"_"`/bin/date +%m%d%y_%H%M` 2>&1
 
 done
 
 
 echo "*** Everything is finished successfully ***" >> $log_file
-
-pushd $TMPDIR/data/
-result_path="/home/esadrfa/es/results/v1.1.1/stp_"$3"/"
-mkdir -pv $result_path
-
-echo "*** Copy the final results to $result_path ***" >> $log_file
-for i in `ls | grep result`; do echo $i && cp $i $result_path ; done
-cp $log_file $result_path 
 
 date >> $log_file

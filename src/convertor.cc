@@ -65,7 +65,10 @@ PetscInt Convertor::get_num_columns(std::string in_file_name){
     return stoi(res);
 }
 
-void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_data, Vec& v_lbl, PetscInt num_row, PetscInt num_col){
+void Convertor::Libsvm_file_to_PETSc_format(std::string in_file_name, 
+                                            Mat& m_data, Vec& v_lbl, 
+                                            PetscInt num_row, 
+                                            PetscInt num_col){
     if(num_row == -1)
         num_row = get_num_rows(in_file_name + ".libsvm");
     if(num_col == -1)
