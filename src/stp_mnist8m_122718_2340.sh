@@ -57,6 +57,10 @@ echo "seed:"$s >> $log_file
 echo "class id:"$c >> $log_file
 echo "low id:"$lidx >> $log_file
 echo "high id:"$hidx >> $log_file
+free -mh  | grep Mem | awk -F" " '{print $1 $2}'  >> $log_file
+cat /proc/cpuinfo  | grep "model name" | head -1  >> $log_file
+printf "Cache Size:" >> $log_file
+cat /proc/cpuinfo  | grep "cache" | head -1  >> $log_file
 #==============================================================================
 # - - - shuffle the data - - -
 if [ ! -f $dsp/filt_s$s.libsvm ]; then
@@ -98,9 +102,12 @@ if [ ! -f $dsp"/mnist_label_s"$s"_c"$c".dat" ]; then
 fi
 
 if [ ! -f $dsp/$fn"_s"$trn"_e"$tes"_s"$s"_test_zsc_data.dat" ]; then
-  ./petsc_utility/getSubMatrix -i $dsp/"filt_data.dat" -s $trn -e $tes -p $dsp \
+  ./petsc_utility/getSubMatrix -i $dsp/"filt_s"$s"_data.dat" -s $trn -e $tes -p $dsp \
      -w $fn"_s"$trn"_e"$tes"_s"$s"_test_zsc_data.dat"
 fi
+
+ln -sv $dsp/$fn"_s"$trn"_e"$tes"_s"$s"_test_zsc_data.dat" \
+      $dsp/$fn"_s"$trn"_e"$tes"_s"$s"_c"$c"_test_zsc_data.dat"
 
 if [ ! -f $dsp/$fn"_s"$trn"_e"$tes"_s"$s"_test_label.dat" ]; then
   ./petsc_utility/getSubVector -i $dsp"/mnist_label_s"$s"_c"$c".dat" \
@@ -116,10 +123,15 @@ scale=$(($trn / 10))
 for i in `seq $lidx 1 $hidx` 
 do  
   size=$((i*$scale)); echo $size
-  ./petsc_utility/getSubMatrix -i $dsp"/filt_s"$s"_data.dat" -s 0 -e $size -p $dsp \
-        ¦ -w $fn"_s"$s"_"$size"_s"$s"_c"$c"_train_zsc_data.dat" >> $log_file 2>&1
-  ./petsc_utility/getSubVector -i $dsp"/mnist_label_s"$s"_c"$c".dat" -s 0 -e $size -p $dsp \
-        ¦ -w $fn"_s"$s"_"$size"_s"$s"_c"$c"_train_label.dat" >> $log_file 2>&1
+  if [ ! -f $dsp/$fn"_s"$s"_"$size"_s"$s"_c"$c"_train_zsc_data.dat" ]; then
+    ./petsc_utility/getSubMatrix -i $dsp"/filt_s"$s"_data.dat" -s 0 -e $size -p $dsp \
+        ¦ -w $fn"_"$size"_s"$s"_c"$c"_train_zsc_data.dat" >> $log_file 2>&1
+  fi  
+  
+  if [ ! -f $dsp/$fn"_s"$s"_"$size"_s"$s"_c"$c"_train_label.dat" ]; then
+    ./petsc_utility/getSubVector -i $dsp"/mnist_label_s"$s"_c"$c".dat" -s 0 -e $size -p $dsp \
+        ¦ -w $fn"_"$size"_s"$s"_c"$c"_train_label.dat" >> $log_file 2>&1
+  fi  
 done  
 #==============================================================================
 echo "*** get the knn ***" >> $log_file
@@ -127,9 +139,11 @@ scale=$(($trn / 10))
 for i in `seq $lidx 1 $hidx`
 do
   size=$((i*$scale)); echo $size
-  input_params=" --ds_p "$dsp"  --tmp_p "$dsp"  -f"$fn"_s"$s"_"$size"_s"$s"_c"$c"_train"
-  echo "input params:"$input_params  >> $log_file 2>&1
-  ./mlsvm_save_knn $input_params >> $log_file 2>&1
+  if [ ! -f $dsp/$fn"_s"$s"_"$size"_s"$s"_c"$c"_train_min_norm_data_dists.dat" ]; then
+    input_params=" --ds_p "$dsp"  --tmp_p "$dsp"  -f "$fn"_"$size"_s"$s"_c"$c"_train"
+    echo "input params:"$input_params  >> $log_file 2>&1
+    ./mlsvm_save_knn $input_params >> $log_file 2>&1
+  fi  
 done
 #==============================================================================
 echo "*** get the mlsvm ***" >> $log_file
