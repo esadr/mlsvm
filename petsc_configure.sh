@@ -1,6 +1,6 @@
 export PETSC_DIR=$PWD
 ./configure PETSC_ARCH=linux-no-debug \
---prefix=~/opt/petsc/ 
+--prefix=~/opt/petsc/ \
 --with-cc=gcc \
 --with-cxx=g++ \
 --with-clanguage=c++ \
