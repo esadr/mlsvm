@@ -361,6 +361,7 @@ void Partitioning::calc_single_center(Mat& m_neigh_Data, Vec& v_vol, Mat& m_cent
  */
 void Partitioning::calc_center(Mat& m_neigh_Data, Vec& v_neigh_vol, std::vector<std::vector<PetscInt>>& vv_parts, Mat& m_parts,
                                                                 Mat& m_centers, std::vector<PetscScalar>& v_sum_vol_parts){
+    ETimer t_calc_center;
     //---- create diagonal matrix from volumes #1 -----
     PetscInt num_point, num_features;
     MatGetSize(m_neigh_Data, &num_point, &num_features);
@@ -437,6 +438,7 @@ void Partitioning::calc_center(Mat& m_neigh_Data, Vec& v_neigh_vol, std::vector<
     std::cout  << "[PR][calc_center] m_centers matrix:\n";                       //$$debug
     MatView(m_centers,PETSC_VIEWER_STDOUT_WORLD);
 #endif
+    t_calc_center.stop_timer("[PR] calc_center");
 }
 
 
@@ -452,7 +454,10 @@ void Partitioning::calc_center(Mat& m_neigh_Data, Vec& v_neigh_vol, std::vector<
  *     N| N-> P     N   |
  *       - - - - - - - -
  */
-void Partitioning::calc_distances(int num_part_p, int num_part_n, Mat& m_centers_p,Mat& m_centers_n, Mat& m_dist){
+void Partitioning::calc_distances(int num_part_p, int num_part_n,
+                                  Mat& m_centers_p, Mat& m_centers_n,
+                                  Mat& m_dist){
+    ETimer t_calc_dist;
     //#performance #bottleneck (the matrix is column major order) @080417-2343
     MatCreateSeqDense(PETSC_COMM_SELF,num_part_p+num_part_n,num_part_p+num_part_n,NULL, &m_dist);
     PetscInt            i, j, ncols_p, ncols_n;
@@ -507,6 +512,7 @@ void Partitioning::calc_distances(int num_part_p, int num_part_n, Mat& m_centers
     std::cout  << "[PR][calc_distances] m_dist matrix:\n";                       //$$debug
     MatView(m_dist,PETSC_VIEWER_STDOUT_WORLD);
 #endif
+    t_calc_dist.stop_timer("[PR] calc_distances");
 }
 
 
@@ -519,17 +525,22 @@ void Partitioning::calc_distances(int num_part_p, int num_part_n, Mat& m_centers
  *      distances matrix
  * @output:
  *      vector index represents nothing
- *      the first represent the index of P class partition and the second represent the index of N class partition
+ *      the first represent the index of P class partition and the second
+ *          represent the index of N class partition.
  */
-void Partitioning::find_groups(int num_part_p, int num_part_n, Mat& m_dist, std::vector<std::pair<int, int> >& v_groups){
+void Partitioning::find_groups(int num_part_p, int num_part_n, Mat& m_dist,
+                               std::vector<std::pair<int, int> >& v_groups){
 
     // edge case: number of partition for any class is 1
     if(num_part_p == 1){
         if(num_part_n == 1){
             v_groups.push_back(std::pair<int, double>(0,0));
 //            std::cout<< "[PR][FG] v_groups size:" << v_groups.size() << std::endl;
+
         }else{      //multiple N class partitions
-            for(int i=0; i < num_part_n; i++){      //add all the N class partitions with the only one P class partition
+
+            //add all the N class partitions with the only one P class partition
+            for(int i=0; i < num_part_n; i++){
                 v_groups.push_back(std::pair<int, double>(0,i));
             }
             std::cout<< "[PR][FG] v_groups size:" << v_groups.size() << std::endl;

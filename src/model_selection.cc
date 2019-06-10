@@ -935,12 +935,14 @@ void ModelSelection::uniform_design_index_base(Mat& p_data, Vec& v_vol_p, Mat& n
  * sum_all_vol_p, sum_all_vol_n is used to set the instance weights for each point in training
  * classifier_id: the loop counter for the groups of training data
  */
-void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n,
-                        bool inh_params, double last_c, double last_gamma,int level,
-                        std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
-                        std::unordered_set<PetscInt>& uset_SV_index_p, std::unordered_set<PetscInt>& uset_SV_index_n,
-                        Mat& m_VD_p, Mat& m_VD_n, Mat& m_VD_both, Mat& m_all_predict_VD, Mat& m_testdata,
-                        int classifier_id, Mat& m_all_predict_TD){
+void ModelSelection::uniform_design_index_base_separate_validation(
+        Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n, bool inh_params,
+        double last_c, double last_gamma,int level,
+        std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
+        std::unordered_set<PetscInt>& uset_SV_index_p,
+        std::unordered_set<PetscInt>& uset_SV_index_n,
+        Mat& m_VD_p, Mat& m_VD_n, Mat& m_VD_both, Mat& m_all_predict_VD,
+        Mat& m_testdata, int classifier_id, Mat& m_all_predict_TD){
 
     ETimer t_sv_ps;
     srand(std::stoll(paramsInst->get_cpp_srand_seed()));
@@ -989,19 +991,31 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
     // - - - - 2nd stage - - - -
     stage = 2 ;
     std::vector<ud_point> ud_params_st_2;
-    ud_params_st_2 = ud_param_generator(2,true, ud_params_st_1[best_1st_stage].C , ud_params_st_1[best_1st_stage].G);
+    ud_params_st_2 = ud_param_generator(2,true,
+                                        ud_params_st_1[best_1st_stage].C ,
+                                        ud_params_st_1[best_1st_stage].G);
 
     for(unsigned int i =0; i < num_iter_st2; i++){
         //skip the center of second stage(duplicate)
-        if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C && ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)
+        if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C &&
+                ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)
             continue;
 
         Solver sv;
         svm_model * curr_svm_model;
-        curr_svm_model = sv.train_model_index_base(p_data, v_vol_p, n_data, v_vol_n, v_p_index, v_n_index,
-                                        iter_train_p_end, iter_train_n_end,true, ud_params_st_2[i].C, ud_params_st_2[i].G);
-//        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index, iter_train_p_end, iter_train_n_end, current_summary,solver_id);
-        sv.predict_validation_data(m_VD_p, m_VD_n, current_summary, solver_id);     // The normal predict method for full matrix is useful rather than index base methods
+        curr_svm_model = sv.train_model_index_base(p_data, v_vol_p, n_data,
+                                                   v_vol_n, v_p_index,
+                                                   v_n_index,iter_train_p_end,
+                                                   iter_train_n_end,true,
+                                                   ud_params_st_2[i].C,
+                                                   ud_params_st_2[i].G);
+
+//        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index,
+//        iter_train_p_end, iter_train_n_end, current_summary,solver_id);
+        // The normal predict method for full matrix is useful rather than
+        // index base methods
+        sv.predict_validation_data(m_VD_p, m_VD_n, current_summary,
+                                   solver_id);
         v_solver.push_back(sv);
         v_summary.push_back(current_summary);
         ++solver_id;
@@ -1013,7 +1027,8 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
     // - - - - - - - - prepare the solution for refinement - - - - - - - - -
     Solver best_sv = v_solver[best_of_all];
     svm_model * best_model = best_sv.get_model() ;
-    if(level > 1 ){     // at the finest level, we need to save the model (SV, C, gamma) for unseen points
+    // at the finest level, we need to save the model (SV, C, gamma) for unseen points
+    if(level > 1 ){
         // ----- create the index of SVs in data points for each class seperately ----
         PetscInt i;
         for (i=0; i < best_model->nSV[0];i++){
@@ -1031,10 +1046,7 @@ void ModelSelection::uniform_design_index_base_separate_validation(Mat& p_data, 
     }
 
 
-    //@@ calculating the validation data for all the partition groups are missed, I need to save the results for picking the best level //#TODO 021317-1750
-//    best_sv.predict_VD_in_output_matrix(m_VD_p, m_VD_n, classifier_id, m_all_predict_VD);  //added 021517-1328
     best_sv.predict_test_data_in_matrix_output(m_VD_both, classifier_id, m_all_predict_VD);  //added 021517-1456
-
     best_sv.predict_test_data_in_matrix_output(m_testdata, classifier_id, m_all_predict_TD);
 
 #if export_SVM_models == 1       //export the model (we save a model at a time)

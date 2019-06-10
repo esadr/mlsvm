@@ -243,31 +243,40 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
                 pt.create_group_index(i, v_groups, m_parts_p, m_parts_n, v_p_index, v_n_index);
                 // - - - - - - Train & predict Model - - - - - - -
                 //Without model selection
-//                Solver sv_part;
-//                sv_part.partial_solver(m_new_neigh_p, v_neigh_Vol_p, m_new_neigh_n, v_neigh_Vol_n, sol_coarser.C, sol_coarser.gamma, level,
-//                                    v_p_index,v_n_index, uset_SV_index_p, uset_SV_index_n, m_VD_p, m_VD_n,m_VD_both, v_mat_all_predict_validation[iter],
-//                                    m_TD, i, v_mat_all_predict_TD[iter]);
+                /*
+                Solver sv_part;
+                sv_part.partial_solver(m_new_neigh_p, v_neigh_Vol_p,
+                           m_new_neigh_n, v_neigh_Vol_n,
+                           sol_coarser.C, sol_coarser.gamma, level,
+                           v_p_index,v_n_index, uset_SV_index_p,
+                           uset_SV_index_n, m_VD_p, m_VD_n,m_VD_both,
+                           v_mat_all_predict_validation[iter],
+                           m_TD, i, v_mat_all_predict_TD[iter]);
+                */
 
                 //with model selection
                 ModelSelection ms_partition;
-                ms_partition.uniform_design_index_base_separate_validation(m_new_neigh_p, v_neigh_Vol_p, m_new_neigh_n, v_neigh_Vol_n,
-                                true, sol_coarser.C, sol_coarser.gamma, level, v_p_index, v_n_index, uset_SV_index_p, uset_SV_index_n,
-                                m_VD_p, m_VD_n, m_VD_both, v_mat_all_predict_validation[iter], m_TD, i, v_mat_all_predict_TD[iter]);
-
-
-
+                ms_partition.uniform_design_index_base_separate_validation(
+                            m_new_neigh_p, v_neigh_Vol_p, m_new_neigh_n,
+                            v_neigh_Vol_n, true, sol_coarser.C, sol_coarser.gamma,
+                            level, v_p_index, v_n_index, uset_SV_index_p,
+                            uset_SV_index_n, m_VD_p, m_VD_n, m_VD_both,
+                            v_mat_all_predict_validation[iter], m_TD, i,
+                            v_mat_all_predict_TD[iter]);
             }
 
-            paramsInst->update_levels_models_info(level, v_groups.size());        // @072617
+            paramsInst->update_levels_models_info(level, v_groups.size());
             t_all_parts_training.stop_timer("[RF][main] training for all partitions");
 
-            /// - - - - - - - calculate the quality of the models on Validation Data (boosting, majority voting,...) - - - - - - -
+            /// calculate the quality of the models on Validation Data
+            ///     (boosting, majority voting,...)
             MatAssemblyBegin(v_mat_all_predict_validation[iter], MAT_FINAL_ASSEMBLY);
             MatAssemblyEnd(v_mat_all_predict_validation[iter], MAT_FINAL_ASSEMBLY);
 
-
-            /// - - - - - - - report the final evaluation on Test Data (boosting, majority voting,...) - - - - - - -
-            // I need to skip predicting for the lower levels for preformance // TODO, #Performance
+            /// calculate the quality of the models on Test Data
+            ///     (boosting, majority voting,...)
+            // I need to skip predicting for the lower levels for performance
+            // TODO, #Performance
             MatAssemblyBegin(v_mat_all_predict_TD[iter], MAT_FINAL_ASSEMBLY);
             MatAssemblyEnd(v_mat_all_predict_TD[iter], MAT_FINAL_ASSEMBLY);
 
@@ -276,12 +285,16 @@ solution Refinement::main(Mat& m_data_p, Mat& m_P_p, Vec& v_vol_p, Mat&m_WA_p
 
 
         summary curr_level_validation_summary;
-        pt.calc_performance_measure(m_VD_both, v_mat_avg_centers, v_mat_all_predict_validation,curr_level_validation_summary);
+        pt.calc_performance_measure(m_VD_both, v_mat_avg_centers,
+                                    v_mat_all_predict_validation,
+                                    curr_level_validation_summary);
 
-        // - - - - - - calculate and report the performance quality of all the trained model on the test data at the current level - - - - -
+        // - - calculate and report the performance quality of all the trained model  - -
+        //      on the test data at the current level
         pt.calc_performance_measure(m_TD, v_mat_avg_centers, v_mat_all_predict_TD,summary_TD);
 
-        // - - - - - - Add validation information for this level to the vector of whole results for all levels on validation data - - - - -
+        // - - Add validation information for this level to the vector of whole  - -
+        //         results for all levels on validation data
         ref_results current_level_refinement_results;
         current_level_refinement_results.validation_data_summary = curr_level_validation_summary;
         current_level_refinement_results.test_data_summary = summary_TD;
