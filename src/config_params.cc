@@ -155,7 +155,7 @@ void Config_params::print_zscore_params(){
 void Config_params::read_params(std::string XML_FILE_PATH,
                                 int argc, char * argv[], program_parts caller_func){
 
-    PetscBool       flg; //@ 040417-2130
+    PetscBool       flg;
     PetscInt        temp;
 //    PetscOptionsGetInt(NULL,NULL,"-help",&temp,&flg);			//newer versions of  PETSc
 //    if (!flg){

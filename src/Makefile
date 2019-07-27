@@ -12,8 +12,8 @@ LIBFLANN= /usr/local/lib/libflann_cpp_s.a
 MLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlsvm_classifier.cc
 MLSVM_OBJS = $(MLSVM_SRCS:.cc=.o)
 
-MlsvmSepTest_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlsvmClassifierSepTest.cc
-MlsvmSepTest_OBJS = $(MlsvmSepTest_SRCS:.cc=.o)
+MLSVM_SEP_TEST_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlsvm_sep_test_classifier.cc
+MLSVM_SEP_TEST_OBJS = $(MLSVM_SEP_TEST_SRCS:.cc=.o)
 
 MlsvmNoTest_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlsvmClassifierNoTest.cc
 MlsvmNoTest_OBJS = $(MlsvmNoTest_SRCS:.cc=.o)
@@ -85,9 +85,9 @@ mlsvm_classifier: $(MLSVM_OBJS) chkopts
 	-${CLINKER} $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_classifier
 	${RM} mlsvm_classifier.o 
 	
-mlsvm_sep_test_classifier: $(MlsvmSepTest_OBJS) chkopts
-	-${CLINKER} $(MlsvmSepTest_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_sep_test_classifier
-	${RM} relsvmSepTestClassifier.o 
+mlsvm_sep_test_classifier: $(MLSVM_SEP_TEST_OBJS) chkopts
+	-${CLINKER} $(MLSVM_SEP_TEST_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_sep_test_classifier
+	${RM} mlsvm_sep_test_classifier.o 
 
 mlsvmNoTestClassifier: $(MlsvmNoTest_OBJS) chkopts
 	-${CLINKER} $(MlsvmNoTest_OBJS)  ${PETSC_MAT_LIB} -o mlsvmNoTestClassifier
