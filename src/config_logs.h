@@ -25,12 +25,14 @@
 #define dbl_KF_CVC                  0           // Default 0
 #define dbl_KF_CVS                  0           // Default 0
 #define dbl_KF_FN                   0           // Default 0
+#define dbl_KF_EK                   0           // Default 0
 #define dbl_KF_CTD                  0           // Default 0
 #define dbl_KF_CTC                  0           // Default 1 [combine_two_classes_in_one]   //release 0
 #define dbl_KF_PDFI                 0           // Default 1 [prepare_data_for_iteration]   //release 0
 #define dbl_KF_WOUT                 0           // Default 1 [write_output]                 //release 0
 #define dbl_KF_rdd                  0           // Default 0 [read divided data]
 #define dbl_KF_rfn                  0           // Default 0 [read full NN]
+#define dbl_KF_al2d                 0           // Default 0 [addLabel2Data]
 //---- Loader ----
 #define dbl_LD_LWAB                 0
 #define dbl_LD_LFB                  0           // 0 Default, load flann binary
@@ -83,7 +85,6 @@
 #define dbl_MS_SB1                  0           // 0 Default, 3 prints after sort, 5 prints prints before and after sort
 #define dbl_MS_set_weights          0           // 0 Default, 1 shows the weight in the WSVM
 #define dbl_MS_UDC                  1           // 1 Default
-
 //---- Solver ----
 #define dbl_SV_free_solver          0           // 0 Default, 1 prints which class called the free method
 #define dbl_SV_malloc_weights       0           // 0 Default, 1 prints the labels for classes
@@ -110,16 +111,11 @@
 #define rpt_TD_only_l1              0           // report the Test data only at the finest level (to collect result for papers)
 //----- Unit Test ------
 #define ut_test_only                0           // 0 Default(unit test are disabled), 1 only do the unit test and exit with 1
-
-
-
+#define dbl_export_coarsning        0           // 072419-1450 added to export 1 level of coarsening in MR
+#define dbl_export_MS_UD            0           // 072719-0100 added to export training data matrices
 #define dbl_SV_PDTPIB               0           // 0 Default    1 prints the details
 #define export_SVM_models           1           // 0 Default    1 Save the SVM models in svm_models folder
 #define save_test_files             0           // 0 Default removes the test file, 	1 keeps them
 #define dbl_exp_train_data          0           // 0 Default, 1 only export the data for comparison with other solvers
 #define timer_complexity_analysis   0           // 0 Default, 1 only for reporting the detail of time for coarsening and refinement
 #endif // CONFIG_LOGS_H
-
-
-
-

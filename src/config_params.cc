@@ -79,11 +79,11 @@ void Config_params::print_classification_training_params(){
                  "\ndegree: "           << degree                   <<
                  "\ngamma: "            << get_svm_gamma()          <<
                  "\ncoef0: "            << coef0                    <<
-                 "\nnu: "               << nu                       <<
-                 "\ncache_size: "       << cache_size               <<
+                 "\nnu: "               << get_svm_nu()             <<
+                 "\ncache_size: "       << get_svm_cache_size()     <<
                  "\nC: "                << get_svm_C()              <<
                  "\neps: "              << get_svm_eps()            <<
-                 "\np: "                << p                        <<
+//                 "\np: "                << p                        <<
                  "\nshrinking: "        << get_svm_shrinking()      <<
                  "\nprobability: "      << get_svm_probability()    <<
                  endl;
@@ -111,6 +111,15 @@ void Config_params::print_classification_prediction_params(){
                  "\nexperiment_id: "        << get_experiment_id()     <<
                  "\nds_name: "              << get_kfold_id()          <<
                  "\npr_maj_voting_id: "     << get_pr_maj_voting_id()  << endl;
+}
+
+void Config_params::print_svm_prediction_params(){
+    std::cout << "mlsvm_version:"           << mlsvm_version              <<
+                 "\ntest_data_path: "          << get_ds_path()           <<
+                 "\ntest_data_filename: "      << get_test_name()         <<
+                 "\nmodel_path: "              << get_model_path()        <<
+                 "\nmodel_filename: "          << get_model_f_name()      <<
+                 "\nsvm_probability: "         << get_svm_probability()   << std::endl;
 }
 
 void Config_params::print_convert_files_params(){
@@ -225,6 +234,11 @@ void Config_params::read_params(std::string XML_FILE_PATH,
         print_classification_prediction_params();
         break;
 
+    case svm_prediction:
+        read_svm_predict_params(root, argc, argv);
+        print_svm_prediction_params();
+        break;
+
     case convert_files:
         read_convert_files_parameters(root, argc, argv);//@080517-1120
         print_convert_files_params();
@@ -261,6 +275,7 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     ds_path             = root.child("ds_path").attribute("stringVal").value();
     ds_name             = root.child("ds_name").attribute("stringVal").value();
     tmp_path            = root.child("tmp_path").attribute("stringVal").value();
+    model_path          = root.child("model_path").attribute("stringVal").value();
     pre_init_loader_matrix = root.child("pre_init_loader_matrix").attribute("intVal").as_int();
     inverse_weight      = root.child("inverse_weight").attribute("boolVal").as_bool();
     ld_weight_type      = root.child("ld_weight_type").attribute("intVal").as_int();
@@ -294,7 +309,7 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     cache_size  = root.child("svm_cache_size").attribute("doubleVal").as_double();
     C           = root.child("svm_C").attribute("doubleVal").as_double();
     eps         = root.child("svm_eps").attribute("doubleVal").as_double();
-    p           = root.child("svm_p").attribute("doubleVal").as_double();
+//    p           = root.child("svm_p").attribute("doubleVal").as_double();
     shrinking   = root.child("svm_shrinking").attribute("intVal").as_int();
     probability = root.child("svm_probability").attribute("intVal").as_int();
     nr_weight   = root.child("svm_nr_weight").attribute("intVal").as_int();
@@ -319,6 +334,7 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     parser_.add_option("-f", "--ds_f", "--file")             .dest("ds_name")  .set_default(ds_name);
     parser_.add_option("--test_data")                        .dest("test_data_name")  .set_default(test_data_name);
     parser_.add_option("--tmp_p")                            .dest("tmp_path")  .set_default(tmp_path);
+    parser_.add_option("--model_p")                          .dest("model_path")  .set_default(model_path);
     parser_.add_option("--cs_pi")                            .dest("pre_init_loader_matrix")  .set_default(pre_init_loader_matrix);
 //    parser_.add_option("--iw", "--inverse_weight")           .dest("inverse_weight")  .set_default(inverse_weight);
     parser_.add_option("--cs_eta")                           .dest("coarse_Eta")  .set_default(coarse_Eta);
@@ -338,13 +354,19 @@ void Config_params::read_classification_training_parameters(pugi::xml_node& root
     parser_.add_option("--ms_bs")                            .dest("ms_best_selection")  .set_default(ms_best_selection);
     parser_.add_option("-v")                                 .dest("ms_VD_sample_size_fraction")  .set_default(ms_VD_sample_size_fraction);
     parser_.add_option("-p", "--ms_prt")                     .dest("ms_print_untouch_reuslts")  .set_default(ms_print_untouch_reuslts);
-    parser_.add_option("--ms_k")                             .dest("kernel_type")  .set_default(kernel_type);
-    parser_.add_option("-g", "--ms_g")                       .dest("gamma")  .set_default(gamma);
-    parser_.add_option("-c", "--ms_c")                       .dest("C")  .set_default(C);
-    parser_.add_option("-e", "--ms_eps")                     .dest("eps")  .set_default(eps);
-    parser_.add_option("--ms_shrinking")                     .dest("shrinking")  .set_default(shrinking);
-    parser_.add_option("--ms_probability")                   .dest("probability")  .set_default(probability);
+    // - - - - SVM - - -
+    parser_.add_option("-g", "--svm_g")                       .dest("gamma")  .set_default(gamma);
+    parser_.add_option("-c", "--svm_c")                       .dest("C")  .set_default(C);
+    parser_.add_option("-e", "--svm_eps")                     .dest("eps")  .set_default(eps);
+    parser_.add_option("--svm_shrinking")                     .dest("shrinking")  .set_default(shrinking);
+    parser_.add_option("--svm_probability")                   .dest("probability")  .set_default(probability);
+    parser_.add_option("--svm_s")                            .dest("svm_type")  .set_default(svm_type);
+    parser_.add_option("--svm_t")                            .dest("kernel_type")  .set_default(kernel_type);
+    parser_.add_option("--svm_d")                            .dest("degree")  .set_default(degree);
+    parser_.add_option("--svm_n")                            .dest("nu")  .set_default(nu);
+    parser_.add_option("--svm_m")                            .dest("cache_size")  .set_default(cache_size);
     parser_.add_option("-z", "--rf_f")                       .dest("rf_add_fraction")  .set_default(rf_add_fraction);
+    // - - - - Refinement - - -
     parser_.add_option("--rf_2nd")                           .dest("rf_add_distant_point_status")     .set_default(rf_add_distant_point_status);
     parser_.add_option("--rf_weight_vol")                    .dest("rf_weight_vol")  .set_default(rf_weight_vol);
     parser_.add_option("--pr_start")                         .dest("pr_start_partitioning")  .set_default(pr_start_partitioning);
@@ -380,6 +402,8 @@ void Config_params::read_classification_prediction_parameters(pugi::xml_node& ro
     /// read the parameters from input arguments ()
     parser_.add_option("--ds_p")                       .dest("ds_path")             .set_default(ds_path);
     parser_.add_option("-f", "--ds_f", "--file")       .dest("ds_name")             .set_default(ds_name);
+    parser_.add_option("--test_data")                  .dest("test_data_name")      .set_default(test_data_name);
+    parser_.add_option("--model_p")                    .dest("model_path")          .set_default(model_path);
     parser_.add_option("--tmp_p")                      .dest("tmp_path")            .set_default(tmp_path);
     parser_.add_option("--mv_id")                      .dest("pr_maj_voting_id")    .set_default(pr_maj_voting_id);
     parser_.add_option("-x")                           .dest("experiment_id")       .set_default(experiment_id);
@@ -398,6 +422,26 @@ void Config_params::read_classification_prediction_parameters(pugi::xml_node& ro
     cout << "[CP] input prediction parameters are read" << endl;
 }
 
+void Config_params::read_svm_predict_params(pugi::xml_node& root,int argc, char * argv[]){
+    mlsvm_version = root.child("mlsvm_version").attribute("stringVal").value();
+    /// read the parameters from the XML file (params.xml)
+    ds_path             = root.child("ds_path").attribute("stringVal").value();
+    ms_print_untouch_reuslts    = root.child("ms_print_untouch_reuslts").attribute("intVal").as_int();
+    //the solver constructor has this
+    probability         = root.child("svm_probability").attribute("intVal").as_int();
+    experiment_id = 0;
+    kfold_id = 0;
+    /// read the parameters from input arguments ()
+    parser_.add_option("--ds_p")                       .dest("ds_path")             .set_default(ds_path);
+    parser_.add_option("--test_data")                  .dest("test_data_name")      .set_default(test_data_name);
+    parser_.add_option("--model_p")                    .dest("model_path")          .set_default(model_path);
+    parser_.add_option("-f")                           .dest("model_f_name")        .set_default("NA");
+    parser_.add_option("--ms_probability")             .dest("probability")  .set_default(probability);
+    this->options_ = parser_.parse_args(argc, argv);
+    std::vector<std::string> args = parser_.args();
+    assert(get_model_f_name() != "NA" && "model name should be passed by -f parameter!");
+    std::cout << "[CP] input svm predict parameters are read" << std::endl;
+}
 
 void Config_params::read_convert_files_parameters(pugi::xml_node& root,int argc, char * argv[]){
 
@@ -567,8 +611,9 @@ void Config_params::set_fixed_file_names(){
 
     p_norm_data_f_name  = get_ds_path() + get_ds_name() + "_min_norm_data.dat";
     n_norm_data_f_name  = get_ds_path() + get_ds_name() + "_maj_norm_data.dat";
-
-    test_ds_f_name      = get_ds_path() + get_test_name() + "_label_data_test.dat";
+    if (getTestdataExist()){
+        test_ds_f_name      = get_ds_path() + get_test_name() + "_label_data_test.dat";
+    }
 }
 
 std::string Config_params::get_tmp_path() const {
@@ -584,6 +629,16 @@ std::string Config_params::get_tmp_path() const {
         return tmp_str + "/";
 }
 
+std::string Config_params::get_model_path() const {
+    std::string model_str (options_["model_path"]);
+    std::string key ("/");
+
+    std::size_t found = model_str.rfind(key);
+    if (found == model_str.size() - 1)
+        return model_str;
+    else
+        return model_str + "/";
+}
 
 void Config_params::debug_only_set_p_norm_data_path_file_name(
                                 std::string const path_file_name){
@@ -730,55 +785,60 @@ void Config_params::reportFinalModelInVCycle() const{
 
 
 void Config_params::print_final_results() const{
-    printf("           >   >   >   >   >   >         Final Results         <   <   <   <   <   < \n");
-    double sum_acc=0;
-    double sum_gmean=0;
-    double sum_sens=0;
-    double sum_spec=0;
-    double sum_ppv=0;
-    double sum_npv=0;
-    double sum_f1=0;
+    if (getTestdataExist()){
+        printf("           >   >   >   >   >   >         Final Results         <   <   <   <   <   < \n");
+        double sum_acc=0;
+        double sum_gmean=0;
+        double sum_sens=0;
+        double sum_spec=0;
+        double sum_ppv=0;
+        double sum_npv=0;
+        double sum_f1=0;
 
-    for(unsigned int i=0; i< this->all_summary.size(); i++){
-        printf("[CP][PFR],it:%d, BestL:%d, AC:%.2f, SN:%.2f, "\
-               "SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f",
-               i, this->all_summary[i].selected_level,
-               this->all_summary[i].perf.at(Acc),
-               this->all_summary[i].perf.at(Sens),
-               this->all_summary[i].perf.at(Spec),
-               this->all_summary[i].perf.at(PPV),
-               this->all_summary[i].perf.at(NPV),
-               this->all_summary[i].perf.at(F1),
-               this->all_summary[i].perf.at(Gmean));
-    #if verbose
-        if(this->all_summary[i].C && this->all_summary[i].gamma)
-            printf(", C:%.2f, G:%.4f",this->all_summary[i].C, this->all_summary[i].gamma);
-    #endif
-        printf("\n");
+        for(unsigned int i=0; i< this->all_summary.size(); i++){
+            printf("[CP][PFR],it:%d, BestL:%d, AC:%.2f, SN:%.2f, "\
+                   "SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f",
+                   i, this->all_summary[i].selected_level,
+                   this->all_summary[i].perf.at(Acc),
+                   this->all_summary[i].perf.at(Sens),
+                   this->all_summary[i].perf.at(Spec),
+                   this->all_summary[i].perf.at(PPV),
+                   this->all_summary[i].perf.at(NPV),
+                   this->all_summary[i].perf.at(F1),
+                   this->all_summary[i].perf.at(Gmean));
+        #if verbose
+            if(this->all_summary[i].C && this->all_summary[i].gamma)
+                printf(", C:%.2f, G:%.4f",this->all_summary[i].C, this->all_summary[i].gamma);
+        #endif
+            printf("\n");
 
-        sum_acc += this->all_summary[i].perf.at(Acc);
-        sum_sens += this->all_summary[i].perf.at(Sens);
-        sum_spec += this->all_summary[i].perf.at(Spec);
-        sum_ppv += this->all_summary[i].perf.at(PPV);
-        sum_npv += this->all_summary[i].perf.at(NPV);
-        sum_f1 += this->all_summary[i].perf.at(F1);
-        sum_gmean += this->all_summary[i].perf.at(Gmean);
+            sum_acc += this->all_summary[i].perf.at(Acc);
+            sum_sens += this->all_summary[i].perf.at(Sens);
+            sum_spec += this->all_summary[i].perf.at(Spec);
+            sum_ppv += this->all_summary[i].perf.at(PPV);
+            sum_npv += this->all_summary[i].perf.at(NPV);
+            sum_f1 += this->all_summary[i].perf.at(F1);
+            sum_gmean += this->all_summary[i].perf.at(Gmean);
 
+        }
+        double avg_acc = sum_acc / this->all_summary.size();
+        double avg_sens = sum_sens / this->all_summary.size();
+        double avg_spec = sum_spec / this->all_summary.size();
+        double avg_ppv = sum_ppv / this->all_summary.size();
+        double avg_npv = sum_npv / this->all_summary.size();
+        double avg_f1 = sum_f1 / this->all_summary.size();
+        double avg_gmean = sum_gmean / this->all_summary.size();
+    //    printf("           -------------------- Average Results --------------------\n");
+        printf("\n           *  *  *  *  *  * *  *  *  *  * *  *  *  *  * *  *  *  *  *  *  *  *  *  *\n");
+        printf("           *                            Average Results                            *\n");
+        printf("           *                                                                       *\n");
+        printf("           *   Acc:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f    *\n",
+                               avg_acc, avg_sens, avg_spec, avg_ppv, avg_npv, avg_f1, avg_gmean);
+        printf("           *  *  *  *  *  * *  *  *  *  * *  *  *  *  * *  *  *  *  *  *  *  *  *  *\n");
+    }else{
+        cout << "Warning: The test data was not provided" <<
+                " final report is not availabel!" << endl;
     }
-    double avg_acc = sum_acc / this->all_summary.size();
-    double avg_sens = sum_sens / this->all_summary.size();
-    double avg_spec = sum_spec / this->all_summary.size();
-    double avg_ppv = sum_ppv / this->all_summary.size();
-    double avg_npv = sum_npv / this->all_summary.size();
-    double avg_f1 = sum_f1 / this->all_summary.size();
-    double avg_gmean = sum_gmean / this->all_summary.size();
-//    printf("           -------------------- Average Results --------------------\n");
-    printf("\n           *  *  *  *  *  * *  *  *  *  * *  *  *  *  * *  *  *  *  *  *  *  *  *  *\n");
-    printf("           *                            Average Results                            *\n");
-    printf("           *                                                                       *\n");
-    printf("           *   Acc:%.2f, SN:%.2f, SP:%.2f, PPV:%.2f, NPV:%.2f, F1:%.2f, GM:%.2f    *\n",
-                           avg_acc, avg_sens, avg_spec, avg_ppv, avg_npv, avg_f1, avg_gmean);
-    printf("           *  *  *  *  *  * *  *  *  *  * *  *  *  *  * *  *  *  *  *  *  *  *  *  *\n");
 }
 
 
@@ -853,17 +913,55 @@ void Config_params::update_master_models_info(){
 //              << ",level:" << best_level << ", number of models: " << levels_models_info[best_level] << endl;
 }
 
+void Config_params::check_create_directory(std::string dir_path){
+
+    std::string dummy_filename { dir_path + "dummy_file"};
+    bool ok = static_cast<bool>(std::ofstream(dummy_filename.c_str()).put('a')); // create file
+    if(!ok) {
+        std::string create_dir_cmd { "mkdir -pv " + dir_path};
+        system(create_dir_cmd.c_str());
+    }else{
+        std::remove(dummy_filename.c_str()); // delete file
+        return ;    // Nothing is required
+    }
+
+    // Extra attampts if the open filed failed
+    int cnt_try = 0;
+    std::ofstream outfile;
+    outfile.open (dummy_filename);
+    while (! outfile.fail() and cnt_try < 3){
+        std::cout << "[CP][CCD] check if the directory: "<< dir_path <<
+                     " is created, try: " << cnt_try << std::endl;
+        outfile.open (dummy_filename);
+        cnt_try += 1;
+    }
+    ok = static_cast<bool>(std::ofstream(dummy_filename.c_str()).put('a')); // create file
+    if(!ok) {
+        std::cerr << "[CP][CCD] failed to create a test file in " <<
+                      dir_path << " location" << std::endl;
+        exit(1);
+    }else{
+        std::cout << "[CP][CCD] directory: "<< dir_path <<
+                     " is created " << std::endl;
+    }
+    std::remove(dummy_filename.c_str()); // delete file
+
+}
+
 void Config_params::export_models_metadata(){
 
-    std::string fname_metadata {"./svm_models/" + get_ds_name() + "_models.summary"};
+    std::string fname_metadata {get_model_path() + get_ds_name() +
+                "_models.summary"};
     std::ofstream outfile;
     outfile.open (fname_metadata);
     if(outfile.fail()){
-        std::cerr << "[CP][EMM] failed to open the " << fname_metadata << " file" << endl;
+        std::cerr << "[CP][EMM] failed to open the " <<
+                     fname_metadata << " file" << endl;
         return ;
     }
 
-    cout << "[CP][EMM] Start exporting the models' summary in " << fname_metadata << " file" << endl;
+    cout << "[CP][EMM] Start exporting the models' summary in " <<
+            fname_metadata << " file" << endl;
 
     outfile << "e:" << get_main_num_repeat_exp() << ", k:" << get_main_num_kf_iter() << endl;
     for(unsigned int i = 0; i < master_models_info.size(); i++){
@@ -873,7 +971,6 @@ void Config_params::export_models_metadata(){
 
     cout << "[CP][EMM] The models' summary are exported successfully" <<endl;
 }
-
 
 void Config_params::read_zscore_parameters(pugi::xml_node& root,int argc, char * argv[]){ //@ 080317-1354
     // read XML values

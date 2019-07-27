@@ -5,7 +5,7 @@
 #include "config_logs.h"
 #include "config_params.h"
 #include "etimer.h"
-
+#include "common_funcs.h"
 
 using std::cout; using std::endl;
 
@@ -108,6 +108,15 @@ solution MainRecursion::main(Mat& p_data, Mat& m_P_p_f, Mat& p_WA, Vec& p_vol,
             m_P_p = p_coarser.calc_P(p_WA, p_vol, v_p_seeds_indices, ref_info_p);
             p_data_c = p_coarser.calc_aggregate_data(m_P_p, p_data,p_vol, v_p_seeds_indices);
             p_WA_c = p_coarser.calc_WA_c(m_P_p, p_WA);
+
+#if dbl_export_coarsning   /// - - - - export minority matrices for debugging - - - -
+            CommonFuncs cf;
+            cf.exp_matrix(p_WA, "./debug","p_WA.dat","[MR]");
+            cf.exp_matrix(p_WA_c, "./debug","p_WA_c.dat","[MR]");
+            cf.exp_matrix(m_P_p, "./debug","m_P_p.dat","[MR]");
+            exit(1);
+#endif
+
             p_coarser.calc_stat_nnz(p_WA,0, level, "minority");
             //recalculate the weights in adjacency matrix from the data
             p_coarser.calc_real_weight(p_WA_c, p_data_c);

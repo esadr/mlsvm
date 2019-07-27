@@ -21,6 +21,7 @@ make mlsvm_save_knn
 make mlsvm_predict 
 make mlsvm_csv_petsc 
 make mlsvm_libsvm_petsc 
+make mlsvm_sep_test_classifier
 make
 
 echo "All targets are made successfully!"

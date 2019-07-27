@@ -85,9 +85,9 @@ mlsvm_classifier: $(MLSVM_OBJS) chkopts
 	-${CLINKER} $(MLSVM_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_classifier
 	${RM} mlsvm_classifier.o 
 	
-mlsvmSepTestClassifier: $(MlsvmSepTest_OBJS) chkopts
-	-${CLINKER} $(MlsvmSepTest_OBJS)  ${PETSC_MAT_LIB} -o mlsvmSepTestClassifier
-	${RM} mlsvmSepTestClassifier.o 
+mlsvm_sep_test_classifier: $(MlsvmSepTest_OBJS) chkopts
+	-${CLINKER} $(MlsvmSepTest_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_sep_test_classifier
+	${RM} relsvmSepTestClassifier.o 
 
 mlsvmNoTestClassifier: $(MlsvmNoTest_OBJS) chkopts
 	-${CLINKER} $(MlsvmNoTest_OBJS)  ${PETSC_MAT_LIB} -o mlsvmNoTestClassifier

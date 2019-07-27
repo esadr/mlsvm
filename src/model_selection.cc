@@ -79,19 +79,20 @@ struct Better_Gmean_SN
     }
 };
 
-
 //bool sortByGmean(const summary &lhs, const summary &rhs)
 //{
-//    if( fabs((lhs.perf.at(Gmean) - rhs.perf.at(Gmean)) > 0.01 )     //a has better gmean
+//    //a has better gmean
+//    if( fabs((lhs.perf.at(Gmean) - rhs.perf.at(Gmean)) > 0.01 )
 //        return true;
 //    else{                                                    //similar gmean
 //        if(paramsInst->get_ms_best_selection() == 1)
-//            return (lhs.num_SV_p + lhs.num_SV_n <  rhs.num_SV_p + rhs.num_SV_n );    // less nSV is better
+//            // less nSV is better
+//            return (lhs.num_SV_p + lhs.num_SV_n <  rhs.num_SV_p + rhs.num_SV_n );
 //        else
-//            return false;              // the gmean were similat and we don't care for nSV
+//            // the gmean were similat and we don't care for nSV
+//            return false;
 //    }
 //}
-
 
 struct BetterNPV
 {
@@ -127,7 +128,6 @@ struct BetterPPV
     }
 };
 
-
 struct BetterAcc
 {
     bool operator () (const summary& a, const summary& b) const
@@ -145,10 +145,6 @@ struct BetterAcc
     }
 };
 
-
-
-
-
 /*
  * shift the points with respect to the last parameters
  * input values are large since they are best C, gamma
@@ -157,49 +153,14 @@ struct BetterAcc
 //void ModelSelection::set_center(double center_C, double center_G){
 //    point_center.C = center_C;
 //    point_center.G = center_G;
-//    cout << "[MS][set_center] point_center.C:"<< point_center.C <<", point_center.G:" << point_center.G << endl;
-
-////    float min = 0.5;
-////    float max = 1.2;
-//////    double scaled_C_ = log2(center_C ) ;
-//////    double scaled_G_ = log2(center_G);
-
-
-////    C_start = log2(center_C * min);
-////    C_end   = log2(center_C * max);
-
-////    if(C_end > 10)
-////        C_end = 10;
-
-////    G_start = log2(center_G * min) ;     // if it's negative, the larger value means smaller
-////    G_end   = log2(center_G * max) ;
-
-////    if(G_end > 1.5)
-////        G_end = 1.5;
-////    cout << "[MS][update_center] center_C:"<< center_C <<", center_G:" << center_G << endl;
-////    cout << "[MS][update_center] C_start:"<< C_start <<", C_end:" << C_end << endl;
-////    cout << "[MS][update_center] G_start:"<< G_start <<", G_end:" << G_end << endl;
-//////    double Cstart = scaled_C_ - f_Ccross;
-//////    if(Cstart <= 0 )
-//////        Cstart = 1e-10;
-//////    double Cend = best_C_1st + f_Ccross;
-//////    double Gstart = best_G_1st - f_Gcross;
-//////    if(Gstart <= 0 )
-//////        Gstart = 1e-10;//
-//////    double Gend = best_G_1st + f_Gcross;
-//////    if(Gend >= 1 )
-//////        Gend = 0.9999999999;
-//}
-
-
+//    cout << "[MS][set_center] point_center.C:"<< point_center.C <<
+//            ", point_center.G:" << point_center.G << endl;
 
 void ModelSelection::set_range(){
-    if(paramsInst->get_ms_svm_id()==1){                   //normal SVM
+    if(paramsInst->get_ms_svm_id()==1){  //normal SVM
         range_c.min = -6.64385619 ;
         range_c.max =  6.64385619 ;
-    }else{                                                      //Weighted SVM (ms_svm_id == 2)
-//        range_c.min = -6.64385619 ;
-//        range_c.max =  10.5507468 ;
+    }else{                               //Weighted SVM (ms_svm_id == 2)
         range_c.min = -10 ;
         range_c.max =  10 ;
 
@@ -209,15 +170,13 @@ void ModelSelection::set_range(){
 //    range_g.max =  1.5850 ;
     range_g.max =  10 ;
 
-//    // Assume no center is set, we set the center to (0,0) {notice that the pow2(0,0) is (1,1)}
-//    // log2(1) == 0, later inside the ud_param_generator, log2 applied to this first
+//    // Assume no center is set, we set the center to (0,0)
+//    // {notice that the pow2(0,0) is (1,1)}
+//    // log2(1) == 0, later inside the ud_param_generator,
+//    //    log2 applied to this first
 //    point_center.C =1;
 //    point_center.G =1;
-
 }
-
-
-
 
 /* use UD table to determine the parameter values for model selection
  * @Input params:
@@ -236,7 +195,10 @@ void ModelSelection::set_range(){
  * @Outputs :
  * Vector of ud_point  : the UD sampling points for current stage
  */
-std::vector<ud_point> ModelSelection::ud_param_generator(int stage, bool inh_param, double param_C, double param_G){
+std::vector<ud_point> ModelSelection::ud_param_generator(int stage,
+                                                         bool inh_param,
+                                                         double param_C,
+                                                         double param_G){
 
     int UDTable[31][30][2] = {
         {},
@@ -347,15 +309,10 @@ std::vector<ud_point> ModelSelection::ud_param_generator(int stage, bool inh_par
     // length for C, gamma range
     double c_len = (range_c.max - range_c.min) ;
     double g_len = (range_g.max - range_g.min) ;
-//    printf("[MS][UPG] DEBUG p_center_c:%.2f, p_center_g:%.2f\n",
-//      p_center_c, p_center_g);             //$$debug
-//    printf("[MS][UPG] DEBUG c_len:%.2f, g_len:%.2f\n",
-//      c_len, g_len);                      //$$debug
 
     std::vector<ud_point> params(pattern);
     double cen_c = p_center_c - (c_len /pow(lg_base,stage));
     double cen_g = p_center_g - (g_len /pow(lg_base,stage));
-//    cout << " \n\n cen_c:" << cen_c  <<"\n";
     double pow_2_stage_minus_one = pow(lg_base,stage -1);
     double pattern_minus_one = (pattern -1);
 
@@ -364,17 +321,11 @@ std::vector<ud_point> ModelSelection::ud_param_generator(int stage, bool inh_par
                 / (pattern_minus_one * pow_2_stage_minus_one)  ) + cen_c;
         params[i].G = (  ((UDTable[pattern][i][1] - 1) * g_len)
                 / (pattern_minus_one * pow_2_stage_minus_one)  ) + cen_g;
-//        printf("[MS][UPG] DEBUG Before correction to edges: C: %.2f, G: %.2f\n"
-//          , params[i].C, params[i].G);             //$$debug
     }
 
     for(int i=0; i < pattern;i++){              // make the output real
-//        printf("[MS][UPG] LOG stage: %d, C:%.2f, G:%.4f\n",
-//          stage, params[i].C, params[i].G);        //$$debug
         params[i].C = pow(lg_base, params[i].C);
         params[i].G = pow(lg_base, params[i].G);
-//        printf("[MS][UPG] stage: %d, C:%.2f, G:%.4f\n"
-//          ,stage, params[i].C, params[i].G);        //$$debug
     }
 
     float real_c_max = pow(lg_base, range_c.max );
@@ -416,10 +367,8 @@ std::vector<ud_point> ModelSelection::ud_param_generator(int stage, bool inh_par
     return params;
 }
 
-
-
-//======================================================================
-int ModelSelection::select_best_model(std::vector<summary> v_summary, int level, int stage){
+int ModelSelection::select_best_model(std::vector<summary> v_summary,
+                                      int level, int stage){
 
 #if dbl_MS_SB1 >=5
     printf("\n[MS][BSM] Before gmean sort level:%d\n",level);
@@ -429,9 +378,15 @@ int ModelSelection::select_best_model(std::vector<summary> v_summary, int level,
 #endif
 
 //    std::sort(v_summary.begin(),v_summary.end(),std::greater<summary>());
-//    std::sort(v_summary.begin(),v_summary.end(),BetterGmean());   // the main method for a year before Sep 21, 2016 - 09:00
-//    std::sort(v_summary.begin(),v_summary.end(),BetterSN_Gmean());  // experiment 092116_0940
-    std::sort(v_summary.begin(),v_summary.end(),Better_Gmean_SN());  // experiment 092816_1600
+
+    // the main method for a year before Sep 21, 2016 - 09:00
+//    std::sort(v_summary.begin(),v_summary.end(),BetterGmean());
+
+    // experiment 092116_0940
+//    std::sort(v_summary.begin(),v_summary.end(),BetterSN_Gmean());
+
+    // experiment 092816_1600
+    std::sort(v_summary.begin(),v_summary.end(),Better_Gmean_SN());
 
 //    std::sort(v_summary.begin(),v_summary.end(),sortByGmean);
 //    std::sort(v_summary.begin(),v_summary.end(),BetterAcc());
@@ -445,19 +400,24 @@ int ModelSelection::select_best_model(std::vector<summary> v_summary, int level,
 #endif
     // - - - - ignore the gmean zero - - - -
     for(unsigned int i =0; i != v_summary.size(); ++i){
-//        cout << "v_summary[i].perf.at(Gmean): " << v_summary[i].perf.at(Gmean) << endl;
+//        cout << "v_summary[i].perf.at(Gmean): " <<
+//                v_summary[i].perf.at(Gmean) << endl;
         if(v_summary[i].perf.at(Gmean) > 0.05)
             return v_summary[i].iter;
 
     }
-    return v_summary[0].iter;   // in case there is model with gmean larger than zero, return the 1st one
+    // in case there is model with gmean larger than zero, return the 1st one
+    return v_summary[0].iter;
 }
 
 
 
 
-void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, Vec& v_vol_n, bool inh_params,
-                                    double param_C, double param_G, int level, solution & udc_sol){
+void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n,
+                                    Vec& v_vol_n, bool inh_params,
+                                    double param_C, double param_G,
+                                    int level, solution & udc_sol){
+    std::string cfid="[MS][UD]";
     ETimer t_whole_UD;
     // - - - - - k-cross-fold data - - - - -
     k_fold kf;
@@ -470,42 +430,49 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, 
     std::vector<summary> v_summary_folds;
     v_summary_folds.reserve(total_num_fold);
 
-    for(int fold_id=0; fold_id < total_num_fold; ++fold_id){    // run the 2 stages on all k fold
+    // run the 2 stages on all k fold
+    for(int fold_id=0; fold_id < total_num_fold; ++fold_id){
         // cross fold the data and volumes for the fold_id
-        kf.cross_validation_simple(m_data_p, m_data_n, v_vol_p, v_vol_n, fold_id, total_num_fold,
-                                   m_train_data_p, m_train_data_n, m_test_data, v_train_vol_p, v_train_vol_n);
+        kf.cross_validation_simple(m_data_p, m_data_n, v_vol_p, v_vol_n,
+                                   fold_id, total_num_fold, m_train_data_p,
+                                   m_train_data_n, m_test_data,
+                                   v_train_vol_p, v_train_vol_n);
 
-        /* DEBUG: export the matrices for further test and comparison
+#if dbl_export_MS_UD
+        // export the matrices for further test and comparison
         CommonFuncs cf;
-        cf.exp_matrix(m_train_data_p,   "./debug/" ,"m_train_data_p.dat",   "[MS][UD]");
-        cf.exp_matrix(m_train_data_n,   "./debug/" ,"m_train_data_n.dat",   "[MS][UD]");
-        cf.exp_vector(v_train_vol_p,    "./debug/" ,"v_train_vol_p.dat",    "[MS][UD]");
-        cf.exp_vector(v_train_vol_n,    "./debug/" ,"v_train_vol_n.dat",    "[MS][UD]");
-        cf.exp_matrix(m_test_data,      "./debug/" ,"m_test_data.dat",      "[MS][UD]");
-        */
-
-//        std::vector<Solver> v_solver;       // vector of solvers for current fold_id
-//        v_solver.reserve(num_iter_st1 + num_iter_st2);
+        cf.exp_matrix(m_train_data_p,"./debug/","m_train_data_p.dat",cfid);
+        cf.exp_matrix(m_train_data_n,"./debug/","m_train_data_n.dat",cfid);
+        cf.exp_vector(v_train_vol_p,"./debug/","v_train_vol_p.dat",cfid);
+        cf.exp_vector(v_train_vol_n,"./debug/","v_train_vol_n.dat",cfid);
+        cf.exp_matrix(m_test_data,"./debug/","m_test_data.dat",cfid);
+#endif
         unsigned int solver_id=0;
         std::vector<summary> v_summary;
 
         summary current_summary;     //map that contains all the measures
         int stage = 1;
-        printf("[MS][UD] ------ stage:%d, level:%d, fold:%d ------ \n", stage, level, fold_id);
+        printf("%s ------ stage:%d, level:%d, fold:%d ------ \n",
+               cfid, stage, level, fold_id);
 
         std::vector<ud_point> ud_params_st_1;
-        ud_params_st_1 = ud_param_generator(stage, inh_params, param_C, param_G);
+        ud_params_st_1 = ud_param_generator(stage, inh_params,
+                                            param_C, param_G);
         for(unsigned int i =0; i < num_iter_st1;++i){
             Solver sv;
             svm_model * curr_svm_model;
-            curr_svm_model = sv.train_model(m_train_data_p, v_train_vol_p, m_train_data_n, v_train_vol_n, 1,
-                                        ud_params_st_1[i].C, ud_params_st_1[i].G);
-//            v_solver.push_back(sv);
-            sv.test_predict(m_test_data, current_summary, solver_id);   //predict the validation data not the test data
-            sv.free_solver("[MS][UD] ");   //free the solver
+            curr_svm_model = sv.train_model(m_train_data_p, v_train_vol_p,
+                                            m_train_data_n, v_train_vol_n, 1,
+                                            ud_params_st_1[i].C,
+                                            ud_params_st_1[i].G);
+
+            //predict the validation data not the test data
+            sv.test_predict(m_test_data, current_summary, solver_id);
+            sv.free_solver(cfid);   //free the solver
             v_summary.push_back(current_summary);
     #if dbl_MS_UD >= 1
-            paramsInst->print_summary(current_summary,"[MS][UD]", level, i, stage,fold_id);
+            paramsInst->print_summary(current_summary,cfid,
+                                      level, i, stage,fold_id);
     #endif
             ++solver_id;
         }
@@ -516,7 +483,8 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, 
                ", paramsC:"<< v_summary[best_1st_stage].C << endl;
     #endif
         stage = 2 ;
-        printf("[MS][UD] ------ stage:%d, level:%d, fold:%d ------ \n", stage, level, fold_id);
+        printf("%s ------ stage:%d, level:%d, fold:%d ------ \n",
+               cfid, stage, level, fold_id);
         std::vector<ud_point> ud_params_st_2;
         printf("[MS][UD] 2nd stage model selection center C:%g, G:%g\n",
                                            ud_params_st_1[best_1st_stage].C ,
@@ -536,11 +504,10 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, 
                                             ud_params_st_2[i].C,
                                             ud_params_st_2[i].G);
             sv.test_predict(m_test_data, current_summary, solver_id);
-//            v_solver.push_back(sv);
             sv.free_solver("[MS][UD] ");   //free the solver
             v_summary.push_back(current_summary);
     #if dbl_MS_UD >= 1
-            paramsInst->print_summary(current_summary,"[MS][UD]", level,
+            paramsInst->print_summary(current_summary,cfid, level,
                                       i, stage,fold_id);
     #endif
             ++solver_id;
@@ -557,7 +524,6 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, 
 
     } // end of for loop for fold_id
 
-
     /* - - - - - start experiment all the best values to find
      *                          a better selection technique - - - - - */
     ETimer t_exp;
@@ -565,21 +531,28 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n, 
             "the test data(not validation data)" << endl;
     Loader test_loader;
     Mat untouched_test_data ;
-    untouched_test_data = test_loader.load_norm_data_sep(paramsInst->get_test_ds_f_name() );
+    untouched_test_data = test_loader.load_norm_data_sep(
+                                        paramsInst->get_test_ds_f_name() );
+
     for(int fold_id=0; fold_id < total_num_fold; ++fold_id){
         // - - - - - train whole the data at this level - - - -
         Solver sv_whole_trd;
         svm_model * whole_trd_model;
-        whole_trd_model = sv_whole_trd.train_model(m_data_p, v_vol_p, m_data_n, v_vol_n, 1,
-                                            v_summary_folds[fold_id].C,v_summary_folds[fold_id].gamma);
+        whole_trd_model = sv_whole_trd.train_model(m_data_p, v_vol_p,
+                                            m_data_n, v_vol_n, 1,
+                                            v_summary_folds[fold_id].C,
+                                            v_summary_folds[fold_id].gamma);
         summary exp_summary;
-        sv_whole_trd.evaluate_testdata(untouched_test_data, 4444000+level, exp_summary);
-        paramsInst->print_summary(exp_summary,"[MS][UD]TD [experiment only] ", level);
+        sv_whole_trd.evaluate_testdata(untouched_test_data,
+                                       4444000+level, exp_summary);
+        paramsInst->print_summary(exp_summary,
+                                  "[MS][UD]TD [experiment only] ", level);
     }
     MatDestroy(&untouched_test_data);
-    t_exp.stop_timer("[MS][UD][exp] evaluate the performance of all the parameters on the testdata at level",
+    t_exp.stop_timer("[MS][UD][exp] evaluate testdata at level",
                      std::to_string(level) );
-    /* - - - - - end   experiment all the best values to find a better selection technique - - - - - */
+    /* - - - - - end experiment all the best values to find
+     *                              a better selection technique - - - - - */
 
     // - - - - - select best of all folds - - - -
     // for now I pass stage 0 as the final stage for the k-fold
@@ -658,9 +631,10 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
     for(unsigned int i =0; i < num_iter_st1;++i){
         Solver sv;
         svm_model * curr_svm_model;
-        curr_svm_model = sv.train_model(m_train_data_p, v_train_vol_p
-                                        , m_train_data_n, v_train_vol_n, 1
-                                        , ud_params_st_1[i].C, ud_params_st_1[i].G);
+        curr_svm_model = sv.train_model(m_train_data_p, v_train_vol_p,
+                                        m_train_data_n, v_train_vol_n, 1,
+                                        ud_params_st_1[i].C,
+                                        ud_params_st_1[i].G);
         v_solver.push_back(sv);
         //predict the validation data not the test data
         sv.predict_validation_data(m_VD_p, m_VD_n
@@ -669,7 +643,8 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
 //            sv.free_solver("[MS][UDSepVal] ");   //free the solver
         v_summary.push_back(current_summary);
 #if dbl_MS_UDSepVal >= 3
-        paramsInst->print_summary(current_summary,"[MS][UDSepVal]", level, i, stage);
+        paramsInst->print_summary(current_summary,"[MS][UDSepVal]", level,
+                                  i, stage);
 #endif
         ++solver_id;
     }
@@ -679,14 +654,15 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
         << " nSV+:" << v_summary[best_1st_stage].num_SV_p
         <<", paramsC:"<< v_summary[best_1st_stage].C << endl;
 #endif
-    t_stage1.stop_timer("[MS][UDSepVal] stage 1 at level", std::to_string(level) );
+    t_stage1.stop_timer("[MS][UDSepVal] stage 1 at level",
+                        std::to_string(level) );
 
     ETimer t_stage2;
     stage = 2 ;
 #if dbl_MS_UDSepVal >= 3
     printf("[MS][UDSepVal] ------ stage:%d, level:%d------ \n", stage, level);
-    printf("[MS][UDSepVal] 2nd stage model selection center C:%g, G:%g\n"
-           , ud_params_st_1[best_1st_stage].C , ud_params_st_1[best_1st_stage].G);
+    printf("[MS][UDSepVal] 2nd stage model selection center C:%g, G:%g\n",
+           ud_params_st_1[best_1st_stage].C, ud_params_st_1[best_1st_stage].G);
 #endif
     std::vector<ud_point> ud_params_st_2;
 
@@ -724,7 +700,8 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
                best_of_all);
     #endif
 #endif
-    t_stage2.stop_timer("[MS][UDSepVal] stage 2 at level", std::to_string(level) );
+    t_stage2.stop_timer("[MS][UDSepVal] stage 2 at level",
+                        std::to_string(level) );
 
     ETimer t_prep_sol;
     // - - - - - prepare solution for finer level - - - -
@@ -732,7 +709,8 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
     MatGetSize(m_train_data_p, &num_point_p, NULL);
     Solver best_solver = v_solver[best_of_all];
     svm_model * best_model = best_solver.get_model() ;
-    best_solver.prepare_solution_single_model(best_model , num_point_p, udc_sol);
+    best_solver.prepare_solution_single_model(best_model ,
+                                              num_point_p, udc_sol);
 
     ref_results refinement_results ;
     refinement_results.validation_data_summary = v_summary[best_of_all];
@@ -763,31 +741,31 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
          *   The models are saved in folder with experiment_unique id
          */
 
-        #if export_SVM_models == 1       //export the model (we save a model at a time)
-           /* save the models in a local folder created by dataset name + exp_info name
-            * use level id, index 0 for a single model
-            *    (for multiple models, increament the id)
-            *
-            * Make sure to close and open the summary file at each level to prevent
-            *   losing models in the case of crash or error
-            */
-            std::string models_directory = paramsInst->get_ds_path() + "/" +
-                                        paramsInst->get_exp_info() ;
-            // check if the directory is not exist, create it
+//export the model (we save a model at a time)
+#if export_SVM_models == 1
+        /* save the models in a local folder created by dataset name + exp_info name
+        * use level id, index 0 for a single model
+        *    (for multiple models, increament the id)
+        *
+        * Make sure to close and open the summary file at each level to prevent
+        *   losing models in the case of crash or error
+        */
+        std::string models_directory = paramsInst->get_ds_path() + "/" +
+                                    paramsInst->get_exp_info() ;
+        // check if the directory is not exist, create it
 //            cout << "models_directory: " << models_directory << endl;
-            CommonFuncs cf;
-            cf.createDirectory(models_directory);
+        CommonFuncs cf;
+        cf.createDirectory(models_directory);
 
-            std::string output_file =
-                    models_directory +"/" + paramsInst->get_ds_name()+
-//                    "_exp_" + std::to_string(paramsInst->get_main_current_exp_id()) +
-//                    "_kf_" + std::to_string(paramsInst->get_main_current_kf_id()) +
-                    "_level_" + std::to_string(paramsInst->get_main_current_level_id()) +
-                    ".svmmodel";
-            svm_save_model(output_file.c_str(), best_model);
-            printf("[MS][UDIBSepVal] model %s is saved\n", output_file.c_str());
+        std::string output_file =
+                models_directory +"/" + paramsInst->get_ds_name()+
+                "_level_" + std::to_string(
+                paramsInst->get_main_current_level_id()) + ".svmmodel";
 
-        #endif
+        svm_save_model(output_file.c_str(), best_model);
+        printf("[MS][UDIBSepVal] model %s is saved\n", output_file.c_str());
+
+#endif
     }
     //collect the final best model at each level
     v_ref_results.push_back(refinement_results);
@@ -803,49 +781,44 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
                           std::to_string(level));
 }
 
-
-
-
-
-summary ModelSelection::summary_factory_update_iter(const summary& in_summary, const int iter){
+summary ModelSelection::summary_factory_update_iter(const summary& in_summary,
+                                                    const int iter){
     summary summary_result;
     summary_result = in_summary;
-//    summary_result.C = in_summary.C;
-//    summary_result.C = in_summary.C;
 
     summary_result.iter = iter;
-    printf("[MS][SPUI] iter %d created successfully!\n", iter);
+    printf("[MS][SFUI] iter %d created successfully!\n", iter);
     return summary_result;
 }
 
-
-
 /*
- *
- *
- *  sum_all_vol_p, sum_all_vol_n is used to set the instance weights for each point in training
+ * sum_all_vol_p, sum_all_vol_n is used to set the instance weights
+ * for each point in training
  */
-
-
-
-void ModelSelection::uniform_design_index_base(Mat& p_data, Vec& v_vol_p, Mat& n_data, Vec& v_vol_n, bool inh_params, double last_c,
-                        double last_gamma,int level, std::vector<PetscInt>& v_p_index, std::vector<PetscInt>& v_n_index,
-                        std::unordered_set<PetscInt>& uset_SV_index_p, std::unordered_set<PetscInt>& uset_SV_index_n,
-                        Mat& m_testdata, int classifier_id, Mat& m_all_predict){
+void ModelSelection::uniform_design_index_base(Mat& p_data, Vec& v_vol_p,
+                        Mat& n_data, Vec& v_vol_n, bool inh_params,
+                        double last_c,double last_gamma,int level,
+                        std::vector<PetscInt>& v_p_index,
+                        std::vector<PetscInt>& v_n_index,
+                        std::unordered_set<PetscInt>& uset_SV_index_p,
+                        std::unordered_set<PetscInt>& uset_SV_index_n,
+                        Mat& m_testdata,int classifier_id, Mat& m_all_predict){
     ETimer t_sv_ps;
     srand(std::stoll(paramsInst->get_cpp_srand_seed()));
-    std::random_shuffle( v_p_index.begin(), v_p_index.end() ); //shuffle all nodes
+    std::random_shuffle( v_p_index.begin(), v_p_index.end() );
     srand(std::stoll(paramsInst->get_cpp_srand_seed()));
-    std::random_shuffle( v_n_index.begin(), v_n_index.end() ); //shuffle all nodes
+    std::random_shuffle( v_n_index.begin(), v_n_index.end() );
 
     double train_fraction = 1 - (1 / paramsInst->get_main_num_kf_iter());
 
-    PetscInt iter_train_p_end = ceil(v_p_index.size()* train_fraction);    //number of poitns in training data
+    PetscInt iter_train_p_end = ceil(v_p_index.size()* train_fraction);
     PetscInt iter_train_n_end = ceil(v_n_index.size()* train_fraction);
 
 #if dbl_MS_UDIB >= 1
-    cout << "[MS][UDIB] p index size:" << v_p_index.size() << ", iter_train_p_end:" << iter_train_p_end << endl;
-    cout << "[MS][UDIB] n index size:" << v_n_index.size() << ", iter_train_n_end:" << iter_train_n_end << endl;
+    cout << "[MS][UDIB] p index size:" << v_p_index.size() <<
+            ", iter_train_p_end:" << iter_train_p_end << endl;
+    cout << "[MS][UDIB] n index size:" << v_n_index.size() <<
+            ", iter_train_n_end:" << iter_train_n_end << endl;
 #endif
 
     unsigned int num_iter_st1 = paramsInst->get_ms_first_stage();
@@ -863,34 +836,45 @@ void ModelSelection::uniform_design_index_base(Mat& p_data, Vec& v_vol_p, Mat& n
     for(unsigned int i =0; i < num_iter_st1;i++){
         Solver sv;
         svm_model * curr_svm_model;
-        curr_svm_model = sv.train_model_index_base(p_data, v_vol_p, n_data, v_vol_n, v_p_index, v_n_index,
-                                        iter_train_p_end, iter_train_n_end,true, ud_params_st_1[i].C, ud_params_st_1[i].G);
+        curr_svm_model = sv.train_model_index_base(p_data, v_vol_p, n_data,
+                                        v_vol_n, v_p_index, v_n_index,
+                                        iter_train_p_end, iter_train_n_end,
+                                        true, ud_params_st_1[i].C,
+                                        ud_params_st_1[i].G);
         v_solver.push_back(sv);
-//        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index, iter_train_p_end, iter_train_n_end, current_summary,solver_id);
+
+//        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index,
+//                                   iter_train_p_end, iter_train_n_end,
+//                                   current_summary,solver_id);
 
         v_summary.push_back(current_summary);
-
-//        sv.free_solver("[MS][UDIB] stage 1");
         ++solver_id;
     }
     int best_1st_stage = select_best_model(v_summary,level,1);
 
-
     // - - - - 2nd stage - - - -
     stage = 2 ;
     std::vector<ud_point> ud_params_st_2;
-    ud_params_st_2 = ud_param_generator(2,true, ud_params_st_1[best_1st_stage].C , ud_params_st_1[best_1st_stage].G);
+    ud_params_st_2 = ud_param_generator(2,true, ud_params_st_1[best_1st_stage].C,
+                                        ud_params_st_1[best_1st_stage].G);
 
     for(unsigned int i =0; i < num_iter_st2; i++){
         //skip the center of second stage(duplicate)
-        if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C && ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)
+        if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C &&
+                ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)
             continue;
 
         Solver sv;
         svm_model * curr_svm_model;
-        curr_svm_model = sv.train_model_index_base(p_data, v_vol_p, n_data, v_vol_n, v_p_index, v_n_index,
-                                        iter_train_p_end, iter_train_n_end,true, ud_params_st_2[i].C, ud_params_st_2[i].G);
-        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index, iter_train_p_end, iter_train_n_end, current_summary,solver_id);
+        curr_svm_model = sv.train_model_index_base(p_data, v_vol_p, n_data,
+                                        v_vol_n, v_p_index, v_n_index,
+                                        iter_train_p_end, iter_train_n_end,
+                                        true, ud_params_st_2[i].C,
+                                        ud_params_st_2[i].G);
+
+        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index,
+                                   iter_train_p_end, iter_train_n_end,
+                                   current_summary,solver_id);
         v_solver.push_back(sv);
         v_summary.push_back(current_summary);
         ++solver_id;
@@ -902,24 +886,29 @@ void ModelSelection::uniform_design_index_base(Mat& p_data, Vec& v_vol_p, Mat& n
     // - - - - - - - - prepare the solution for refinement - - - - - - - - -
     Solver best_sv = v_solver[best_of_all];
     svm_model * best_model = best_sv.get_model() ;
-    if(level > 1 ){     // at the finest level, we need to save the model (SV, C, gamma) for unseen points
-        // ----- create the index of SVs in data points for each class seperately ----
+    // at the finest level, we need to save the model
+    //  (SV, C, gamma) for unseen points
+    if(level > 1 ){
+        //--create the index of SVs in data points for each class seperately--
         PetscInt i;
         for (i=0; i < best_model->nSV[0];i++){
             uset_SV_index_p.insert(v_p_index[best_model->sv_indices[i] - 1]);
         }
         for (int i=0; i < best_model->nSV[1];i++){
-            uset_SV_index_n.insert(v_n_index[ best_model->sv_indices[best_model->nSV[0] + i] - 1 - iter_train_p_end]);
+            uset_SV_index_n.insert(v_n_index[ best_model->
+                    sv_indices[best_model->nSV[0] + i] - 1 - iter_train_p_end]);
         }
     }else{
         if(paramsInst->get_ms_save_final_model()){
-            printf("\n\n\n[MS][UDIB] at the finest level the partial models needs to be saved!!! Exit is cancelled to continue the runs! \n\n\n");
-//            exit(1);
+            printf("\n\n\n[MS][UDIB] at the finest level the partial models ");
+            printf("needs to be saved!!! ");
+            printf("Exit is cancelled to continue the runs! \n\n\n");
         }
         //TODO: multiple hyperplain
     }
 
-    best_sv.predict_test_data_in_matrix_output(m_testdata, classifier_id, m_all_predict);
+    best_sv.predict_test_data_in_matrix_output(m_testdata, classifier_id,
+                                               m_all_predict);
 
     for(auto it=v_solver.begin(); it!= v_solver.end(); ++it){
         it->free_solver("[MS][UDIB] ");   //free all solvers
@@ -928,11 +917,9 @@ void ModelSelection::uniform_design_index_base(Mat& p_data, Vec& v_vol_p, Mat& n
     // no evaluation on test data //#TODO
 }
 
-
-
-
 /*
- * sum_all_vol_p, sum_all_vol_n is used to set the instance weights for each point in training
+ * sum_all_vol_p, sum_all_vol_n is used to set the instance weights
+ *  for each point in training
  * classifier_id: the loop counter for the groups of training data
  */
 void ModelSelection::uniform_design_index_base_separate_validation(
@@ -946,17 +933,20 @@ void ModelSelection::uniform_design_index_base_separate_validation(
 
     ETimer t_sv_ps;
     srand(std::stoll(paramsInst->get_cpp_srand_seed()));
-    std::random_shuffle( v_p_index.begin(), v_p_index.end() ); //shuffle all nodes
+    //shuffle all nodes
+    std::random_shuffle( v_p_index.begin(), v_p_index.end() );
     srand(std::stoll(paramsInst->get_cpp_srand_seed()));
-    std::random_shuffle( v_n_index.begin(), v_n_index.end() ); //shuffle all nodes
+    std::random_shuffle( v_n_index.begin(), v_n_index.end() );
 
 //    double train_fraction = 1 - (1 / paramsInst->get_main_num_kf_iter());
 
-    PetscInt iter_train_p_end = v_p_index.size();    //number of poitns in training data
+    //number of poitns in training data
+    PetscInt iter_train_p_end = v_p_index.size();
     PetscInt iter_train_n_end = v_n_index.size();
 
 #if dbl_MS_UDIB >= 0
-    cout << "[MS][UDIBSepVal] p index size:" << v_p_index.size() << ", n index size:" << v_n_index.size() << endl;
+    cout << "[MS][UDIBSepVal] p index size:" << v_p_index.size() <<
+            ", n index size:" << v_n_index.size() << endl;
 #endif
 
     unsigned int num_iter_st1 = paramsInst->get_ms_first_stage();
@@ -974,12 +964,18 @@ void ModelSelection::uniform_design_index_base_separate_validation(
     for(unsigned int i =0; i < num_iter_st1;i++){
         Solver sv;
         svm_model * curr_svm_model;
-        curr_svm_model = sv.train_model_index_base(p_data, v_vol_p, n_data, v_vol_n, v_p_index, v_n_index,
-                                        iter_train_p_end, iter_train_n_end,true, ud_params_st_1[i].C, ud_params_st_1[i].G);
+        curr_svm_model = sv.train_model_index_base(p_data, v_vol_p, n_data,
+                                   v_vol_n, v_p_index, v_n_index,
+                                   iter_train_p_end, iter_train_n_end,true,
+                                   ud_params_st_1[i].C, ud_params_st_1[i].G);
         v_solver.push_back(sv);
-//        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index, iter_train_p_end, iter_train_n_end, current_summary,solver_id);
+//        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index,
+//                          iter_train_p_end, iter_train_n_end,
+//                          current_summary,solver_id);
 //        cout << "[MS][UDIBSepVal] after push_back solver" << endl;
-        sv.predict_validation_data(m_VD_p, m_VD_n, current_summary, solver_id);     // The normal predict method for full matrix is useful rather than index base methods
+
+        // The normal predict method for full matrix is better than index base
+        sv.predict_validation_data(m_VD_p, m_VD_n, current_summary, solver_id);
 //        cout << "[MS][UDIBSepVal] after predicting the validation data" << endl;
         v_summary.push_back(current_summary);
         ++solver_id;
@@ -1011,7 +1007,9 @@ void ModelSelection::uniform_design_index_base_separate_validation(
                                                    ud_params_st_2[i].G);
 
 //        sv.test_predict_index_base(p_data, n_data, v_p_index, v_n_index,
-//        iter_train_p_end, iter_train_n_end, current_summary,solver_id);
+//                                  iter_train_p_end, iter_train_n_end,
+//                                    current_summary,solver_id);
+
         // The normal predict method for full matrix is useful rather than
         // index base methods
         sv.predict_validation_data(m_VD_p, m_VD_n, current_summary,
@@ -1035,25 +1033,32 @@ void ModelSelection::uniform_design_index_base_separate_validation(
             uset_SV_index_p.insert(v_p_index[best_model->sv_indices[i] - 1]);
         }
         for (int i=0; i < best_model->nSV[1];i++){
-            uset_SV_index_n.insert(v_n_index[ best_model->sv_indices[best_model->nSV[0] + i] - 1 - iter_train_p_end]);
+            uset_SV_index_n.insert(v_n_index[best_model->
+                    sv_indices[best_model->nSV[0] + i] - 1 - iter_train_p_end]);
         }
     }else{
         if(paramsInst->get_ms_save_final_model()){
-            printf("\n\n\n[MS][UDIBSepVal] at the finest level the partial models needs to be saved!!! Exit is cancelled to continue the runs! \n\n\n");
+            printf("\n\n\n[MS][UDIBSepVal] at the finest level the partial");
+            printf("models needs to be saved!!!");
+            printf("Exit is cancelled to continue the runs! \n\n\n");
 //            exit(1);
         }
         //TODO: multiple hyperplain
     }
 
-
-    best_sv.predict_test_data_in_matrix_output(m_VD_both, classifier_id, m_all_predict_VD);  //added 021517-1456
-    best_sv.predict_test_data_in_matrix_output(m_testdata, classifier_id, m_all_predict_TD);
+    best_sv.predict_test_data_in_matrix_output(m_VD_both, classifier_id,
+                                               m_all_predict_VD);
+    best_sv.predict_test_data_in_matrix_output(m_testdata, classifier_id,
+                                               m_all_predict_TD);
 
 #if export_SVM_models == 1       //export the model (we save a model at a time)
-    //save the models in a local folder
-    //use dataset name, experiment id, level id, index 0 for a single model (for multiple models, increament the id)
-    //append the model to summary file after each export
-    //make sure to close and open the summary file at each level to prevent losing models in the case of crash or error
+    /* save the models in a local folder
+     * use dataset name, experiment id, level id, index 0 for a single model
+     * (for multiple models, increament the id)
+     * append the model to summary file after each export
+     * - make sure to close and open the summary file at each level to prevent
+     *      losing models in the case of crash or error
+     */
     std::string output_file = "./svm_models/" + paramsInst->get_ds_name()+
             "_exp_" + std::to_string(paramsInst->get_main_current_exp_id()) +
             "_kf_" + std::to_string(paramsInst->get_main_current_kf_id()) +
@@ -1071,4 +1076,3 @@ void ModelSelection::uniform_design_index_base_separate_validation(
 
     // no evaluation on test data //#TODO
 }
-

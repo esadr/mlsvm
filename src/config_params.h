@@ -68,6 +68,7 @@ private:
     string ds_name;
     string test_data_name;     // add 083018
     string tmp_path;
+    std::string model_path;
     int         pre_init_loader_matrix;
     bool        inverse_weight;
     int         ld_weight_type;
@@ -145,6 +146,9 @@ private:
     void read_classification_prediction_parameters(
             pugi::xml_node& root,int argc, char * argv[]);
 
+    void read_svm_predict_params(
+            pugi::xml_node& root,int argc, char * argv[]);
+
     void read_convert_files_parameters(
             pugi::xml_node& root,int argc, char * argv[]);
 
@@ -159,13 +163,14 @@ private:
 
 public:
     enum program_parts {main, convert_files, zscore, flann, svm,
-                        prediction, clustring} ;
+                        prediction, clustring, svm_prediction} ;
 
     static Config_params* getInstance();
     int  get_main_function() const { return main_function;  }
 
     void print_classification_training_params();
     void print_classification_prediction_params();
+    void print_svm_prediction_params();
     void print_convert_files_params();
     void read_flann_parameters(pugi::xml_node& root,int argc, char * argv[]);
     void read_zscore_parameters(pugi::xml_node& root,int argc, char * argv[]);
@@ -194,6 +199,8 @@ public:
     const string &get_ds_name()    const { return options_["ds_name"];}
     const string &get_test_name()  const { return options_["test_data_name"];}
     string get_tmp_path()   const ;
+    std::string get_model_path()   const ;
+    const std::string &get_model_f_name()    const { return options_["model_f_name"];}
     const string &get_exp_info()   const { return options_["exp_info"];}
 
     const string &get_p_indices_f_name()           const {return p_indices_f_name;}
@@ -291,7 +298,7 @@ public:
     double  get_svm_coef0()         const { return coef0; }
     double  get_svm_nu()            const { return nu; }
     double  get_svm_cache_size()    const { return cache_size; }
-    double  get_svm_p()             const { return p; }
+//    double  get_svm_p()             const { return p; }
     int     get_svm_nr_weight()     const { return nr_weight; }
     double  get_svm_C()             const { return  stod(options_["C"]); }
     double  get_svm_eps()           const { return  stod(options_["eps"]); }
@@ -306,6 +313,7 @@ public:
     void    set_levels_models_info();
 //    void    check_models_metadata();        //for debug
     void    update_levels_models_info(int level_id, int num_models);
+    void    check_create_directory(std::string dir_path);
     void    update_master_models_info();
     void    export_models_metadata();
 
