@@ -21,6 +21,7 @@
   <ds_path stringVal="./datasets/"/>
   <ds_name stringVal="twonorm"/>		 
   <tmp_path stringVal="./temp/"/>	<!--temp folder path for k_fold files-->
+  <model_path stringVal="./svm_models/"/>
   <pre_init_loader_matrix intVal = "300"/>; 	<!--In Loader, for initaliation of the matrix (not less than the number of features)-->
   <inverse_weight boolVal= "1"/>		<!-- 0: means the distance is related to strenght of the connection.
 						                     1: means the inverse is needed, like Euclidean distnace (July 20,2015)-->
