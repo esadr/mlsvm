@@ -1,3 +1,12 @@
+@article{sadrfaridpour2019engineering,
+  title={Engineering fast multilevel support vector machines},
+  author={Sadrfaridpour, Ehsan and Razzaghi, Talayeh and Safro, Ilya},
+  journal={Machine Learning},
+  pages={1--39},
+  year={2019},
+  publisher={Springer}
+}
+
 @inproceedings{sadrfaridpour_ehsan2017,
   title={Algebraic multigrid support vector machines},
   author={Sadrfaridpour, Ehsan and Jeereddy Sandeep and Ken Kennedy and Andre Luckow and Talayeh Razzaghi and Ilya Safro},
@@ -8,4 +17,3 @@
   isbn      = {9782875870391},
   url       = {https://www.elen.ucl.ac.be/Proceedings/esann/esannpdf/es2017-37.pdf}
 }
-
