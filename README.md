@@ -3,8 +3,9 @@ Multilevel Support Vector Machines
 
 
 The correspoding papers with experimental results are as follows:
-  * Sadrfaridpour, Ehsan, Talayeh Razzaghi, and Ilya Safro. "Engineering fast multilevel support vector machines" arXiv preprint arXiv:1707.07657 (2017).
-  [(PDF)](https://arxiv.org/pdf/1707.07657.pdf) [(BibTex)](https://goo.gl/XPHioV)
+    
+  * Sadrfaridpour, Ehsan, Talayeh Razzaghi, and Ilya Safro. "Engineering fast multilevel support vector machines." Machine Learning (2019): 1-39.
+  [(PDF)](https://link.springer.com/article/10.1007/s10994-019-05800-7) [(ArXiv)](https://arxiv.org/pdf/1707.07657.pdf) [(BibTex)](https://raw.githubusercontent.com/esadr/mlsvm/master/Bibliography.txt)
   
   * Sadrfaridpour, Ehsan, Sandeep Jeereddy , Ken Kennedy, Andre Luckow, Talayeh Razzaghi, and Ilya Safro. "Algebraic multigrid support vector machines." ESANN 2017 proceedings, European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning.
   [(PDF)](https://www.elen.ucl.ac.be/Proceedings/esann/esannpdf/es2017-37.pdf)  [(BibTex)](https://raw.githubusercontent.com/esadr/mlsvm/master/Bibliography.txt)
