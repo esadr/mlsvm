@@ -14,20 +14,14 @@ struct BetterGmean
     bool operator () (const summary& a, const summary& b) const
     {
         // a has completely better gmean than b
-        if( (a.perf.at(Gmean) - b.perf.at(Gmean)) > 0.01 )
+        if( (a.perf.at(Gmean) - b.perf.at(Gmean)) > 0.001 )
             return true;
         else{
             // b has completely better gmean than a
-            if( (b.perf.at(Gmean) - a.perf.at(Gmean)) > 0.01 )
+            if( (b.perf.at(Gmean) - a.perf.at(Gmean)) > 0.001 )
                 return false;
-            else{                               // similar gmean
-                if(paramsInst->get_ms_best_selection() == 1)
-                    // a has less nSV than b which is better
-                    return (a.num_SV_p + a.num_SV_n <  b.num_SV_p + b.num_SV_n );
-                else
-                    // the gmeans  are similar and we don't care for nSV  ???
-                    return false;
-            }
+            else
+                return true; // in case of similar gmean, pick a
         }
     }
 };
@@ -55,6 +49,7 @@ struct BetterSN_Gmean
     }
 };
 
+
 struct Better_Gmean_SN
 {
     bool operator () (const summary& a, const summary& b) const
@@ -74,6 +69,33 @@ struct Better_Gmean_SN
                 else
                     // the gmeans  are similar and we don't care for nSV  ???
                     return false;
+            }
+        }
+    }
+};
+
+struct Better_Gmean_SN_nSV
+{
+    bool operator () (const summary& a, const summary& b) const
+    {
+        float filter_range = 0.02;
+        //a has completely better gmean than b
+        if( (a.perf.at(Gmean) - b.perf.at(Gmean)) > filter_range )
+            return true;
+        else{
+            //b has completely better gmean than a
+            if( (b.perf.at(Gmean) - a.perf.at(Gmean)) > filter_range )
+                return false;
+            else{                               //similar gmean
+                if ( a.perf.at(Sens) -  b.perf.at(Sens) > filter_range ) // we have a winner
+                    return true;
+                else{
+                // if b has higher sensitivity, return false to select b
+                    if (b.perf.at(Sens) -  a.perf.at(Sens) > filter_range)
+                        return false;
+                    else // return true if number of (A's SV < B's SV)
+                        return (a.num_SV_p + a.num_SV_n <  b.num_SV_p + b.num_SV_n );
+                }
             }
         }
     }
@@ -377,6 +399,22 @@ int ModelSelection::select_best_model(std::vector<summary> v_summary,
     }
 #endif
 
+
+    switch(paramsInst->get_ms_best_selection()){
+    case 0:
+        // what is this
+    case 1:
+        std::sort(v_summary.begin(),v_summary.end(),Better_Gmean_SN_nSV());
+        break;
+    case 2:
+        std::sort(v_summary.begin(),v_summary.end(),BetterGmean());
+        break;
+    default:
+        std::sort(v_summary.begin(),v_summary.end(),Better_Gmean_SN_nSV());
+
+    }
+
+
 //    std::sort(v_summary.begin(),v_summary.end(),std::greater<summary>());
 
     // the main method for a year before Sep 21, 2016 - 09:00
@@ -385,8 +423,8 @@ int ModelSelection::select_best_model(std::vector<summary> v_summary,
     // experiment 092116_0940
 //    std::sort(v_summary.begin(),v_summary.end(),BetterSN_Gmean());
 
-    // experiment 092816_1600
-    std::sort(v_summary.begin(),v_summary.end(),Better_Gmean_SN());
+    // experiment 092816_1600:
+//    std::sort(v_summary.begin(),v_summary.end(),Better_Gmean_SN());
 
 //    std::sort(v_summary.begin(),v_summary.end(),sortByGmean);
 //    std::sort(v_summary.begin(),v_summary.end(),BetterAcc());
@@ -611,7 +649,7 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
     Loader ld;
     // - - - - set number of iterations in each stage - - - - -
     //+1 for one extra parameter to test
-    unsigned int num_iter_st1 = paramsInst->get_ms_first_stage()  + 1;
+    unsigned int num_iter_st1 = paramsInst->get_ms_first_stage()  + 1;  // ??? strange
     unsigned int num_iter_st2 = paramsInst->get_ms_second_stage();
     // - - - - define required variables - - - - -
     std::vector<Solver> v_solver;       // vector of solvers for current fold_id
@@ -668,11 +706,12 @@ void ModelSelection::uniform_design_separate_validation(Mat& m_train_data_p
 
     ud_params_st_2 = ud_param_generator(stage,true,
                                         ud_params_st_1[best_1st_stage].C ,
-                                        ud_params_st_1[best_1st_stage].G);
-    for(unsigned int i = 0; i < num_iter_st2 ;i++){
+                                        ud_params_st_1[best_1st_stage].G);  //092519-1323
+    for(unsigned int i = 0; i < num_iter_st2 ;i++){                         // set the first element as center of 1st stage
+                                                                            // skip the first one by setting i=1
         //skip the center of second stage(duplicate)
-        if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C &&
-                ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)
+        if(ud_params_st_2[i].C == ud_params_st_1[best_1st_stage].C &&       // don't need the continue anymore
+                ud_params_st_2[i].G == ud_params_st_1[best_1st_stage].G)   // check if the diff is less than 0.00001
             continue;
         Solver sv;
         svm_model * curr_svm_model;

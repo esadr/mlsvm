@@ -76,13 +76,13 @@
 #define dbl_PR_CPM                  0           // 0 Default    //calc_performance_measure  5 prints final predicted label
 //---- Model Selection ----
 #define dbl_MS_UD                   1           // 1 Default
-#define dbl_MS_UDSepVal             1           // 1 Default   print the best validation results //release 0
+#define dbl_MS_UDSepVal             3           // 1 Default   print the best validation results //release 0
 #define dbl_MS_UDIB                 1           // 1 Default
 #define dbl_MS_combine_test_data    0
 #define dbl_MS_ud_param_generator   0           // 0 Default, 3 shows new parameters
 #define dbl_MS_cross_fold           0           // 0 Default
 #define dbl_MS_PS                   0           // 0 Default
-#define dbl_MS_SB1                  0           // 0 Default, 3 prints after sort, 5 prints prints before and after sort
+#define dbl_MS_SB1                  5           // 5 Default, 3 prints after sort, 5 prints prints before and after sort
 #define dbl_MS_set_weights          0           // 0 Default, 1 shows the weight in the WSVM
 #define dbl_MS_UDC                  1           // 1 Default
 //---- Solver ----
