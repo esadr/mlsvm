@@ -1,4 +1,5 @@
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3462573.svg)](https://doi.org/10.5281/zenodo.3462573)
 
 # MLSVM
 Multilevel Support Vector Machines
