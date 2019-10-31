@@ -7,7 +7,8 @@ MAIN 	 = mlsvm_classifier.cc
 MANSEC   = Mat
 
 LIBS= -lpugixml -lm -fopenmp 
-LIBFLANN= /usr/local/lib/libflann_cpp_s.a
+#LIBFLANN= /usr/local/lib/libflann_cpp_s.a
+LIBFLANN= ${FLANN_PATH}
 
 MLSVM_SRCS = pugixml.cc etimer.cc common_funcs.cc OptionParser.cc k_fold.cc svm_weighted.cc config_params.cc model_selection.cc solver.cc partitioning.cc refinement.cc  main_recursion.cc coarsening.cc loader.cc ds_node.cc ds_graph.cc mlsvm_classifier.cc
 MLSVM_OBJS = $(MLSVM_SRCS:.cc=.o)
