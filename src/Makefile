@@ -48,6 +48,10 @@ ZSCORE_OBJS = $(ZSCORE_SRCS:.cc=.o)
 CSV_PETSC_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc convertor.cc loader.cc k_fold.cc  ./tools/mlsvm_csv_petsc.cc
 CSV_PETSC_OBJS = $(CSV_PETSC_SRCS:.cc=.o)
 
+CSV_TO_VEC_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc convertor.cc loader.cc k_fold.cc  ./tools/mlsvm_csv_to_vec.cc
+CSV_TO_VEC_OBJS = $(CSV_TO_VEC_SRCS:.cc=.o)
+
+
 KNN_SRCS= pugixml.cc config_params.cc etimer.cc common_funcs.cc OptionParser.cc loader.cc k_fold.cc  ./tools/mlsvm_knn.cc
 KNN_OBJS = $(KNN_SRCS:.cc=.o) $(LIBFLANN) 
 
@@ -142,6 +146,10 @@ mlsvm_zscore: $(ZSCORE_OBJS) chkopts
 mlsvm_csv_petsc: $(CSV_PETSC_OBJS) chkopts
 	-${CLINKER} $(CSV_PETSC_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_csv_petsc
 	${RM} mlsvm_csv_petsc.o
+
+mlsvm_csv_to_vec: $(CSV_TO_VEC_OBJS) chkopts
+	-${CLINKER} $(CSV_TO_VEC_OBJS)  ${PETSC_MAT_LIB} -o mlsvm_csv_to_vec
+	${RM} mlsvm_csv_to_vec.o
 
 mlsvm_knn: $(KNN_OBJS) chkopts
 	-${CLINKER}  $(KNN_OBJS) ${PETSC_MAT_LIB} -o mlsvm_knn

@@ -491,7 +491,7 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n,
         summary current_summary;     //map that contains all the measures
         int stage = 1;
         printf("%s ------ stage:%d, level:%d, fold:%d ------ \n",
-               cfid, stage, level, fold_id);
+               cfid.c_str(), stage, level, fold_id);
 
         std::vector<ud_point> ud_params_st_1;
         ud_params_st_1 = ud_param_generator(stage, inh_params,
@@ -522,7 +522,7 @@ void ModelSelection::uniform_design(Mat& m_data_p, Vec& v_vol_p, Mat& m_data_n,
     #endif
         stage = 2 ;
         printf("%s ------ stage:%d, level:%d, fold:%d ------ \n",
-               cfid, stage, level, fold_id);
+               cfid.c_str(), stage, level, fold_id);
         std::vector<ud_point> ud_params_st_2;
         printf("[MS][UD] 2nd stage model selection center C:%g, G:%g\n",
                                            ud_params_st_1[best_1st_stage].C ,

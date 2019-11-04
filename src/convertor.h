@@ -17,6 +17,7 @@ public:
     void Libsvm_file_to_PETSc_format(std::string in_file_name, Mat& m_data, Vec& v_lbl, PetscInt num_row =-1, PetscInt num_col=-1);
 
     void CSV_file_to_PETSc_format();
+    void CSV_file_to_PETSc_Vector();
 };
 
 #endif // CONVERTOR_H

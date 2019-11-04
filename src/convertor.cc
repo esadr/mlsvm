@@ -223,3 +223,67 @@ void Convertor::CSV_file_to_PETSc_format(){
 
 }
 
+
+
+void Convertor::CSV_file_to_PETSc_Vector(){
+    //find the level in the summary
+    std::fstream in_file;
+    std::string fname = Config_params::getInstance()->get_ds_path()
+                        + Config_params::getInstance()->get_ds_name() + ".csv";
+    in_file.open(fname);
+
+    if(!in_file.is_open()){
+        std::cout << "[CFPV] failed to open " << fname <<" file! \nExit";
+        exit(1);
+    }
+    std::string line;
+
+    int line_num = 0;
+    std::vector<double> v_data;
+    while(std::getline(in_file, line)){
+        try{
+            v_data.push_back(stod(line));
+        }
+        catch(const std::exception e){
+            std::cout << e.what() ;
+            std::cout << "A good guess:\n" << "data: " <<
+                         line << " at line " << line_num <<
+                         " is not convertable to double!" << std::endl;
+            std::cout << "Please check the file, \nExit!\n";
+            exit(1);
+        }
+        line_num++;
+    }
+    in_file.close();
+
+
+
+    PetscInt num_row= v_data.size();
+    std::cout << "[CFPV] num_rows:" <<num_row << std::endl;
+
+    Vec v_lbl;
+    VecCreateSeq(PETSC_COMM_SELF,num_row,&v_lbl);
+    // Notice the Dense matrix is column major order. I need to fill the columns
+    // For performance, I insert each row of a file to a column in matrix
+    // In the end, I transpose the matrix before save to file
+
+    for(int i=0; i< num_row; i++ ){
+        if(abs(v_data[i]) != 1){
+            std::cout << "[CFPV] Wrong label is provided at row " << i <<" with value "<< v_data[i] <<" \nExit";
+            exit(1);
+        }
+        VecSetValue(v_lbl, i, v_data[i], INSERT_VALUES);
+    }
+    VecAssemblyBegin(v_lbl);
+    VecAssemblyEnd(v_lbl);
+
+    std::string out_fname = Config_params::getInstance()->get_ds_path()
+                            + Config_params::getInstance()->get_ds_name();
+    CommonFuncs cf;
+    cf.exp_vector(v_lbl, "", out_fname + "_label.dat", "CSV_PETSc" );
+    VecDestroy(&v_lbl);
+
+
+//TODO list: handle the empty lines Aug 24, 2018
+
+}
