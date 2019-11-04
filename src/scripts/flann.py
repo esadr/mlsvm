@@ -1,9 +1,7 @@
 '''
-Created on Feb 3, 2016
 Version 2: Dec 16, 2018
     only remove the last suffix after the right most dot
 Version 1: March 8, 2016
-    The script reads 2 parameters from command line which are path and filename
     The script reads 2 parameters from command line which are path and filename
     It calculates the Flann and save the result, in the same path with similar file names
     Drawback: convert from csr to ndarray and vise versa 

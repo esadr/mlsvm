@@ -229,7 +229,7 @@ void Convertor::CSV_file_to_PETSc_Vector(){
     //find the level in the summary
     std::fstream in_file;
     std::string fname = Config_params::getInstance()->get_ds_path()
-                        + Config_params::getInstance()->get_ds_name() + ".csv";
+                        +"/"+ Config_params::getInstance()->get_ds_name() + ".csv";
     in_file.open(fname);
 
     if(!in_file.is_open()){
@@ -280,7 +280,7 @@ void Convertor::CSV_file_to_PETSc_Vector(){
     std::string out_fname = Config_params::getInstance()->get_ds_path()
                             + Config_params::getInstance()->get_ds_name();
     CommonFuncs cf;
-    cf.exp_vector(v_lbl, "", out_fname + "_label.dat", "CSV_PETSc" );
+    cf.exp_vector(v_lbl, "", out_fname + ".dat", "CSV_PETSc" );
     VecDestroy(&v_lbl);
 
 
