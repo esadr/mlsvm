@@ -1408,11 +1408,9 @@ void Solver::test_predict(Mat& test_data, summary& result_summary,
 
         //read the label in the first column(0)
         target_label = vals[0];
-        //allocate required memory,
-        // No need for +1 as I add the label in index 0 that
-        //      add one non-zero value to each row
-        x = (struct svm_node *) realloc(x, (ncols + 1 ) *
-                                        sizeof(struct svm_node));
+        //allocate required memory
+
+        x = (struct svm_node *) realloc(x, ncols * sizeof(struct svm_node));
 
         for (k=1; k< ncols; k++) {  //zero is the label
             // the label is added in the first column, so +1 is not required
@@ -1424,8 +1422,8 @@ void Solver::test_predict(Mat& test_data, summary& result_summary,
 #endif
         }
         //create the end element of each node (-1,0)
-        x[k].index = -1;
-        x[k].value = 0;
+        x[k-1].index = -1;
+        x[k-1].value = 0;
 #if dbl_SV_test_predict >= 9 // 9 default
         printf("[SV][TP] k:%d, x[k].index:%d, x[k].value:%g\n",
                k,x[k].index, x[k].value);
