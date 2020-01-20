@@ -914,7 +914,7 @@ void Coarsening::filter_weak_edges(Mat &A, double alfa, int level){
 }
 
 
-Mat Coarsening::calc_real_weight(Mat& m_WA_c, Mat& m_data_c) {
+void Coarsening::calc_real_weight(Mat& m_WA_c, Mat& m_data_c) {
     ETimer t_crw;
     PetscInt num_row,i,k, ncols_WA_c, ncols_dtc_i, ncols_dtc_k;
     MatGetSize(m_WA_c,&num_row,NULL);

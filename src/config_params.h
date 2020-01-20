@@ -254,9 +254,9 @@ public:
     int    get_main_current_exp_id()        const {return main_current_exp_id;}        //for export models
     int    get_main_current_kf_id()         const {return main_current_kf_id;}         //for export models
     int    get_main_current_level_id()      const {return main_current_level_id;}      //for export models
-    int    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
-    int    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
-    int    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
+    void    set_main_current_exp_id(int new_id)        { main_current_exp_id = new_id;}        //for export models
+    void    set_main_current_kf_id(int new_id)         { main_current_kf_id = new_id;}         //for export models
+    void    set_main_current_level_id(int new_id)      { main_current_level_id = new_id;}      //for export models
     void   set_current_iter_file_names(int curr_exp, int curr_iter);
     // Loader
     bool   get_inverse_weight()     const { return inverse_weight; }
@@ -288,7 +288,7 @@ public:
 
     double  get_ms_bs_gm_threshold()    const { return ms_bs_gm_threshold; }
     int     get_ms_best_selection()     const { return stoi(options_["ms_best_selection"]); }
-    bool    setTestdataExist()          { ms_testdata_existance_flag = 1; }
+    void    setTestdataExist()          { ms_testdata_existance_flag = 1; }
     bool    getTestdataExist() const    { return ms_testdata_existance_flag; }
     // SVM
     int     get_svm_svm_type()      const { return svm_type; }
